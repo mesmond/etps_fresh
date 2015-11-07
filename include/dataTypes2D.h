@@ -29,23 +29,59 @@ using namespace std;
  */
 template <class type> class Point2D
 {
-	private:
-	type value_dir0;
-	type value_dir1;
+	protected:
+	type dir0;
+	type dir1;
 
 	public:
 	explicit Point2D(type dir0=0, type dir1=0)
-	{
-		value_dir0=dir0;
-		value_dir1=dir1;
-	}
+		: dir0(dir0), dir1(dir1) {};
 
-	inline void write_dir0(const type& value) { value_dir0=value; }
-	inline void write_dir1(const type& value)	{ value_dir1=value; }
-	inline type get_dir0() const { return value_dir0; }
-	inline type get_dir1() const { return value_dir1; }
+	inline void write_dir0(const type& value) { dir0=value; }
+	inline void write_dir1(const type& value)	{ dir1=value; }
+	inline type get_dir0() const { return dir0; }
+	inline type get_dir1() const { return dir1; }
 };
 
+//Define Operators***********************************************************
+template <typename T> ostream& operator<<(ostream& os, Point2D<T> point)
+{
+	os << "(" << point.get_dir0() << "," << point.get_dir1() << ")";
+	return os;
+}
+
+template <typename T> Point2D<T> operator-(const Point2D<T>& p1, const Point2D<T>& p2)
+{
+	Point2D<T> result;
+
+	result.write_dir0(p1.get_dir0() - p2.get_dir0());
+	result.write_dir1(p1.get_dir1() - p2.get_dir1());
+
+	return result;
+}
+
+template <typename T> Point2D<T> operator+(const Point2D<T>& p1, const Point2D<T>& p2)
+{
+	Point2D<T> result;
+
+	result.write_dir0(p1.get_dir0() + p2.get_dir0());
+	result.write_dir1(p1.get_dir1() + p2.get_dir1());
+
+	return result;
+}
+
+template <typename T> Point2D<T> operator*(const Point2D<T>& point, const T& value)
+{
+	Point2D<T> result;
+	result.write_dir0(point.get_dir0() * value);
+	result.write_dir1(point.get_dir1() * value);
+	return result;
+}
+
+template <typename T> Point2D<T> operator*(const T& value, const Point2D<T>& point)
+{
+	return point*value;
+}
 
 
 //***************************************************************************
@@ -57,73 +93,25 @@ template <class type> class Point2D
  * Purpose: Act as a mathematical vector in 2D.
  *
  * Description: This class simply stores and processes a mathematical
- * 	vector.  This is not to be confused with a C++ vector.
+ * 	vector.  This is not to be confused with a std::vector.	
  */
-template <class type> class Vector2D
-{
-	private:
-	type value_dir0;
-	type value_dir1;
+template <class type> class Vector2D : public Point2D<type>
+{	
 
 	public:
 	explicit Vector2D(type dir0=0, type dir1=0)
-	{
-		value_dir0=dir0;
-		value_dir1=dir1;
-	}
+		: Point2D<type>(dir0, dir1) {};
 
 	inline type getMagnitude() const
 	{
-		return sqrt(pow(value_dir0,2.0)+pow(value_dir1,2.0));
+		return sqrt(
+			 pow(this->get_dir0(),2.0)
+			+pow(this->get_dir1(),2.0));
 	}
-
-	inline void write_dir0(const type& value) { value_dir0=value; }
-	inline void write_dir1(const type& value)	{ value_dir1=value; }
-	inline type get_dir0() const { return value_dir0; }
-	inline type get_dir1() const { return value_dir1; }
 };
 
 
 //Define Operators***********************************************************
-template <typename T> ostream& operator<<(ostream& os, Vector2D<T> vector)
-{
-	os << "(" << vector.get_dir0() << "," << vector.get_dir1() << ")";
-	return os;
-}
-
-template <typename T> Vector2D<T> operator-(const Vector2D<T>& vec1, const Vector2D<T>& vec2)
-{
-	Vector2D<T> result;
-
-	result.write_dir0(vec1.get_dir0() - vec2.get_dir0());
-	result.write_dir1(vec1.get_dir1() - vec2.get_dir1());
-
-	return result;
-}
-
-template <typename T> Vector2D<T> operator+(const Vector2D<T>& vec1, const Vector2D<T>& vec2)
-{
-	Vector2D<T> result;
-
-	result.write_dir0(vec1.get_dir0() + vec2.get_dir0());
-	result.write_dir1(vec1.get_dir1() + vec2.get_dir1());
-
-	return result;
-}
-
-template <typename T> Vector2D<T> operator*(const Vector2D<T>& vec1, const T& value)
-{
-	Vector2D<T> result;
-	result.write_dir0(vec1.get_dir0() * value);
-	result.write_dir1(vec1.get_dir1() * value);
-	return result;
-}
-
-template <typename T> Vector2D<T> operator*(const T& value, const Vector2D<T>& vec1)
-{
-	return vec1*value;
-}
-
 template <typename T> T dotProduct(const Vector2D<T>& vec1, const Vector2D<T>& vec2)
 {
 	T product0=vec1.get_dir0()*vec2.get_dir0();

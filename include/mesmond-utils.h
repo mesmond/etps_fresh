@@ -39,31 +39,27 @@ double max_array(double array[],int num_elements)
 }
 
 
-void outputToLogFile(
-	string fileName,
-	double simTime,
-	double timeStep,
-	int timeStepCount,
-	double wallTime)
+/*
+ * Function: IsEqual()
+ * Purpose: Compare floating point numbers for equality.
+ *
+ * Description: Adapted from
+ * 	http://www.cygnus-software.com/papers/comparingfloats/comparingfloats.htm
+ * 	This article explains that this particular approach will not behave
+ * 	well with numbers very close to zero.
+ */
+bool isEqual(double A, double B, double maxRelativeError=1.0e-10)
 {
-	ofstream output;
-
-	output.open(fileName.c_str(), ios::app);
-
-	if (output.is_open())
-	{
-		output << "************************************" << endl;
-		output << "wallTime(s)  =" << wallTime << endl;
-		output << "simTime(s)   =" << simTime << endl;
-		output << "timeStep(s)  =" << timeStep << endl;
-		output << "timeStepCount=" << timeStepCount << endl;
-	}
-	else
-	{
-		cout << "ERROR: Unable to open Log file!!!" << endl;
-		exit(1);
-	}
-
+    if (A == B)
+        return true;
+    double relativeError;
+    if (fabs(B) > fabs(A))
+        relativeError = fabs((A - B) / B);
+    else
+        relativeError = fabs((A - B) / A);
+    if (relativeError <= maxRelativeError)
+        return true;
+    return false;
 }
 
 

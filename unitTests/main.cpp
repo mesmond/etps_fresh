@@ -26,15 +26,52 @@
 #include <chrono>
 #include <cstdio>
 #include "mpi.h"
+#include <assert.h>
+
 
 #include "dataTypes2D.h"
 #include "userInputClass.h"
+#include "mesmond-utils.h"
 
 using namespace std;
 
 int main(int argc, char *argv[])
 {
-	cout << "*******************************" << endl;
+	cout << "************************************" << endl;
+	cout << "Testing Point2D and Vector2D..." << endl;
+
+	Point2D<double> point(3.0, 4.6);
+	Vector2D<double> vec(4.5,3.6);
+	double scale=3.0;
+	
+	cout << "point=" << point << endl;
+	cout << "vec  =" << vec << endl;
+	
+	cout << "point-vec=" << point-vec << endl;
+	cout << "point+vec=" << point+vec << endl;
+
+	cout << "------------------------------------" << endl;
+	Point2D<double> point2(7.8,76.9);
+	point2=vec*scale;
+	cout << "scale=" << scale << endl;
+	cout << "vec*scale=" << vec	*scale << endl;
+	cout << "point*scale=" << point*scale << endl;
+	assert( isEqual(point2.get_dir1(), vec.get_dir1()*scale) );
+	assert( isEqual(point2.get_dir0(), vec.get_dir0()*scale) );
+
+
+	cout << "------------------------------------" << endl;
+	Vector2D<double> vec2(3.5,2.5);
+	vec=vec2;
+	cout << "vec2 =" << vec2 << endl;
+	cout << "vec=vec2:" << endl;
+	cout << "vec =" << vec << endl;
+	cout << "vec2=" << vec2 << endl;
+	assert( isEqual(vec.get_dir1(), vec2.get_dir1()) );
+	assert( isEqual(vec.get_dir0(), vec2.get_dir0()) );
+
+	
+	
 	//~ StructuredGeometry2D block(0.0,0.0,1.0,1.0,10,10);
 	//~ StructuredGeometry2D block_north(0.0,1.0,1.0,3.0,10,5);
 //~ 

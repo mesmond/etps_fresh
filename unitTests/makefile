@@ -3,8 +3,8 @@
 #****************************************************************************
 #
 # File: makefile
-# Project: euler2D
-# Descrition: This script builds the source code for euler2D.  The source
+# Project: unitTests
+# Descrition: This script builds the source code for unitTests.  The source
 #	is located in WORKINGDIR.  The shared source code and object files
 #	are stored in SRC.  Old object files are replaced if their source file
 #	is newer.
