@@ -38,6 +38,43 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 	cout << "************************************" << endl;
+	cout << "Testing SpacialArray2D ..." << endl;
+
+	SpacialArray2D<double> pressure;
+	SpacialArray2D< Vector2D<double> > velocity(15,15);
+
+	pressure.print();
+	velocity.print();	
+	
+	
+	//~ StructuredGeometry2D block(0.0,0.0,1.0,1.0,10,10);
+	//~ StructuredGeometry2D block_north(0.0,1.0,1.0,3.0,10,5);
+//~ 
+	//~ block.link_north(block_north);
+	//~ block_north.link_south(block);
+//~ 
+	//~ cout << "block_north:" << endl;
+	//~ for (int i=block_north.numZones.dir1+1; i>=0; --i)
+	//~ {
+		//~ ////~ cout << block_north.zoneDelta.dir1[i] << endl;
+		//~ cout << block_north.globalCoord.dir1[i] << endl;
+	//~ }
+//~ 
+	//~ 
+	//~ cout << "block:" << endl;
+	//~ for (int i=block.numZones.dir1+1; i>=0; --i)
+	//~ {
+		//~ ////~ cout << block.zoneDelta.dir1[i] << endl;
+		//~ cout << block.globalCoord.dir1[i] << endl;
+	//~ }
+
+
+
+}
+
+void test_Point2D_Vector2D()
+{
+	cout << "************************************" << endl;
 	cout << "Testing Point2D and Vector2D..." << endl;
 
 	Point2D<double> point(3.0, 4.6);
@@ -70,64 +107,46 @@ int main(int argc, char *argv[])
 	assert( isEqual(vec.get_dir1(), vec2.get_dir1()) );
 	assert( isEqual(vec.get_dir0(), vec2.get_dir0()) );
 
-	
-	
-	//~ StructuredGeometry2D block(0.0,0.0,1.0,1.0,10,10);
-	//~ StructuredGeometry2D block_north(0.0,1.0,1.0,3.0,10,5);
-//~ 
-	//~ block.link_north(block_north);
-	//~ block_north.link_south(block);
-//~ 
-	//~ cout << "block_north:" << endl;
-	//~ for (int i=block_north.numZones.dir1+1; i>=0; --i)
-	//~ {
-		//~ ////~ cout << block_north.zoneDelta.dir1[i] << endl;
-		//~ cout << block_north.globalCoord.dir1[i] << endl;
-	//~ }
-//~ 
-	//~ 
-	//~ cout << "block:" << endl;
-	//~ for (int i=block.numZones.dir1+1; i>=0; --i)
-	//~ {
-		//~ ////~ cout << block.zoneDelta.dir1[i] << endl;
-		//~ cout << block.globalCoord.dir1[i] << endl;
-	//~ }
+	cout << "------------------------------------" << endl;
+	cout << "Vector Magnitude--------------------" << endl;
+	vec=Vector2D<double>(3.0,4.0);
+	cout << "vec       =" << vec << endl;
+	cout << "vec (mag) =" << vec.get_magnitude() << endl;
+	assert( isEqual(vec.get_magnitude(), 5.0) );
 
+	Vector2D<int> vecInt(3,4);
+	cout << "vecInt      =" << vecInt << endl;
+	cout << "vecInt (mag)=" << vecInt.get_magnitude() << endl;
+	assert( vecInt.get_magnitude() == 5 );
 
+	cout << "------------------------------------" << endl;
+	cout << "Vector DotProduct-------------------" << endl;
+	vec=Vector2D<double>(3.0,4.0);
+	vec2=Vector2D<double>(3.0,4.0);
+	double dotProd=dotProduct(vec, vec2);
 
+	cout << "vec        =" << vec << endl;
+	cout << "vec2       =" << vec2 << endl;
+	cout << "dotProd    =" << dotProd << endl;
+
+	assert( isEqual(dotProd, 25.0) );
 }
 
-void testVector2D()
+
+void test_Dyad2D()
 {
-	Vector2D<double> vec(3,4);
-	Vector2D<double> vec2(4,5);
+	cout << "************************************" << endl;
+	cout << "Testing Dyad2D ..." << endl;
 
-	Vector2D<double> velocity(6,2);
+	Vector2D<double> vec(4,6);
+	Vector2D<double> vec2(3,5);
 
-	double scalarVal=3.0;
+	Dyad2D dyad;
 
 	cout << "vec =" << vec << endl;
 	cout << "vec2=" << vec2 << endl;
-	cout << "vec dot vec2=" << dotProduct(vec, vec2) << endl;
-	cout << "vec*vec2=" << vec*vec2 << endl;
-	cout << "vec2 - vec=" << vec2 - vec << endl;
-	cout << "vec - vec2=" << vec - vec2 << endl;
-
-	cout << "scalarVal*vec=" << scalarVal*vec << endl;
-	cout << "vec*scalarVal=" << vec*scalarVal << endl;
-
-
-	cout << "velocity=" << velocity << endl;
-	cout << "Vector2D<double>(4,5) : " << Vector2D<double>(4,5) << endl;
-
-
-
-	cout << "*****************" << endl;
-	Vector2D<double> u(4,3);
-	Vector2D<double> v(5,6);
-	Dyad2D dyad=u*v;
-
-	cout << "u   =" << u << endl;
-	cout << "v   =" << v << endl;
-	cout << "dyad=" << dyad << endl;
+	
+	cout << "dyad (init)=" << dyad << endl;
+	dyad=vec*vec2;
+	cout << "dyad=vec*vec2 : dyad=" << dyad << endl;
 }

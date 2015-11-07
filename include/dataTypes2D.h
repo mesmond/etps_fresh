@@ -102,7 +102,7 @@ template <class type> class Vector2D : public Point2D<type>
 	explicit Vector2D(type dir0=0, type dir1=0)
 		: Point2D<type>(dir0, dir1) {};
 
-	inline type getMagnitude() const
+	inline type get_magnitude() const
 	{
 		return sqrt(
 			 pow(this->get_dir0(),2.0)
@@ -164,9 +164,9 @@ Dyad2D operator*(const Vector2D<double>& vec0, const Vector2D<double>& vec1);
 //***************************************************************************
 //***************************************************************************
 //***************************************************************************
-//cellDirections*************************************************************
+//StructuredLocalField2D*****************************************************
 /*
- * struct: cellDirections
+ * struct: StructuredLocalField2D
  * Purpose: Provide a basic object for acquiring and sending simulation
  * 	information relevant to a particular cell.
  *
@@ -177,29 +177,7 @@ Dyad2D operator*(const Vector2D<double>& vec0, const Vector2D<double>& vec1);
  * 	center. The directions dir0 and dir1 are included for the P placeholder
  * 	so that fluxes in these directions can be stored and used.
  */
-struct cellDirections
-{
-	double P;
-	double P_dir0;
-	double P_dir1;
-	double N;
-	double S;
-	double E;
-	double W;
-
-	cellDirections()
-	{
-		P=0.0;
-		P_dir0=0.0;
-		P_dir1=0.0;
-		N=0.0;
-		S=0.0;
-		E=0.0;
-		W=0.0;
-	}
-};
-
-template <class type> class cardinalDirections
+template <class type> class StructuredLocalField2D
 {
 	public:
 	type P;
@@ -210,7 +188,7 @@ template <class type> class cardinalDirections
 	type E;
 	type W;
 
-	cardinalDirections()
+	StructuredLocalField2D()
 	{
 		P=0;
 		P_dir0=0;
@@ -221,6 +199,101 @@ template <class type> class cardinalDirections
 		W=0;
 	}
 };
+
+
+
+
+//***************************************************************************
+//***************************************************************************
+//***************************************************************************
+//SpacialArray2D*************************************************************
+template <class type> class SpacialArray2D
+{
+	private:
+	struct ArraySize
+	{
+		int dir0;
+		int dir1;
+	} numZones;
+
+	type **array;
+
+	public:
+	explicit SpacialArray2D(int size0=10, int size1=10)
+	{
+		numZones.dir0=size0;
+		numZones.dir1=size1;
+
+		array = new type *[numZones.dir0+2];
+		for (int i=0; i<=numZones.dir0+1; ++i)
+		{
+			array[i]= new type [numZones.dir1+2];
+		}
+
+		for (int i=0; i<=numZones.dir0+1; ++i) {
+			for (int j=0; j<=numZones.dir1+1; ++j)
+			{
+				array[i][j]=(type)0;
+			}}
+	}
+	SpacialArray2D(const SpacialArray2D<type>& that)
+	{
+		numZones.dir0=that.numZones.dir0;
+		numZones.dir1=that.numZones.dir1;
+
+		array = new type *[numZones.dir0+2];
+		for (int i=0; i<=numZones.dir0+1; ++i)
+		{
+			array[i]= new type [numZones.dir1+2];
+		}
+
+		for (int i=0; i<=numZones.dir0+1; ++i) {
+			for (int j=0; j<=numZones.dir1+1; ++j)
+			{
+				array[i][j]=that.get(i,j);
+			}}
+	}
+
+	~SpacialArray2D()
+	{
+		for (int i=0; i<=numZones.dir0+1; ++i)
+		{
+			delete[] array[i];
+		}
+		*array=0;
+		delete array;
+		array=0;
+	}
+
+	inline type get(int i, int j) const { return array[i][j]; }
+	inline void write(int i, int j, const type& value) { array[i][j]=value; }
+
+	void print() const
+	{
+		for (int j=numZones.dir1+1; j>=0; --j)
+		{
+			for (int i=0; i<=numZones.dir0+1; ++i)
+			{
+				cout << array[i][j] << " ";
+			}
+			cout << endl;
+		}
+	}
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //***************************************************************************
@@ -325,90 +398,6 @@ class StructuredGeometry2D
 };
 
 
-//***************************************************************************
-//***************************************************************************
-//***************************************************************************
-//SpacialArray2D*************************************************************
-template <class type> class SpacialArray2D
-{
-	private:
-	struct ArraySize
-	{
-		int dir0;
-		int dir1;
-	} numZones;
-
-	type **array;
-
-	public:
-	explicit SpacialArray2D(int size0=10, int size1=10)
-	{
-		numZones.dir0=size0;
-		numZones.dir1=size1;
-
-		array = new type *[numZones.dir0+2];
-		for (int i=0; i<=numZones.dir0+1; ++i)
-		{
-			array[i]= new type [numZones.dir1+2];
-		}
-
-		for (int i=0; i<=numZones.dir0+1; ++i) {
-			for (int j=0; j<=numZones.dir1+1; ++j)
-			{
-				array[i][j]=(type)0;
-			}}
-	}
-	SpacialArray2D(const SpacialArray2D<type>& that)
-	{
-		numZones.dir0=that.numZones.dir0;
-		numZones.dir1=that.numZones.dir1;
-
-		array = new type *[numZones.dir0+2];
-		for (int i=0; i<=numZones.dir0+1; ++i)
-		{
-			array[i]= new type [numZones.dir1+2];
-		}
-
-		for (int i=0; i<=numZones.dir0+1; ++i) {
-			for (int j=0; j<=numZones.dir1+1; ++j)
-			{
-				array[i][j]=that.get(i,j);
-			}}
-	}
-
-	~SpacialArray2D()
-	{
-		for (int i=0; i<=numZones.dir0+1; ++i)
-		{
-			delete[] array[i];
-		}
-		*array=0;
-		delete array;
-		array=0;
-	}
-
-	type get(int i, int j) const
-	{
-		return array[i][j];
-	}
-
-	void write(int i, int j, const type& value)
-	{
-		array[i][j]=value;
-	}
-
-	void print() const
-	{
-		for (int j=numZones.dir1+1; j>=0; --j)
-		{
-			for (int i=0; i<=numZones.dir0+1; ++i)
-			{
-				cout << array[i][j] << " ";
-			}
-			cout << endl;
-		}
-	}
-};
 
 
 
@@ -426,99 +415,98 @@ template <class type> class SpacialArray2D
 
 
 
-
-
-
-
-
-
-/*
- * Class: spacialArray2D
- * Purpose: Provide a basic object for spacial arrays.
- */
-class spacialArray2D
-{
-	protected:
-	struct arraySize
-	{
-		int dir0;
-		int dir1;
-	} numZones;
-
-	double **array;
-
-	public:
-	spacialArray2D(const spacialArray2D& that);
-	spacialArray2D(int size_dir0=10, int size_dir1=10, double valueInit=0.0);
-	spacialArray2D& operator=(const spacialArray2D& that);
-
-	
-	~spacialArray2D();
-
-	double get(int i, int j) const;
-	void write(int i, int j, double value);
-
-	int getSize_dir0() const;
-	int getSize_dir1() const;
-
-	cellDirections getLocalField(int i, int j) const;
-};
-
-/*
- * class: scalarArray2D
- * Purpose: Store and process 2D scalar arrays.
- */
-class scalarArray2D : public spacialArray2D
-{
-	public:
-	scalarArray2D(const scalarArray2D& that) : spacialArray2D(that){}
-	scalarArray2D(int size_dir0=10, int size_dir1=10)
-		: spacialArray2D(size_dir0, size_dir1) {}
-};
-
-/*
- * class: vectorArray2D
- * Purpose: Store and process 2D vector arrays.
- */
-class vectorArray2D
-{
-	private:
-	spacialArray2D array_dir0;
-	spacialArray2D array_dir1;
-
-	public:
-	vectorArray2D(const vectorArray2D& that)
-		: 	array_dir0(that.array_dir0),
-			array_dir1(that.array_dir1) {}
-	vectorArray2D(int size_dir0=10, int size_dir1=10)
-		:	array_dir0(size_dir0, size_dir1),
-			array_dir1(size_dir0, size_dir1) {}
-
-	double getMagnitude(int i, int j);
-	void writeComponent_dir0(int i, int j, double value);
-	void writeComponent_dir1(int i, int j, double value);
-
-	double component_dir0(int i, int j);
-	double component_dir1(int i, int j);
-
-	int getSize_dir0();
-	int getSize_dir1();
-
-	spacialArray2D dir0() {return array_dir0;}
-
-	spacialArray2D dir1() {return array_dir1;}
-
-	cellDirections product(cellDirections scalarField, int i, int j) const;
-
-	cellDirections localField_dir0(int i, int j)
-	{
-		return array_dir0.getLocalField(i,j);
-	}
-	cellDirections localField_dir1(int i, int j)
-	{
-		return array_dir1.getLocalField(i,j);
-	}
-};
+//~ 
+//~ 
+//~ 
+//~ 
+//~ 
+//~ /*
+ //~ * Class: spacialArray2D
+ //~ * Purpose: Provide a basic object for spacial arrays.
+ //~ */
+//~ class spacialArray2D
+//~ {
+	//~ protected:
+	//~ struct arraySize
+	//~ {
+		//~ int dir0;
+		//~ int dir1;
+	//~ } numZones;
+//~ 
+	//~ double **array;
+//~ 
+	//~ public:
+	//~ spacialArray2D(const spacialArray2D& that);
+	//~ spacialArray2D(int size_dir0=10, int size_dir1=10, double valueInit=0.0);
+	//~ spacialArray2D& operator=(const spacialArray2D& that);
+//~ 
+	//~ 
+	//~ ~spacialArray2D();
+//~ 
+	//~ double get(int i, int j) const;
+	//~ void write(int i, int j, double value);
+//~ 
+	//~ int getSize_dir0() const;
+	//~ int getSize_dir1() const;
+//~ 
+	//~ cellDirections getLocalField(int i, int j) const;
+//~ };
+//~ 
+//~ /*
+ //~ * class: scalarArray2D
+ //~ * Purpose: Store and process 2D scalar arrays.
+ //~ */
+//~ class scalarArray2D : public spacialArray2D
+//~ {
+	//~ public:
+	//~ scalarArray2D(const scalarArray2D& that) : spacialArray2D(that){}
+	//~ scalarArray2D(int size_dir0=10, int size_dir1=10)
+		//~ : spacialArray2D(size_dir0, size_dir1) {}
+//~ };
+//~ 
+//~ /*
+ //~ * class: vectorArray2D
+ //~ * Purpose: Store and process 2D vector arrays.
+ //~ */
+//~ class vectorArray2D
+//~ {
+	//~ private:
+	//~ spacialArray2D array_dir0;
+	//~ spacialArray2D array_dir1;
+//~ 
+	//~ public:
+	//~ vectorArray2D(const vectorArray2D& that)
+		//~ : 	array_dir0(that.array_dir0),
+			//~ array_dir1(that.array_dir1) {}
+	//~ vectorArray2D(int size_dir0=10, int size_dir1=10)
+		//~ :	array_dir0(size_dir0, size_dir1),
+			//~ array_dir1(size_dir0, size_dir1) {}
+//~ 
+	//~ double getMagnitude(int i, int j);
+	//~ void writeComponent_dir0(int i, int j, double value);
+	//~ void writeComponent_dir1(int i, int j, double value);
+//~ 
+	//~ double component_dir0(int i, int j);
+	//~ double component_dir1(int i, int j);
+//~ 
+	//~ int getSize_dir0();
+	//~ int getSize_dir1();
+//~ 
+	//~ spacialArray2D dir0() {return array_dir0;}
+//~ 
+	//~ spacialArray2D dir1() {return array_dir1;}
+//~ 
+	//~ cellDirections product(cellDirections scalarField, int i, int j) const;
+//~ 
+	//~ cellDirections localField_dir0(int i, int j)
+	//~ {
+		//~ return array_dir0.getLocalField(i,j);
+	//~ }
+	//~ cellDirections localField_dir1(int i, int j)
+	//~ {
+		//~ return array_dir1.getLocalField(i,j);
+	//~ }
+//~ };
 
 
 #endif  // INCLUDE_DATATYPES2D_H_

@@ -11,6 +11,11 @@
 //***************************************************************************
 //***************************************************************************
 //***************************************************************************
+//Point2D********************************************************************
+
+//***************************************************************************
+//***************************************************************************
+//***************************************************************************
 //Vector2D*******************************************************************
 
 
@@ -30,7 +35,6 @@ ostream& operator<<(ostream& os, const Dyad2D dyad)
 	return os;
 }
 
-
 Dyad2D operator*(const Vector2D<double>& vec0, const Vector2D<double>& vec1)
 {
 	Dyad2D dyad;
@@ -42,6 +46,13 @@ Dyad2D operator*(const Vector2D<double>& vec0, const Vector2D<double>& vec1)
 
 	return dyad;
 }
+
+
+//***************************************************************************
+//***************************************************************************
+//***************************************************************************
+//SpacialArray2D*************************************************************
+
 
 //***************************************************************************
 //***************************************************************************
@@ -199,143 +210,143 @@ void StructuredGeometry2D::link_south(const StructuredGeometry2D& toLink)
 //***************************************************************************
 //***************************************************************************
 //spacialArray2D*************************************************************
-spacialArray2D::spacialArray2D(const spacialArray2D& that)
-{
-	this->numZones.dir0=that.numZones.dir0;
-	this->numZones.dir1=that.numZones.dir1;
-	
-	array= new double *[numZones.dir0+2];
-	for (int i=0; i<=numZones.dir0+1; ++i)
-	{
-		array[i]= new double [numZones.dir1+2];
-	}
+//~ spacialArray2D::spacialArray2D(const spacialArray2D& that)
+//~ {
+	//~ this->numZones.dir0=that.numZones.dir0;
+	//~ this->numZones.dir1=that.numZones.dir1;
+	//~ 
+	//~ array= new double *[numZones.dir0+2];
+	//~ for (int i=0; i<=numZones.dir0+1; ++i)
+	//~ {
+		//~ array[i]= new double [numZones.dir1+2];
+	//~ }
+//~ 
+	//~ for (int i=0; i<=numZones.dir0+1; ++i) {
+	//~ for (int j=0; j<=numZones.dir1+1; ++j)
+	//~ {
+		//~ array[i][j]= that.array[i][j];
+	//~ }}
+//~ }
+//~ 
+//~ spacialArray2D::spacialArray2D(int size_dir0, int size_dir1, double valueInit)
+//~ {
+	//~ numZones.dir0=size_dir0;
+	//~ numZones.dir1=size_dir1;
+//~ 
+	//~ array= new double *[numZones.dir0+2];
+	//~ for (int i=0; i<=numZones.dir0+1; ++i)
+	//~ {
+		//~ array[i]= new double [numZones.dir1+2];
+	//~ }
+//~ 
+	//~ for (int i=0; i<=numZones.dir0+1; ++i) {
+	//~ for (int j=0; j<=numZones.dir1+1; ++j)
+	//~ {
+		//~ array[i][j] = valueInit;
+	//~ }}
+//~ 
+	//~ //cout << "Done" << endl;
+//~ }
+//~ 
+//~ spacialArray2D& spacialArray2D::operator=(const spacialArray2D& that)
+//~ {
+	//~ this->numZones.dir0=that.numZones.dir0;
+	//~ this->numZones.dir1=that.numZones.dir1;
+	//~ 
+	//~ array= new double *[numZones.dir0+2];
+	//~ for (int i=0; i<=numZones.dir0+1; ++i)
+	//~ {
+		//~ array[i]= new double [numZones.dir1+2];
+	//~ }
+//~ 
+	//~ for (int i=0; i<=numZones.dir0+1; ++i) {
+	//~ for (int j=0; j<=numZones.dir1+1; ++j)
+	//~ {
+		//~ array[i][j]= that.array[i][j];
+	//~ }}
+//~ 
+	//~ return *this;
+//~ }
+//~ 
+//~ spacialArray2D::~spacialArray2D()
+//~ {
+	//~ for (int i=0; i<=numZones.dir0+1; ++i)
+	//~ {
+		//~ delete [] array[i];
+//~ 
+		//~ *array=NULL;
+	//~ }
+	//~ delete [] array;
+//~ 
+	//~ array=NULL;
+//~ }
+//~ 
+//~ double spacialArray2D::get(int i, int j) const
+//~ {
+	//~ return array[i][j];
+//~ }
+//~ void spacialArray2D::write(int i, int j, double value)
+//~ {
+	//~ array[i][j]=value;
+//~ }
+//~ int spacialArray2D::getSize_dir0() const
+//~ {
+	//~ return numZones.dir0;
+//~ }
+//~ int spacialArray2D::getSize_dir1() const	
+//~ {
+	//~ return numZones.dir1;
+//~ }
 
-	for (int i=0; i<=numZones.dir0+1; ++i) {
-	for (int j=0; j<=numZones.dir1+1; ++j)
-	{
-		array[i][j]= that.array[i][j];
-	}}
-}
-
-spacialArray2D::spacialArray2D(int size_dir0, int size_dir1, double valueInit)
-{
-	numZones.dir0=size_dir0;
-	numZones.dir1=size_dir1;
-
-	array= new double *[numZones.dir0+2];
-	for (int i=0; i<=numZones.dir0+1; ++i)
-	{
-		array[i]= new double [numZones.dir1+2];
-	}
-
-	for (int i=0; i<=numZones.dir0+1; ++i) {
-	for (int j=0; j<=numZones.dir1+1; ++j)
-	{
-		array[i][j] = valueInit;
-	}}
-
-	//~ cout << "Done" << endl;
-}
-
-spacialArray2D& spacialArray2D::operator=(const spacialArray2D& that)
-{
-	this->numZones.dir0=that.numZones.dir0;
-	this->numZones.dir1=that.numZones.dir1;
-	
-	array= new double *[numZones.dir0+2];
-	for (int i=0; i<=numZones.dir0+1; ++i)
-	{
-		array[i]= new double [numZones.dir1+2];
-	}
-
-	for (int i=0; i<=numZones.dir0+1; ++i) {
-	for (int j=0; j<=numZones.dir1+1; ++j)
-	{
-		array[i][j]= that.array[i][j];
-	}}
-
-	return *this;
-}
-
-spacialArray2D::~spacialArray2D()
-{
-	for (int i=0; i<=numZones.dir0+1; ++i)
-	{
-		delete [] array[i];
-
-		*array=NULL;
-	}
-	delete [] array;
-
-	array=NULL;
-}
-
-double spacialArray2D::get(int i, int j) const
-{
-	return array[i][j];
-}
-void spacialArray2D::write(int i, int j, double value)
-{
-	array[i][j]=value;
-}
-int spacialArray2D::getSize_dir0() const
-{
-	return numZones.dir0;
-}
-int spacialArray2D::getSize_dir1() const	
-{
-	return numZones.dir1;
-}
-
-cellDirections spacialArray2D::getLocalField(int i, int j) const
-{
-	cellDirections field;
-	field.P=array[i][j];
-	field.N=array[i][j+1];
-	field.S=array[i][j-1];
-	field.E=array[i+1][j];
-	field.W=array[i-1][j];
-
-	return field;
-}
+//~ cellDirections spacialArray2D::getLocalField(int i, int j) const
+//~ {
+	//~ cellDirections field;
+	//~ field.P=array[i][j];
+	//~ field.N=array[i][j+1];
+	//~ field.S=array[i][j-1];
+	//~ field.E=array[i+1][j];
+	//~ field.W=array[i-1][j];
+//~ 
+	//~ return field;
+//~ }
 
 //***************************************************************************
 //***************************************************************************
 //***************************************************************************
 //vectorArray2D**************************************************************
-double vectorArray2D::getMagnitude(int i, int j)
-{
-	return sqrt(
-		pow(array_dir0.get(i,j),2.0)
-		+pow(array_dir1.get(i,j),2.0));
-}
-
-void vectorArray2D::writeComponent_dir0(int i, int j, double value)
-{
-	array_dir0.write(i,j,value);
-}
-void vectorArray2D::writeComponent_dir1(int i, int j, double value)
-{
-	array_dir1.write(i,j,value);
-}
-
-double vectorArray2D::component_dir0(int i, int j)
-{
-	return array_dir0.get(i,j);
-}
-double vectorArray2D::component_dir1(int i, int j)
-{
-	return array_dir1.get(i,j);
-}
-
-int vectorArray2D::getSize_dir0()
-{
-	return array_dir1.getSize_dir0();
-}
-int vectorArray2D::getSize_dir1()
-{
-	return array_dir1.getSize_dir1();
-}
+//~ double vectorArray2D::getMagnitude(int i, int j)
+//~ {
+	//~ return sqrt(
+		//~ pow(array_dir0.get(i,j),2.0)
+		//~ +pow(array_dir1.get(i,j),2.0));
+//~ }
+//~ 
+//~ void vectorArray2D::writeComponent_dir0(int i, int j, double value)
+//~ {
+	//~ array_dir0.write(i,j,value);
+//~ }
+//~ void vectorArray2D::writeComponent_dir1(int i, int j, double value)
+//~ {
+	//~ array_dir1.write(i,j,value);
+//~ }
+//~ 
+//~ double vectorArray2D::component_dir0(int i, int j)
+//~ {
+	//~ return array_dir0.get(i,j);
+//~ }
+//~ double vectorArray2D::component_dir1(int i, int j)
+//~ {
+	//~ return array_dir1.get(i,j);
+//~ }
+//~ 
+//~ int vectorArray2D::getSize_dir0()
+//~ {
+	//~ return array_dir1.getSize_dir0();
+//~ }
+//~ int vectorArray2D::getSize_dir1()
+//~ {
+	//~ return array_dir1.getSize_dir1();
+//~ }
 
 /*
  * Function: vectorArray2D::product()
@@ -345,19 +356,19 @@ int vectorArray2D::getSize_dir1()
  * Description: The product of a scalar and a vector yield a vector
  * 	flux.  A local vector flux field is computed here and returned.
  */
-cellDirections vectorArray2D::product(
-	cellDirections scalarField,
-	int i, int j) const
-{
-	cellDirections fieldFlux;
-	fieldFlux.P_dir0=scalarField.P*array_dir0.get(i,j);
-	fieldFlux.P_dir1=scalarField.P*array_dir1.get(i,j);
-
-	fieldFlux.N=scalarField.N*array_dir1.get(i,j+1);
-	fieldFlux.S=scalarField.S*array_dir1.get(i,j-1);
-	fieldFlux.E=scalarField.E*array_dir0.get(i+1,j);
-	fieldFlux.W=scalarField.W*array_dir0.get(i-1,j);
-
-	return fieldFlux;
-}
+//~ cellDirections vectorArray2D::product(
+	//~ cellDirections scalarField,
+	//~ int i, int j) const
+//~ {
+	//~ cellDirections fieldFlux;
+	//~ fieldFlux.P_dir0=scalarField.P*array_dir0.get(i,j);
+	//~ fieldFlux.P_dir1=scalarField.P*array_dir1.get(i,j);
+//~ 
+	//~ fieldFlux.N=scalarField.N*array_dir1.get(i,j+1);
+	//~ fieldFlux.S=scalarField.S*array_dir1.get(i,j-1);
+	//~ fieldFlux.E=scalarField.E*array_dir0.get(i+1,j);
+	//~ fieldFlux.W=scalarField.W*array_dir0.get(i-1,j);
+//~ 
+	//~ return fieldFlux;
+//~ }
 
