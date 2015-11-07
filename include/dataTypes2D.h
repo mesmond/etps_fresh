@@ -12,6 +12,7 @@
 #include <iostream>
 #include <math.h>
 #include <assert.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -207,6 +208,17 @@ template <class type> class StructuredLocalField2D
 //***************************************************************************
 //***************************************************************************
 //SpacialArray2D*************************************************************
+/*
+ * Class: SpacialArray2D
+ * Purpose: Provide a tempalte class to store and process simulated
+ * 	spacial distriutions (e.g. pressure, velocity, etc.).
+ *
+ * Description: This template class allows the user to define
+ * 	a spacial array of multiple types such as a vector (Vector2D)
+ * 	or a scalar (double).
+ * 	This class provides an extension of the basic 2D data types to include
+ * 	spacial distributions.
+ */
 template <class type> class SpacialArray2D
 {
 	private:
@@ -266,6 +278,8 @@ template <class type> class SpacialArray2D
 	}
 
 	inline type get(int i, int j) const { return array[i][j]; }
+	inline int getSize_dir0() const { return numZones.dir0; }
+	inline int getSize_dir1() const { return numZones.dir1; }
 	inline void write(int i, int j, const type& value) { array[i][j]=value; }
 
 	void print() const
@@ -278,6 +292,39 @@ template <class type> class SpacialArray2D
 			}
 			cout << endl;
 		}
+	}
+
+	void fill(const type& value)
+	{
+		for (int i=0; i<=numZones.dir0+1; ++i) {
+		for (int j=0; j<=numZones.dir1+1; ++j)
+		{
+			array[i][j]=value;
+		}}
+	}
+
+	StructuredLocalField2D<type> getLocalField(int i, int j)
+	{
+		if (i < 1 || i > numZones.dir0 || j < 1 || j > numZones.dir1)
+		{
+			cout << "Array Index Out of range!" << endl;
+			exit(1);
+
+			return 0;
+		}
+		else
+		{
+			StructuredLocalField2D<type> field;
+			field.P=get(i,j);
+			field.N=get(i,j+1);
+			field.S=get(i,j-1);
+			field.E=get(i+1,j);
+			field.W=get(i-1,j);
+
+			return field;
+		}
+
+		return 0;
 	}
 };
 

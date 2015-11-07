@@ -41,10 +41,16 @@ int main(int argc, char *argv[])
 	cout << "Testing SpacialArray2D ..." << endl;
 
 	SpacialArray2D<double> pressure;
-	SpacialArray2D< Vector2D<double> > velocity(15,15);
+	SpacialArray2D< Vector2D<double> > velocity(5,5);
 
 	pressure.print();
-	velocity.print();	
+	velocity.print();
+
+	Vector2D<double> vec(4.5,3.4);
+
+	velocity.fill(vec);
+
+	velocity.print();
 	
 	
 	//~ StructuredGeometry2D block(0.0,0.0,1.0,1.0,10,10);
