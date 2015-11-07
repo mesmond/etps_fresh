@@ -1,0 +1,51 @@
+*****************************************************************************
+*****************************************************************************
+File: README
+Project: unitTests
+Author: Micah Esmond
+Date: November 7, 2015
+
+Unit Tests are included here.
+*****************************************************************************
+*****************************************************************************
+
+*****************************************************************************
+Non-Standard Dependencies****************************************************
+openmpi
+
+*****************************************************************************
+Compile the Source code******************************************************
+The source code has been designed to run on linux systems.
+Running
+
+./makefile
+
+from this directory should compile the source code.
+If makefile did not stay executable, one can run
+
+source makefile
+
+*****************************************************************************
+Running the Code*************************************************************
+The input file is the *.inp file in this directory.
+From here, the user can change the basic parameters used to setup and
+	solve the explosion wave problem which is default.
+To run the simulation, use the run script by typing
+
+./run
+
+into a terminal.  If "run" did not stay executable, you can also run the code
+using
+
+source run
+
+after the code is compiled.
+
+Simulation information is stored in the log file after
+	the simulation has begun.
+Output data is written in .vtk format for analysis in Paraview.
+
+*****************************************************************************
+About the Author*************************************************************
+Micah Esmond is a Ph.D. candidate at Virginia Tech conducting research in the
+	computational modeling of Electrothermal (ET) plasmas.

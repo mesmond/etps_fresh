@@ -1,0 +1,42 @@
+#!/bin/bash
+#Run Script for esmond_euler2D
+
+#Get all names of inout files in this directory
+inputFile=*.inp
+
+#Verify that only one file name was globbed in using the * command
+#Note: wc = count of something, -w = word count 
+numberOfStrings=$(echo $inputFile | wc -w)
+if [ $numberOfStrings -gt 1 ]
+then
+	echo "	Too Many input files Globbed! ."
+	echo "	Put only one input file in this directory."
+	echo "	Exiting..."
+	exit
+fi
+
+#Get the file prefix by string manipulation.
+inputFile=(*.inp)
+fileStringLength=${#inputFile}
+inputFilePrefix=${inputFile:0:$fileStringLength-4}
+
+#****************************************************************************
+#Calculate the required number of processes needed to run the program.
+lineString=$(grep numBlocks_dir0 $inputFile)
+stringLength=${#lineString}
+numberLength=$(echo "$stringLength - 15" | bc -l) #The length of the number
+numBlocks_dir0="${lineString:15:$numberLength}"
+
+lineString=$(grep numBlocks_dir1 $inputFile)
+stringLength=${#lineString}
+numberLength=$(echo "$stringLength - 15" | bc -l) #The length of the number
+numBlocks_dir1="${lineString:15:$numberLength}"
+
+totalProc=$(echo "$numBlocks_dir0 * $numBlocks_dir1" | bc -l)
+#****************************************************************************
+
+
+
+
+#Run the program*************************************************************
+mpirun -np $totalProc ./euler2D $inputFilePrefix.inp
