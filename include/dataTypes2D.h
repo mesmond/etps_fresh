@@ -191,13 +191,13 @@ template <class type> class StructuredLocalField2D
 
 	StructuredLocalField2D()
 	{
-		P=0;
-		P_dir0=0;
-		P_dir1=0;
-		N=0;
-		S=0;
-		E=0;
-		W=0;
+		P=(type)0;
+		P_dir0=(type)0;
+		P_dir1=(type)0;
+		N=(type)0;
+		S=(type)0;
+		E=(type)0;
+		W=(type)0;
 	}
 };
 
@@ -231,23 +231,7 @@ template <class type> class SpacialArray2D
 	type **array;
 
 	public:
-	explicit SpacialArray2D(int size0=10, int size1=10)
-	{
-		numZones.dir0=size0;
-		numZones.dir1=size1;
-
-		array = new type *[numZones.dir0+2];
-		for (int i=0; i<=numZones.dir0+1; ++i)
-		{
-			array[i]= new type [numZones.dir1+2];
-		}
-
-		for (int i=0; i<=numZones.dir0+1; ++i) {
-			for (int j=0; j<=numZones.dir1+1; ++j)
-			{
-				array[i][j]=(type)0;
-			}}
-	}
+	explicit SpacialArray2D(int size0=10, int size1=10);
 	SpacialArray2D(const SpacialArray2D<type>& that)
 	{
 		numZones.dir0=that.numZones.dir0;
@@ -310,7 +294,7 @@ template <class type> class SpacialArray2D
 			cout << "Array Index Out of range!" << endl;
 			exit(1);
 
-			return 0;
+			//~ return 0;
 		}
 		else
 		{
@@ -324,7 +308,7 @@ template <class type> class SpacialArray2D
 			return field;
 		}
 
-		return 0;
+		//~ return 0;
 	}
 };
 

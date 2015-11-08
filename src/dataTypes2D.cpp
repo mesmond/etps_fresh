@@ -52,8 +52,27 @@ Dyad2D operator*(const Vector2D<double>& vec0, const Vector2D<double>& vec1)
 //***************************************************************************
 //***************************************************************************
 //SpacialArray2D*************************************************************
+template <typename type> SpacialArray2D<type>::SpacialArray2D(int size0, int size1)
+{
+	numZones.dir0=size0;
+	numZones.dir1=size1;
 
+	array = new type *[numZones.dir0+2];
+	for (int i=0; i<=numZones.dir0+1; ++i)
+	{
+		array[i]= new type [numZones.dir1+2];
+	}
 
+	for (int i=0; i<=numZones.dir0+1; ++i) {
+		for (int j=0; j<=numZones.dir1+1; ++j)
+		{
+			array[i][j]=(type)0;
+		}}
+}
+
+template class SpacialArray2D<Vector2D<double> >;
+template class SpacialArray2D<double>;
+template class SpacialArray2D<int>;
 //***************************************************************************
 //***************************************************************************
 //***************************************************************************
