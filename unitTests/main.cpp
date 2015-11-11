@@ -32,11 +32,13 @@
 #include "dataTypes2D.h"
 #include "userInputClass.h"
 #include "mesmond-utils.h"
+#include <string.h>
 
 using namespace std;
 
+
 int main(int argc, char *argv[])
-{
+{	
 	cout << "************************************" << endl;
 	cout << "Testing SpacialArray2D ..." << endl;
 
@@ -51,8 +53,15 @@ int main(int argc, char *argv[])
 	velocity.fill(vec);
 
 	velocity.print();
+
+	StructuredLocalField2D< Vector2D<double> > localField;
+	localField=velocity.getLocalField(2,3);
+
+	localField.print();	
+
 	
-	
+	//~ 
+	//~ 
 	//~ StructuredGeometry2D block(0.0,0.0,1.0,1.0,10,10);
 	//~ StructuredGeometry2D block_north(0.0,1.0,1.0,3.0,10,5);
 //~ 
@@ -73,9 +82,9 @@ int main(int argc, char *argv[])
 		//~ ////~ cout << block.zoneDelta.dir1[i] << endl;
 		//~ cout << block.globalCoord.dir1[i] << endl;
 	//~ }
-
-
-
+//~ 
+//~ 
+//~ 
 }
 
 void test_Point2D_Vector2D()

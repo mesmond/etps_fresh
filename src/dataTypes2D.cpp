@@ -48,6 +48,27 @@ Dyad2D operator*(const Vector2D<double>& vec0, const Vector2D<double>& vec1)
 }
 
 
+
+//***************************************************************************
+//***************************************************************************
+//***************************************************************************
+//StructuredLocalField2D*****************************************************
+template <typename type> void StructuredLocalField2D<type>::print() const
+{
+	cout << "StructuredLocalField2D:" << endl;
+	cout << "\t P      =" << P << endl;
+	cout << "\t P(dir0)=" << P_dir0 << endl;
+	cout << "\t P(dir1)=" << P_dir1 << endl;
+	cout << "\t N      =" << N << endl;
+	cout << "\t S      =" << S << endl;
+	cout << "\t E      =" << E << endl;
+	cout << "\t W      =" << W << endl;
+}
+
+template class StructuredLocalField2D<Vector2D<double> >;
+template class StructuredLocalField2D<double>;
+template class StructuredLocalField2D<int>;
+
 //***************************************************************************
 //***************************************************************************
 //***************************************************************************
@@ -68,6 +89,81 @@ template <typename type> SpacialArray2D<type>::SpacialArray2D(int size0, int siz
 		{
 			array[i][j]=(type)0;
 		}}
+}
+
+template <typename type> SpacialArray2D<type>::SpacialArray2D(const SpacialArray2D<type>& that)
+{
+	numZones.dir0=that.numZones.dir0;
+	numZones.dir1=that.numZones.dir1;
+
+	array = new type *[numZones.dir0+2];
+	for (int i=0; i<=numZones.dir0+1; ++i)
+	{
+		array[i]= new type [numZones.dir1+2];
+	}
+
+	for (int i=0; i<=numZones.dir0+1; ++i) {
+		for (int j=0; j<=numZones.dir1+1; ++j)
+		{
+			array[i][j]=that.get(i,j);
+		}}
+}
+
+template <typename type> SpacialArray2D<type>::~SpacialArray2D()
+{
+	for (int i=0; i<=numZones.dir0+1; ++i)
+	{
+		delete[] array[i];
+	}
+	*array=0;
+	delete array;
+	array=0;
+}
+
+
+template <typename type> void SpacialArray2D<type>::print() const
+{
+	for (int j=numZones.dir1+1; j>=0; --j)
+	{
+		for (int i=0; i<=numZones.dir0+1; ++i)
+		{
+			cout << array[i][j] << " ";
+		}
+		cout << endl;
+	}
+}
+
+template <typename type> void SpacialArray2D<type>::fill(const type& value)
+{
+	for (int i=0; i<=numZones.dir0+1; ++i) {
+	for (int j=0; j<=numZones.dir1+1; ++j)
+	{
+		array[i][j]=value;
+	}}
+}
+
+
+template <typename type> StructuredLocalField2D<type>
+	SpacialArray2D<type>::getLocalField(int i, int j)
+{
+	if (i < 1 || i > numZones.dir0 || j < 1 || j > numZones.dir1)
+	{
+		cout << "Array Index Out of range!" << endl;
+		exit(1);
+
+		return StructuredLocalField2D<type>();
+	}
+	else
+	{
+		StructuredLocalField2D<type> field;
+		field.P=get(i,j);
+		field.N=get(i,j+1);
+		field.S=get(i,j-1);
+		field.E=get(i+1,j);
+		field.W=get(i-1,j);
+
+		return field;
+	}
 }
 
 template class SpacialArray2D<Vector2D<double> >;

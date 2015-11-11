@@ -199,6 +199,8 @@ template <class type> class StructuredLocalField2D
 		E=(type)0;
 		W=(type)0;
 	}
+
+	void print() const;
 };
 
 
@@ -232,84 +234,19 @@ template <class type> class SpacialArray2D
 
 	public:
 	explicit SpacialArray2D(int size0=10, int size1=10);
-	SpacialArray2D(const SpacialArray2D<type>& that)
-	{
-		numZones.dir0=that.numZones.dir0;
-		numZones.dir1=that.numZones.dir1;
-
-		array = new type *[numZones.dir0+2];
-		for (int i=0; i<=numZones.dir0+1; ++i)
-		{
-			array[i]= new type [numZones.dir1+2];
-		}
-
-		for (int i=0; i<=numZones.dir0+1; ++i) {
-			for (int j=0; j<=numZones.dir1+1; ++j)
-			{
-				array[i][j]=that.get(i,j);
-			}}
-	}
-
-	~SpacialArray2D()
-	{
-		for (int i=0; i<=numZones.dir0+1; ++i)
-		{
-			delete[] array[i];
-		}
-		*array=0;
-		delete array;
-		array=0;
-	}
+	SpacialArray2D(const SpacialArray2D<type>& that);
+	~SpacialArray2D();
 
 	inline type get(int i, int j) const { return array[i][j]; }
 	inline int getSize_dir0() const { return numZones.dir0; }
 	inline int getSize_dir1() const { return numZones.dir1; }
 	inline void write(int i, int j, const type& value) { array[i][j]=value; }
 
-	void print() const
-	{
-		for (int j=numZones.dir1+1; j>=0; --j)
-		{
-			for (int i=0; i<=numZones.dir0+1; ++i)
-			{
-				cout << array[i][j] << " ";
-			}
-			cout << endl;
-		}
-	}
+	void print() const;
 
-	void fill(const type& value)
-	{
-		for (int i=0; i<=numZones.dir0+1; ++i) {
-		for (int j=0; j<=numZones.dir1+1; ++j)
-		{
-			array[i][j]=value;
-		}}
-	}
+	void fill(const type& value);
 
-	StructuredLocalField2D<type> getLocalField(int i, int j)
-	{
-		if (i < 1 || i > numZones.dir0 || j < 1 || j > numZones.dir1)
-		{
-			cout << "Array Index Out of range!" << endl;
-			exit(1);
-
-			//~ return 0;
-		}
-		else
-		{
-			StructuredLocalField2D<type> field;
-			field.P=get(i,j);
-			field.N=get(i,j+1);
-			field.S=get(i,j-1);
-			field.E=get(i+1,j);
-			field.W=get(i-1,j);
-
-			return field;
-		}
-
-		//~ return 0;
-	}
+	StructuredLocalField2D<type> getLocalField(int i, int j);
 };
 
 
