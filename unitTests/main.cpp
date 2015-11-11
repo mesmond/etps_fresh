@@ -40,51 +40,53 @@ using namespace std;
 int main(int argc, char *argv[])
 {	
 	cout << "************************************" << endl;
-	cout << "Testing SpacialArray2D ..." << endl;
+	cout << "Testing StructuredGeometry2D ..." << endl;
 
-	SpacialArray2D<double> pressure;
-	SpacialArray2D< Vector2D<double> > velocity(5,5);
+	StructuredGeometry2D block(0.0,0.0,1.0,1.0,10,10);
+	StructuredGeometry2D block_north(0.0,1.0,1.0,3.0,10,5);
 
-	pressure.print();
-	velocity.print();
+	block.link_north(block_north);
+	block_north.link_south(block);
 
-	Vector2D<double> vec(4.5,3.4);
-
-	velocity.fill(vec);
-
-	velocity.print();
-
-	StructuredLocalField2D< Vector2D<double> > localField;
-	localField=velocity.getLocalField(2,3);
-
-	localField.print();	
+	cout << "block_north:" << endl;
+	for (int i=block_north.numZones.dir1+1; i>=0; --i)
+	{
+		////~ cout << block_north.zoneDelta.dir1[i] << endl;
+		cout << block_north.globalCoord.dir1[i] << endl;
+	}
 
 	
-	//~ 
-	//~ 
-	//~ StructuredGeometry2D block(0.0,0.0,1.0,1.0,10,10);
-	//~ StructuredGeometry2D block_north(0.0,1.0,1.0,3.0,10,5);
-//~ 
-	//~ block.link_north(block_north);
-	//~ block_north.link_south(block);
-//~ 
-	//~ cout << "block_north:" << endl;
-	//~ for (int i=block_north.numZones.dir1+1; i>=0; --i)
-	//~ {
-		//~ ////~ cout << block_north.zoneDelta.dir1[i] << endl;
-		//~ cout << block_north.globalCoord.dir1[i] << endl;
-	//~ }
-//~ 
-	//~ 
-	//~ cout << "block:" << endl;
-	//~ for (int i=block.numZones.dir1+1; i>=0; --i)
-	//~ {
-		//~ ////~ cout << block.zoneDelta.dir1[i] << endl;
-		//~ cout << block.globalCoord.dir1[i] << endl;
-	//~ }
-//~ 
-//~ 
-//~ 
+	cout << "block:" << endl;
+	for (int i=block.numZones.dir1+1; i>=0; --i)
+	{
+		////~ cout << block.zoneDelta.dir1[i] << endl;
+		cout << block.globalCoord.dir1[i] << endl;
+	}
+
+
+
+}
+
+void test_SpacialArray2D()
+{
+	cout << "************************************" << endl;
+	cout << "Testing SpacialArray2D ..." << endl;
+
+	SpacialArray2D< Vector2D<double> > velocity(5,5);
+	Vector2D<double> localVel(4.5,3.4);
+
+	velocity.fill(Vector2D<double>(2.0,3.0));
+
+	velocity.write(2,2, localVel);
+	velocity.print();
+
+	StructuredLocalField2D<Vector2D<double> > localField=velocity.getLocalField(2,1);
+	localField.print();	
+
+	assert( isEqual(velocity.get(2,2).get_dir0(), localField.N.get_dir0()) );
+	assert( isEqual(velocity.get(2,0).get_dir0(), localField.S.get_dir0()) );
+	assert( isEqual(velocity.get(3,1).get_dir0(), localField.E.get_dir0()) );
+	assert( isEqual(velocity.get(1,1).get_dir0(), localField.W.get_dir0()) );
 }
 
 void test_Point2D_Vector2D()
