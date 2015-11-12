@@ -309,16 +309,32 @@ StructuredGeometry2D::~StructuredGeometry2D()
 
 void StructuredGeometry2D::link_north(const StructuredGeometry2D& toLink)
 {
-	assert(numZones.get_dir0() == toLink.getSize_dir0());
+	assert(getCount_dir0() == toLink.getCount_dir0());
+	assert( isEqual(get_extent().get_dir1(), toLink.get_origin().get_dir1()));
 	setBdy_zoneDelta_north(toLink.get_zoneDelta_south());
 }
 
 void StructuredGeometry2D::link_south(const StructuredGeometry2D& toLink)
 {
-	assert(numZones.get_dir0() == toLink.getSize_dir0());
-	//~ assert(
+	assert(getCount_dir0() == toLink.getCount_dir0());
+	assert( isEqual(get_origin().get_dir1(), toLink.get_extent().get_dir1()));
 	setBdy_zoneDelta_south(toLink.get_zoneDelta_north());
 }
+
+void StructuredGeometry2D::link_east(const StructuredGeometry2D& toLink)
+{
+	assert(getCount_dir1() == toLink.getCount_dir1());
+	assert( isEqual(get_extent().get_dir0(), toLink.get_origin().get_dir0()));
+	setBdy_zoneDelta_east(toLink.get_zoneDelta_west());
+}
+
+void StructuredGeometry2D::link_west(const StructuredGeometry2D& toLink)
+{
+	assert(getCount_dir1() == toLink.getCount_dir1());
+	assert( isEqual(get_origin().get_dir0(), toLink.get_extent().get_dir0()));
+	setBdy_zoneDelta_west(toLink.get_zoneDelta_east());
+}
+
 
 
 //***************************************************************************

@@ -14,6 +14,9 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include "mesmond-utils.h"
+
+
 using namespace std;
 
 //***************************************************************************
@@ -281,7 +284,7 @@ template <class type> class SpacialArray2D
  */
 class StructuredGeometry2D
 {
-	public:
+	private:
 	Point2D<double> origin;
 	Point2D<double> extent;
 	Vector2D<double> length;
@@ -326,8 +329,10 @@ class StructuredGeometry2D
 		return zoneDelta.dir0[1];
 	}
 
-	inline int getSize_dir0() const { return numZones.get_dir0(); }
-	inline int getSize_dir1() const { return numZones.get_dir1(); }
+	inline int getCount_dir0() const { return numZones.get_dir0(); }
+	inline int getCount_dir1() const { return numZones.get_dir1(); }
+	inline Point2D<double> get_origin() const { return origin; }
+	inline Point2D<double> get_extent() const { return extent; }
 
 	private:
 	//Set Information********************************************************
@@ -362,6 +367,9 @@ class StructuredGeometry2D
 	public:
 	void link_north(const StructuredGeometry2D& toLink);
 	void link_south(const StructuredGeometry2D& toLink);
+	void link_east(const StructuredGeometry2D& toLink);
+	void link_west(const StructuredGeometry2D& toLink);
+
 
 };
 

@@ -38,31 +38,33 @@ using namespace std;
 
 
 int main(int argc, char *argv[])
-{	
+{
 	cout << "************************************" << endl;
 	cout << "Testing StructuredGeometry2D ..." << endl;
 
-	StructuredGeometry2D block(0.0,0.0,1.0,1.0,10,10);
-	StructuredGeometry2D block_north(0.0,1.0,1.0,3.0,10,5);
+	Point2D<double> origin(0.0,0.0);
+	Point2D<double> extent(1.0,3.5);
+	Vector2D<int> size(34,34);
+	
+	StructuredGeometry2D block(origin,extent,size);
+
+	origin=Point2D<double>(0.0,3.5);
+	extent=Point2D<double>(1.0,4.5);
+	size=Vector2D<int>(34,15);
+	
+	StructuredGeometry2D block_north(origin,extent,size);
+
+	origin=Point2D<double>(1.0,3.5);
+	Point2D<double> length(1.0,3.25);
+	size=Vector2D<int>(34,15);
+	
+	StructuredGeometry2D block_east(origin,origin+length,size);
 
 	block.link_north(block_north);
 	block_north.link_south(block);
 
-	cout << "block_north:" << endl;
-	for (int i=block_north.numZones.dir1+1; i>=0; --i)
-	{
-		////~ cout << block_north.zoneDelta.dir1[i] << endl;
-		cout << block_north.globalCoord.dir1[i] << endl;
-	}
-
-	
-	cout << "block:" << endl;
-	for (int i=block.numZones.dir1+1; i>=0; --i)
-	{
-		////~ cout << block.zoneDelta.dir1[i] << endl;
-		cout << block.globalCoord.dir1[i] << endl;
-	}
-
+	block_north.link_east(block_east);
+	block_east.link_west(block_north);
 
 
 }
