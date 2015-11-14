@@ -1,9 +1,9 @@
 //***************************************************************************
 //***************************************************************************
 /*
- * File: Utils.h
+ * File: mesmond-utils.h
  * Description: This file contains declarations and definitions of
- * 	several useful functions.
+ * 	several useful one-off functions. It includes the folowing:
 */
 //***************************************************************************
 //***************************************************************************
