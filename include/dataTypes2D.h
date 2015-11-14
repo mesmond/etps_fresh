@@ -310,29 +310,28 @@ class StructuredGeometry2D
 
 	//Get Information********************************************************
 	inline double get_zoneDelta_north() const
-	{
-		return zoneDelta.dir1[numZones.get_dir1()];
-	}
+		{ return zoneDelta.dir1[numZones.get_dir1()]; }
 
 	inline double get_zoneDelta_south() const
-	{
-		return zoneDelta.dir1[1];
-	}
+		{ return zoneDelta.dir1[1]; }
 
 	inline double get_zoneDelta_east() const
-	{
-		return zoneDelta.dir0[numZones.get_dir0()];
-	}
+		{ return zoneDelta.dir0[numZones.get_dir0()]; }
 
-	inline double get_zoneDelta_west() const
-	{
-		return zoneDelta.dir0[1];
-	}
+	inline double get_zoneDelta_west() const { return zoneDelta.dir0[1]; }
 
 	inline int getCount_dir0() const { return numZones.get_dir0(); }
 	inline int getCount_dir1() const { return numZones.get_dir1(); }
 	inline Point2D<double> get_origin() const { return origin; }
 	inline Point2D<double> get_extent() const { return extent; }
+
+
+	//Mutation Handling******************************************************
+	void link_north(const StructuredGeometry2D& toLink);
+	void link_south(const StructuredGeometry2D& toLink);
+	void link_east(const StructuredGeometry2D& toLink);
+	void link_west(const StructuredGeometry2D& toLink);
+
 
 	private:
 	//Set Information********************************************************
@@ -363,12 +362,6 @@ class StructuredGeometry2D
 		zoneDelta.dir0[index] = value;
 		globalCoord.dir0[index]=origin.get_dir0()-0.5*zoneDelta.dir0[index];
 	}
-
-	public:
-	void link_north(const StructuredGeometry2D& toLink);
-	void link_south(const StructuredGeometry2D& toLink);
-	void link_east(const StructuredGeometry2D& toLink);
-	void link_west(const StructuredGeometry2D& toLink);
 
 
 };

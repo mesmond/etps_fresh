@@ -27,44 +27,25 @@
 #include <cstdio>
 #include "mpi.h"
 #include <assert.h>
-
+#include <string.h>
 
 #include "dataTypes2D.h"
 #include "userInputClass.h"
 #include "mesmond-utils.h"
-#include <string.h>
+#include "fluids2D.h"
+
 
 using namespace std;
 
 
 int main(int argc, char *argv[])
 {
-	cout << "************************************" << endl;
-	cout << "Testing StructuredGeometry2D ..." << endl;
+	Fluid2D water(30,30);
 
-	Point2D<double> origin(0.0,0.0);
-	Point2D<double> extent(1.0,3.5);
-	Vector2D<int> size(34,34);
-	
-	StructuredGeometry2D block(origin,extent,size);
+	water.pressure.fill(1.0);
+	water.pressure.print();
 
-	origin=Point2D<double>(0.0,3.5);
-	extent=Point2D<double>(1.0,4.5);
-	size=Vector2D<int>(34,15);
-	
-	StructuredGeometry2D block_north(origin,extent,size);
-
-	origin=Point2D<double>(1.0,3.5);
-	Point2D<double> length(1.0,3.25);
-	size=Vector2D<int>(34,15);
-	
-	StructuredGeometry2D block_east(origin,origin+length,size);
-
-	block.link_north(block_north);
-	block_north.link_south(block);
-
-	block_north.link_east(block_east);
-	block_east.link_west(block_north);
+	cout << "count=" << water.getCount() << endl;
 
 
 }
@@ -168,4 +149,36 @@ void test_Dyad2D()
 	cout << "dyad (init)=" << dyad << endl;
 	dyad=vec*vec2;
 	cout << "dyad=vec*vec2 : dyad=" << dyad << endl;
+}
+
+
+
+void test_StructuredGeometry2D()
+{
+	cout << "************************************" << endl;
+	cout << "Testing StructuredGeometry2D ..." << endl;
+
+	Point2D<double> origin(0.0,0.0);
+	Point2D<double> extent(1.0,3.5);
+	Vector2D<int> size(34,34);
+	
+	StructuredGeometry2D block(origin,extent,size);
+
+	origin=Point2D<double>(0.0,3.5);
+	extent=Point2D<double>(1.0,4.5);
+	size=Vector2D<int>(34,15);
+	
+	StructuredGeometry2D block_north(origin,extent,size);
+
+	origin=Point2D<double>(1.0,3.5);
+	Point2D<double> length(1.0,3.25);
+	size=Vector2D<int>(34,15);
+	
+	StructuredGeometry2D block_east(origin,origin+length,size);
+
+	block.link_north(block_north);
+	block_north.link_south(block);
+
+	block_north.link_east(block_east);
+	block_east.link_west(block_north);
 }
