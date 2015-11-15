@@ -163,23 +163,25 @@ class PerfectGas2D
 };
 
 
-//~ class ThreeComponentPlasma2D
-//~ {
-	//~ private:
-	//~ Vector2D<int> size;
-	//~ 
-	//~ PerfectGas2D elec;
-	//~ PerfectGas2D ions;
-	//~ PerfectGas2D neut;
-//~ 
-	//~ public:
-	//~ ThreeComponentPlasma2D(
-		//~ Vector2D<int> size=Vector2D<int>(10,10),
-		//~ 
-		//~ double gamma=5.0/3.0,
-		//~ double particleMass=2.3258671e-26,
-		//~ double particleRadius=65.0e-12)
-//~ }
+class ThreeComponentPlasma2D
+{
+	private:
+	Vector2D<int> size;
+	
+	PerfectGas2D elec;
+	PerfectGas2D ions;
+	PerfectGas2D neut;
+
+	public:
+	ThreeComponentPlasma2D(
+		Vector2D<int> size=Vector2D<int>(10,10),
+		double gamma=5.0/3.0,
+		double particleMass=2.3258671e-26,
+		double particleRadius=65.0e-12)
+		:	elec(size, 5.0/3.0, c_eMass, 0.0),
+			ions(size, gamma, particleMass, particleRadius),
+			neut(size, gamma, particleMass, particleRadius) {}
+};
 
 
 #endif // INCLUDE_FLUIDS2D_H_
