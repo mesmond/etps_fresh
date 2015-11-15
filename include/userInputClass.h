@@ -1,7 +1,7 @@
 //***************************************************************************
 //***************************************************************************
 /*
- * File: UserInputClass.h
+ * File: userInputClass.h
  * Description: The functions and classes used to gather user
  * 	input are declared here.
 */

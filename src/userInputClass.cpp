@@ -1,7 +1,7 @@
 //***************************************************************************
 //***************************************************************************
 /*
- * File: UserInputClass.cpp
+ * File: userInputClass.cpp
  * Description: The functions and classes used to gather user
  * 	input are defined here.
 */

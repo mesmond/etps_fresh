@@ -1,8 +1,15 @@
 //***************************************************************************
 //***************************************************************************
 /*
- * File: DataTypes2D.h
+ * File: dataTypes2D.h
  * Description: This file contains class declarations for 2D data types.
+ * 	The datatypes included are:
+ * 		Point2D
+ * 		Vector2D
+ * 		Dyad2D
+ * 		StructuredLocalField2D
+ * 		StructuredGeometry2D
+ * 		SpacialArray2D
 */
 //***************************************************************************
 //***************************************************************************
@@ -88,6 +95,12 @@ template <typename T> Point2D<T> operator*(const T& value, const Point2D<T>& poi
 }
 
 
+
+
+
+
+
+
 //***************************************************************************
 //***************************************************************************
 //***************************************************************************
@@ -97,7 +110,9 @@ template <typename T> Point2D<T> operator*(const T& value, const Point2D<T>& poi
  * Purpose: Act as a mathematical vector in 2D.
  *
  * Description: This class simply stores and processes a mathematical
- * 	vector.  This is not to be confused with a std::vector.	
+ * 	vector.  This is not to be confused with a std::vector.	Vector2D
+ * 	utilizes the functionality of a Point2D type while adding
+ * 	a get_magnitude() function.
  */
 template <class type> class Vector2D : public Point2D<type>
 {	
@@ -127,6 +142,12 @@ template <typename T> T dotProduct(const Vector2D<T>& vec1, const Vector2D<T>& v
 
 
 
+
+
+
+
+
+
 //***************************************************************************
 //***************************************************************************
 //***************************************************************************
@@ -136,7 +157,8 @@ template <typename T> T dotProduct(const Vector2D<T>& vec1, const Vector2D<T>& v
  * Purpose: Act as a mathematical Dyad in 2D.
  *
  * Description: This class stores and processes Dyad objects in 2D.  Only a
- * 	double type is allowed for its members.
+ * 	double type is allowed for its members.  When two vectors are multiplied
+ * 	together, the result will be this Dyad2D as in normal mathematics.
  */
 class Dyad2D
 {
@@ -165,18 +187,25 @@ Dyad2D operator*(const Vector2D<double>& vec0, const Vector2D<double>& vec1);
 
 
 
+
+
+
+
+
+
+
 //***************************************************************************
 //***************************************************************************
 //***************************************************************************
 //StructuredLocalField2D*****************************************************
 /*
- * struct: StructuredLocalField2D
+ * Class: StructuredLocalField2D
  * Purpose: Provide a basic object for acquiring and sending simulation
  * 	information relevant to a particular cell.
  *
  * Description: North, South, East, and West are determined according to
- * 	the convention that direction zero (x or r) points to the East, while
- * 	direction unity points to the North.
+ * 	the convention that dir0 (x or r) points to the East, while
+ * 	dir1 (y or z) points to the North.
  * 	The P stands for Point and is a placeholder for values at the cell
  * 	center. The directions dir0 and dir1 are included for the P placeholder
  * 	so that fluxes in these directions can be stored and used.
@@ -209,17 +238,25 @@ template <class type> class StructuredLocalField2D
 
 
 
+
+
+
+
+
+
+
+
 //***************************************************************************
 //***************************************************************************
 //***************************************************************************
 //SpacialArray2D*************************************************************
 /*
  * Class: SpacialArray2D
- * Purpose: Provide a tempalte class to store and process simulated
+ * Purpose: Provide a template class to store and process simulated
  * 	spacial distriutions (e.g. pressure, velocity, etc.).
  *
  * Description: This template class allows the user to define
- * 	a spacial array of multiple types such as a vector (Vector2D)
+ * 	a spacial array of different types such as a vector (Vector2D)
  * 	or a scalar (double).
  * 	This class provides an extension of the basic 2D data types to include
  * 	spacial distributions.
@@ -227,22 +264,19 @@ template <class type> class StructuredLocalField2D
 template <class type> class SpacialArray2D
 {
 	private:
-	struct ArraySize
-	{
-		int dir0;
-		int dir1;
-	} numZones;
-
+	Vector2D<int> size;
 	type **array;
 
 	public:
-	explicit SpacialArray2D(int size0=10, int size1=10);
+	explicit SpacialArray2D( Vector2D<int> size=Vector2D<int>(10,10) );
 	SpacialArray2D(const SpacialArray2D<type>& that);
 	~SpacialArray2D();
 
 	inline type get(int i, int j) const { return array[i][j]; }
-	inline int getSize_dir0() const { return numZones.dir0; }
-	inline int getSize_dir1() const { return numZones.dir1; }
+	inline int getSize_dir0() const { return size.get_dir0(); }
+	inline int getSize_dir1() const { return size.get_dir1(); }
+	inline int getCount_dir0() const { return size.get_dir0(); }
+	inline int getCount_dir1() const { return size.get_dir1(); }
 	inline void write(int i, int j, const type& value) { array[i][j]=value; }
 
 	void print() const;
@@ -251,8 +285,6 @@ template <class type> class SpacialArray2D
 
 	StructuredLocalField2D<type> getLocalField(int i, int j);
 };
-
-
 
 
 

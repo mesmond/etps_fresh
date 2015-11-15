@@ -38,15 +38,26 @@
 using namespace std;
 
 
+
+void test_SpacialArray2D();
+
 int main(int argc, char *argv[])
 {
-	Fluid2D water(30,30);
+	cout << "************************************" << endl;
+	cout << "Testing PerfectGas2D ..." << endl;
+	PerfectGas2D air(Vector2D<int>(30,30));
 
-	water.pressure.fill(1.0);
-	water.pressure.print();
+	air.print_massDensity();
 
-	cout << "count=" << water.getCount() << endl;
 
+
+
+
+	cout << "Done***************************************" << endl;
+
+
+
+	//~ test_SpacialArray2D();
 
 }
 
@@ -55,7 +66,7 @@ void test_SpacialArray2D()
 	cout << "************************************" << endl;
 	cout << "Testing SpacialArray2D ..." << endl;
 
-	SpacialArray2D< Vector2D<double> > velocity(5,5);
+	SpacialArray2D< Vector2D<double> > velocity(Vector2D<int>(10,5));
 	Vector2D<double> localVel(4.5,3.4);
 
 	velocity.fill(Vector2D<double>(2.0,3.0));

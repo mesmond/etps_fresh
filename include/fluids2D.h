@@ -17,50 +17,62 @@
 
 using namespace std;
 
-class Fluid2D
+class PerfectGas2D
 {
 	private:
-	Vector2D<int> count;
+	//Mesh Size**************************************************************
+	Vector2D<int> size;
+
+	//Dependent Variables****************************************************
+	SpacialArray2D<double> molarDensity; 					//mol/m^3
+	SpacialArray2D<double> massDensity;						//kg/m^3
+	
+	SpacialArray2D<Vector2D<double> > velocity;				//m/s
+	SpacialArray2D<Vector2D<double> > momentum;				//kg/(m^2 s)
+	
+	SpacialArray2D<double> temperature;						//Kelvin
+	SpacialArray2D<double> internalEnergy;					//J/m^3
+	SpacialArray2D<double> totalEnergy;						//J/m^3
+	
+	SpacialArray2D<double> pressure;
+
+	//Governing Equations' right hand sides**********************************
+	SpacialArray2D<double> continuity_rhs;
+	SpacialArray2D<Vector2D<double> > momentum_rhs;
+	SpacialArray2D<double> totalEnergy_rhs;
+
+	//Properties*************************************************************
+	SpacialArray2D<double> soundSpeed;	//m/s
+
+	double gamma;						//Specific Heat Ratio (constant)
+	double particleMass;				//kg
+	double maxSoundSpeed;				//m/s
 
 	public:
-	SpacialArray2D<double> pressure;
-	SpacialArray2D<Vector2D<double> > velocity;
-	SpacialArray2D<double> temperature;
+	PerfectGas2D(
+		Vector2D<int> size=Vector2D<int>(10,10),
+		double particleMass=2.66e-26, double gamma=1.6667)
+		:
+			size(size),
+			//Dependent Variables********************************************
+			molarDensity(size),
+			massDensity(size),
+			velocity(size),
+			momentum(size),
+			temperature(size),
+			internalEnergy(size),
+			totalEnergy(size),
+			pressure(size),
+			//Right hand sides***********************************************
+			continuity_rhs(size),
+			momentum_rhs(size),
+			totalEnergy_rhs(size),
+			//Properties*****************************************************
+			soundSpeed(size),
+			gamma(gamma),
+			particleMass(particleMass) {}
 
-	SpacialArray2D<Vector2D<double> > momentum;
-	SpacialArray2D<double> internalEnergy;
-	SpacialArray2D<double> totalEnergy;
-
-	Fluid2D(int size0=10, int size1=10) :
-		pressure(size0, size1),
-		velocity(size0, size1),
-		temperature(size0, size1),
-		momentum(size0, size1),
-		internalEnergy(size0, size1),
-		totalEnergy(size0, size1)
-	{
-		count.write_dir0(size0);
-		count.write_dir1(size1);
-	}
-
-	Vector2D<int> getCount() const { return count; }
-};
-
-class IdealGas : public Fluid2D
-{
-	SpacialArray2D<double> massDensity;
-	SpacialArray2D<double> molarDensity;
-
-	//~ void updatePressure()
-	//~ {
-		//~ int count_dir0=this->getCount().get_dir0();
-		//~ int count_dir1=this->getCount().get_dir1();
-//~ 
-		//~ 
-	//~ }
-
-	
-	
+	void print_massDensity() const { massDensity.print(); }
 };
 
 
