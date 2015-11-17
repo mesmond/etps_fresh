@@ -60,8 +60,8 @@ class PerfectGas2D
 	public:
 	PerfectGas2D(
 		Vector2D<int> size=Vector2D<int>(10,10),
-		double gamma=5.0/3.0,
-		double particleMass=2.3258671e-26,
+		double gamma=1.4,
+		double particleMass=28.97/(1000.0*c_Avagadro),
 		double particleRadius=65.0e-12)
 		:
 			size(size),
@@ -89,9 +89,44 @@ class PerfectGas2D
 
 	inline Vector2D<int> getSize() const { return size; }
 
+	//***********************************************************************
+	//Print Data*************************************************************
 	inline void print_molarDensity() const { molarDensity.print(); }
 	inline void print_massDensity() const { massDensity.print(); }
+	inline void print_temperature() const { temperature.print(); }
+	inline void print_pressure() const { pressure.print(); }
+	inline void print_thermalConductivity() const { thermalConductivity.print(); }
 
+	//***********************************************************************
+	//Fill Data**************************************************************
+	inline void fill_molarDensity(const double& value_mol_per_m3)
+	{
+		double massDensity_tmp=value_mol_per_m3*(particleMass*c_Avagadro);
+		molarDensity.fill(value_mol_per_m3);
+		massDensity.fill(massDensity_tmp);
+	}
+	inline void fill_massDensity(const double& value_kg_per_m3)
+	{
+		double molarDensity_tmp=value_kg_per_m3/(particleMass*c_Avagadro);
+		massDensity.fill(value_kg_per_m3);
+		molarDensity.fill(molarDensity_tmp);
+	}
+	inline void fill_temperature(const double& value) { temperature.fill(value); }
+	inline void fill_thermalConductivity(const double& value) { thermalConductivity.fill(value); }
+	inline void update_pressure()
+	{
+		for (int i=0; i<=size.get_dir0()+1; ++i)
+		for (int j=0; j<=size.get_dir1()+1; ++j)
+		{
+			pressure.write( i,j, getPressure(i, j) );
+		}
+	}
+
+	inline double getPressure(int i, int j)
+	{
+		return molarDensity.get(i,j)*c_univGasConst*temperature.get(i,j); // Pa
+	}
+	
 	//***********************************************************************
 	//Thermal Speeds*********************************************************
 	/*
@@ -126,7 +161,7 @@ class PerfectGas2D
 	 * 	Purpose: Return the self collision frequency for the fluid assuming
 	 * 		electrically neutral.
 	 */
-	inline double collFreq(int i, int j)
+	inline double collFreq(int i, int j) const
 	{
 		//Woods (1993) (pg. 40)
 		return 1.414213562*c_pi*molarDensity.get(i,j)*c_Avagadro
@@ -142,7 +177,7 @@ class PerfectGas2D
 	 *	Purpose: Return the thermal conductivity based on
 	 * 		self collisions only and assuming electrically neutral.
 	 */
-	inline double getThermalConductivty(int i, int j)
+	inline double getThermalConductivty(int i, int j) const
 	{
 		//See Bukowski (1996).
 		return (5.0/2.0)*molarDensity.get(i,j)*c_Avagadro
@@ -154,7 +189,7 @@ class PerfectGas2D
 	 * Function: getSoundSpeed()
 	 * Purpose: Return the local fluid sound speed.
 	 */
-	inline double getSoundSpeed(int i, int j)
+	inline double getSoundSpeed(int i, int j) const
 	{
 		return sqrt(gamma*c_k*temperature.get(i,j)/particleMass);
 	}

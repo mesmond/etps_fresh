@@ -45,10 +45,23 @@ int main(int argc, char *argv[])
 {
 	cout << "************************************" << endl;
 	cout << "Testing PerfectGas2D ..." << endl;
-	PerfectGas2D air(Vector2D<int>(30,30));
+	PerfectGas2D air(Vector2D<int>(15,30));
 
-	air.print_massDensity();
 
+	double air_massDensity=1.205; 	//kg/m^3
+	double air_temperature=20.0;	//deg C
+	air.fill_temperature(air_temperature+273.15);	//K
+	air.fill_massDensity(air_massDensity);
+	air.update_pressure();
+
+	air.print_pressure();
+
+	cout << "pressure=" << air.getPressure(2,3) << endl;
+
+
+	
+	int soundSpeed=(int)air.getSoundSpeed(2,3);
+	assert(soundSpeed == 343); // m/s
 
 
 
