@@ -24,6 +24,7 @@
 #include "userInputClass.h"
 #include "mesmond-utils.h"
 #include "fluids2D.h"
+#include "operators2D.h"
 
 
 using namespace std;
@@ -35,10 +36,28 @@ void test_SpacialArray2D();
 int main(int argc, char *argv[])
 {
 	cout << "************************************" << endl;
+	cout << "Testing Operators2D_cyl ..." << endl;
+
+	SpacialArray2D<double> pressure(Vector2D<int>(20,5));
+	Vector2D<double> gradP;
+	pressure.fill(5.0);
+	pressure.print();
+	
+
+	Operators2D operate;
+	gradP=operate.gradient(2,3, pressure);
+
+	cout << "gradP=" << gradP << endl;
+
+}
+
+void test_PerfectGas2D()
+{
+	cout << "************************************" << endl;
 	cout << "Testing PerfectGas2D ..." << endl;
 	PerfectGas2D air(Vector2D<int>(15,30));
 
-	double air_temperature=400.0;	//deg C
+	double air_temperature=20;	//deg C
 	air.fill_temperature(air_temperature+273.15);	//K
 	air.fill_pressure(101325.0);					//Pa
 	air.fill_velocity(Vector2D<double>(0.0,0.0));	//m/s
@@ -50,21 +69,10 @@ int main(int argc, char *argv[])
 	cout << "soundSpeed=" << soundSpeed << endl;
 	cout << "thermalConductivity=" << air.getThermalConductivity(2,3) << endl;
 	
-	//~ assert(soundSpeed == 343); // m/s
-	
-	
-	//~ assert( (int)air.getPressure(2,3) == 101382 ); // Pa
-
-
-
-
+	assert(soundSpeed == 343); // m/s
 	cout << "Done***************************************" << endl;
-
-
-
-	//~ test_SpacialArray2D();
-
 }
+
 
 void test_SpacialArray2D()
 {

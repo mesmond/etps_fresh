@@ -142,7 +142,7 @@ template <typename type> void SpacialArray2D<type>::fill(const type& value)
 
 
 template <typename type> StructuredLocalField2D<type>
-	SpacialArray2D<type>::getLocalField(int i, int j)
+	SpacialArray2D<type>::getLocalField(int i, int j) const
 {
 	if (i < 1 || i > size.get_dir0() || j < 1 || j > size.get_dir1())
 	{
@@ -303,6 +303,30 @@ StructuredGeometry2D::~StructuredGeometry2D()
 
 	globalCoord.dir0=NULL;
 	globalCoord.dir1=NULL;
+}
+
+void StructuredGeometry2D::print() const
+{
+	int maxi=numZones.get_dir0()+1;
+	int maxj=numZones.get_dir1()+1;
+	
+	cout << "StructuredGeometry2D: \n"
+		<< "\t Location: " << origin << "->" << extent << endl
+		<< "\t Size=" << numZones << endl;
+	cout << "\t Cell Center Locations:" << endl;
+
+	for (int j=maxj; j>=0; --j)
+	{
+		cout << "\t" << globalCoord.dir1[j] << endl;
+	}
+
+	cout << "\t\t";
+	for (int i=0; i<=maxi; ++i)
+	{
+		cout << globalCoord.dir0[i] << " ";
+	}
+	cout << endl;
+
 }
 
 void StructuredGeometry2D::link_north(const StructuredGeometry2D& toLink)

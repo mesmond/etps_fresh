@@ -88,7 +88,7 @@ class PerfectGas2D
 			particleMass(particleMass),
 			particleRadius(particleRadius) {}
 
-	inline Vector2D<int> getSize() const { return size; }
+
 
 	//***********************************************************************
 	//Print Data*************************************************************
@@ -163,6 +163,7 @@ class PerfectGas2D
 		return molarDensity.get(i,j)*Cv_J_per_mol_K()*temperature.get(i,j);
 			//units: J/m^3
 	}
+	inline Vector2D<int> getSize() const { return size; }
 
 	//***********************************************************************
 	//Thermal Speeds*********************************************************
@@ -217,6 +218,7 @@ class PerfectGas2D
 	inline double getThermalConductivity(int i, int j) const
 	{
 		//See Bukowski (1996).
+		//See Woods (1993) pg. 64.
 		return (5.0/2.0)*molarDensity.get(i,j)*c_Avagadro
 			*c_k*c_k*temperature.get(i,j)
 			/(particleMass*collFreq(i,j)); //units: [W m^{-1} K{-1}]
