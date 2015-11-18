@@ -20,6 +20,8 @@
 #include <math.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <iomanip>
+
 
 #include "mesmond-utils.h"
 
@@ -114,8 +116,7 @@ template <typename T> Point2D<T> operator*(const T& value, const Point2D<T>& poi
  * 	a get_magnitude() function.
  */
 template <class type> class Vector2D : public Point2D<type>
-{	
-
+{
 	public:
 	explicit Vector2D(type dir0=0, type dir1=0)
 		: Point2D<type>(dir0, dir1) {};
@@ -369,22 +370,20 @@ class StructuredGeometry2D
 	inline Point2D<double> get_origin() const { return origin; }
 	inline Point2D<double> get_extent() const { return extent; }
 
-	StructuredLocalField2D<double> getLocalDeltaFactors(int i, int j) const
-	{
-		StructuredLocalField2D<double> result;
-
-		result.N=zoneDelta.dir1[j]/(zoneDelta.dir1[j]+zoneDelta.dir1[j+1]);
-		result.S=zoneDelta.dir1[j]/(zoneDelta.dir1[j]+zoneDelta.dir1[j-1]);
-		result.E=zoneDelta.dir0[i]/(zoneDelta.dir0[i]+zoneDelta.dir0[i+1]);
-		result.W=zoneDelta.dir0[i]/(zoneDelta.dir0[i]+zoneDelta.dir0[i-1]);
-
-		result.P_dir0=zoneDelta.dir0[i];
-		result.P_dir1=zoneDelta.dir1[j];
-
-		return result;
-	}
+	StructuredLocalField2D<double> getLocalDeltaFactors(int i, int j) const;
 
 	void print() const;
+
+	Point2D<double> getPoint(int i, int j) const;
+	Vector2D<double> getMeshDelta(int i, int j) const;
+
+	void vtkOutput(const char* fileName="output.vtk") const;
+	void vtkOutput(const SpacialArray2D<double>& scalar,
+		const char* fileName="output.vtk") const;
+	void vtkOutput(const SpacialArray2D<double>& scalar,
+		const SpacialArray2D<Vector2D<double> >& vector,
+		const char* fileName="output.vtk") const;
+
 
 	//Mutation Handling******************************************************
 	void link_north(const StructuredGeometry2D& toLink);
@@ -425,14 +424,7 @@ class StructuredGeometry2D
 
 	protected:
 	//Check Information******************************************************
-	void checkIndices(int i, int j)
-	{
-		assert( i > 0 );
-		assert( j > 0 );
-		
-		assert( i <= numZones.get_dir0() );
-		assert( j <= numZones.get_dir1() );
-	}
+	void checkIndices(int i, int j) const;
 
 };
 

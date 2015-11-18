@@ -167,6 +167,13 @@ template <typename type> StructuredLocalField2D<type>
 template class SpacialArray2D<Vector2D<double> >;
 template class SpacialArray2D<double>;
 template class SpacialArray2D<int>;
+
+
+
+
+
+
+
 //***************************************************************************
 //***************************************************************************
 //***************************************************************************
@@ -305,6 +312,22 @@ StructuredGeometry2D::~StructuredGeometry2D()
 	globalCoord.dir1=NULL;
 }
 
+StructuredLocalField2D<double>
+	StructuredGeometry2D::getLocalDeltaFactors(int i, int j) const
+{
+	StructuredLocalField2D<double> result;
+
+	result.N=zoneDelta.dir1[j]/(zoneDelta.dir1[j]+zoneDelta.dir1[j+1]);
+	result.S=zoneDelta.dir1[j]/(zoneDelta.dir1[j]+zoneDelta.dir1[j-1]);
+	result.E=zoneDelta.dir0[i]/(zoneDelta.dir0[i]+zoneDelta.dir0[i+1]);
+	result.W=zoneDelta.dir0[i]/(zoneDelta.dir0[i]+zoneDelta.dir0[i-1]);
+
+	result.P_dir0=zoneDelta.dir0[i];
+	result.P_dir1=zoneDelta.dir1[j];
+
+	return result;
+}
+
 void StructuredGeometry2D::print() const
 {
 	int maxi=numZones.get_dir0()+1;
@@ -328,6 +351,166 @@ void StructuredGeometry2D::print() const
 	cout << endl;
 
 }
+
+Point2D<double> StructuredGeometry2D::getPoint(int i, int j) const
+{
+	Point2D<double> point;
+
+	point.write_dir0(globalCoord.dir0[i]);
+	point.write_dir1(globalCoord.dir1[j]);
+
+	return point;
+}
+
+Vector2D<double> StructuredGeometry2D::getMeshDelta(int i, int j) const
+{
+	Vector2D<double> delta;
+
+	delta.write_dir0(zoneDelta.dir0[i]);
+	delta.write_dir1(zoneDelta.dir1[j]);
+
+	return delta;
+}
+
+void StructuredGeometry2D::vtkOutput(const char* fileName) const
+{
+	cout << "Preparing Output to VTK" << endl;
+
+	//Store the output precision so that it can be returned to its
+	//	usual value after this function.
+	streamsize ss = cout.precision();
+
+
+	//stringstream outputIndex;
+	//outputIndex << setw(5) << setfill('0') << outputCount;
+	//string numberString = outputIndex.str();
+
+	//~ string outFileName=inputFilePrefix+"_block#"+to_string(blockID)+"@-"
+		//~ +numberString+".vtk";
+
+	ofstream output;
+	output.open(fileName, ios::out);
+
+
+	if ( output.is_open() )
+	{
+		int maxi=numZones.get_dir0()+1;
+		int maxj=numZones.get_dir1()+1;
+		output << "# vtk DataFile Version 2.0" << endl;
+		output 	<< "Blank"
+				<< scientific
+				<< setprecision(10)
+				<< endl;
+		output << "ASCII" << endl;
+		output	<< "DATASET STRUCTURED_GRID" << endl;
+
+		output << "DIMENSIONS " << maxi << " " 
+				<< maxj << " 2" << endl;
+
+		output << "POINTS " <<
+			maxi*maxj*2
+			<< " float\n";
+
+		for (double depth=0.0; depth<0.00101; depth=depth+0.001)
+		{
+			for (int j=1; j<=maxj; ++j) {
+			for (int i=1; i<=maxi; ++i)
+			{
+				output	<< globalCoord.dir0[i]-0.5*zoneDelta.dir0[i]
+						<< " "
+						<< globalCoord.dir1[j]-0.5*zoneDelta.dir1[j]
+						<< " "
+						<< depth << endl;
+			}}
+		}
+
+		output.close();
+
+	}
+
+	//Restore original cout precision.
+	cout.precision (ss);
+	cout.unsetf (ios::floatfield); // unsets fixed
+}
+
+void StructuredGeometry2D::vtkOutput(const SpacialArray2D<double>& scalar,
+	const char* fileName) const
+{
+	vtkOutput(fileName);
+
+	//Store the output precision so that it can be returned to its
+	//	usual value after this function.
+	streamsize ss = cout.precision();
+
+	assert(scalar.getCount_dir0() == numZones.get_dir0());
+	assert(scalar.getCount_dir1() == numZones.get_dir1());
+
+	ofstream output;
+	output.open(fileName, ios::app);
+
+	if ( output.is_open() )
+	{
+		output << "\nCELL_DATA "
+			<< numZones.get_dir1()*numZones.get_dir0() << endl;
+		output << "SCALARS " << "scalar" << " float" << endl;
+		output << "LOOKUP_TABLE default" << endl;
+		for (int j=1; j<=numZones.get_dir1(); ++j){
+		for (int i=1; i<=numZones.get_dir0(); ++i)
+		{
+			output << scalar.get(i,j) << endl;
+		}}
+		output << endl;
+		
+		output.close();
+	}
+
+	//Restore original cout precision.
+	cout.precision (ss);
+	cout.unsetf (ios::floatfield); // unsets fixed
+}
+
+void StructuredGeometry2D::vtkOutput(
+	const SpacialArray2D<double>& scalar,
+	const SpacialArray2D<Vector2D<double> >& vector,
+	const char* fileName) const
+{
+	vtkOutput(scalar, fileName);
+
+	//Store the output precision so that it can be returned to its
+	//	usual value after this function.
+	streamsize ss = cout.precision();
+
+	assert(vector.getCount_dir0() == numZones.get_dir0());
+	assert(vector.getCount_dir1() == numZones.get_dir1());
+
+	ofstream output;
+	output.open(fileName, ios::app);
+
+	if ( output.is_open() )
+	{
+		output << "VECTORS " << "vector" << " float" << endl;
+		for (int j=1; j<=numZones.get_dir1(); ++j){
+		for (int i=1; i<=numZones.get_dir0(); ++i)
+		{
+			output << vector.get(i,j).get_dir0()
+				<< " " << vector.get(i,j).get_dir1()
+				<< " 0.0"
+				<< endl;
+		}}
+		output << endl;
+		
+		output.close();
+	}
+
+	//Restore original cout precision.
+	cout.precision (ss);
+	cout.unsetf (ios::floatfield); // unsets fixed
+}
+
+
+
+
+
 
 void StructuredGeometry2D::link_north(const StructuredGeometry2D& toLink)
 {
@@ -357,171 +540,11 @@ void StructuredGeometry2D::link_west(const StructuredGeometry2D& toLink)
 	setBdy_zoneDelta_west(toLink.get_zoneDelta_east());
 }
 
-
-
-//***************************************************************************
-//***************************************************************************
-//***************************************************************************
-//spacialArray2D*************************************************************
-//~ spacialArray2D::spacialArray2D(const spacialArray2D& that)
-//~ {
-	//~ this->numZones.dir0=that.numZones.dir0;
-	//~ this->numZones.dir1=that.numZones.dir1;
-	//~ 
-	//~ array= new double *[numZones.dir0+2];
-	//~ for (int i=0; i<=numZones.dir0+1; ++i)
-	//~ {
-		//~ array[i]= new double [numZones.dir1+2];
-	//~ }
-//~ 
-	//~ for (int i=0; i<=numZones.dir0+1; ++i) {
-	//~ for (int j=0; j<=numZones.dir1+1; ++j)
-	//~ {
-		//~ array[i][j]= that.array[i][j];
-	//~ }}
-//~ }
-//~ 
-//~ spacialArray2D::spacialArray2D(int size_dir0, int size_dir1, double valueInit)
-//~ {
-	//~ numZones.dir0=size_dir0;
-	//~ numZones.dir1=size_dir1;
-//~ 
-	//~ array= new double *[numZones.dir0+2];
-	//~ for (int i=0; i<=numZones.dir0+1; ++i)
-	//~ {
-		//~ array[i]= new double [numZones.dir1+2];
-	//~ }
-//~ 
-	//~ for (int i=0; i<=numZones.dir0+1; ++i) {
-	//~ for (int j=0; j<=numZones.dir1+1; ++j)
-	//~ {
-		//~ array[i][j] = valueInit;
-	//~ }}
-//~ 
-	//~ //cout << "Done" << endl;
-//~ }
-//~ 
-//~ spacialArray2D& spacialArray2D::operator=(const spacialArray2D& that)
-//~ {
-	//~ this->numZones.dir0=that.numZones.dir0;
-	//~ this->numZones.dir1=that.numZones.dir1;
-	//~ 
-	//~ array= new double *[numZones.dir0+2];
-	//~ for (int i=0; i<=numZones.dir0+1; ++i)
-	//~ {
-		//~ array[i]= new double [numZones.dir1+2];
-	//~ }
-//~ 
-	//~ for (int i=0; i<=numZones.dir0+1; ++i) {
-	//~ for (int j=0; j<=numZones.dir1+1; ++j)
-	//~ {
-		//~ array[i][j]= that.array[i][j];
-	//~ }}
-//~ 
-	//~ return *this;
-//~ }
-//~ 
-//~ spacialArray2D::~spacialArray2D()
-//~ {
-	//~ for (int i=0; i<=numZones.dir0+1; ++i)
-	//~ {
-		//~ delete [] array[i];
-//~ 
-		//~ *array=NULL;
-	//~ }
-	//~ delete [] array;
-//~ 
-	//~ array=NULL;
-//~ }
-//~ 
-//~ double spacialArray2D::get(int i, int j) const
-//~ {
-	//~ return array[i][j];
-//~ }
-//~ void spacialArray2D::write(int i, int j, double value)
-//~ {
-	//~ array[i][j]=value;
-//~ }
-//~ int spacialArray2D::getSize_dir0() const
-//~ {
-	//~ return numZones.dir0;
-//~ }
-//~ int spacialArray2D::getSize_dir1() const	
-//~ {
-	//~ return numZones.dir1;
-//~ }
-
-//~ cellDirections spacialArray2D::getLocalField(int i, int j) const
-//~ {
-	//~ cellDirections field;
-	//~ field.P=array[i][j];
-	//~ field.N=array[i][j+1];
-	//~ field.S=array[i][j-1];
-	//~ field.E=array[i+1][j];
-	//~ field.W=array[i-1][j];
-//~ 
-	//~ return field;
-//~ }
-
-//***************************************************************************
-//***************************************************************************
-//***************************************************************************
-//vectorArray2D**************************************************************
-//~ double vectorArray2D::getMagnitude(int i, int j)
-//~ {
-	//~ return sqrt(
-		//~ pow(array_dir0.get(i,j),2.0)
-		//~ +pow(array_dir1.get(i,j),2.0));
-//~ }
-//~ 
-//~ void vectorArray2D::writeComponent_dir0(int i, int j, double value)
-//~ {
-	//~ array_dir0.write(i,j,value);
-//~ }
-//~ void vectorArray2D::writeComponent_dir1(int i, int j, double value)
-//~ {
-	//~ array_dir1.write(i,j,value);
-//~ }
-//~ 
-//~ double vectorArray2D::component_dir0(int i, int j)
-//~ {
-	//~ return array_dir0.get(i,j);
-//~ }
-//~ double vectorArray2D::component_dir1(int i, int j)
-//~ {
-	//~ return array_dir1.get(i,j);
-//~ }
-//~ 
-//~ int vectorArray2D::getSize_dir0()
-//~ {
-	//~ return array_dir1.getSize_dir0();
-//~ }
-//~ int vectorArray2D::getSize_dir1()
-//~ {
-	//~ return array_dir1.getSize_dir1();
-//~ }
-
-/*
- * Function: vectorArray2D::product()
- * Purpose: Compute and return a local field determined from the
- * 	product of a scalar and a vector.
- *
- * Description: The product of a scalar and a vector yield a vector
- * 	flux.  A local vector flux field is computed here and returned.
- */
-//~ cellDirections vectorArray2D::product(
-	//~ cellDirections scalarField,
-	//~ int i, int j) const
-//~ {
-	//~ cellDirections fieldFlux;
-	//~ fieldFlux.P_dir0=scalarField.P*array_dir0.get(i,j);
-	//~ fieldFlux.P_dir1=scalarField.P*array_dir1.get(i,j);
-//~ 
-	//~ fieldFlux.N=scalarField.N*array_dir1.get(i,j+1);
-	//~ fieldFlux.S=scalarField.S*array_dir1.get(i,j-1);
-	//~ fieldFlux.E=scalarField.E*array_dir0.get(i+1,j);
-	//~ fieldFlux.W=scalarField.W*array_dir0.get(i-1,j);
-//~ 
-	//~ return fieldFlux;
-//~ }
-
+void StructuredGeometry2D::checkIndices(int i, int j) const
+{
+	assert( i > 0 );
+	assert( j > 0 );
+	
+	assert( i <= numZones.get_dir0() );
+	assert( j <= numZones.get_dir1() );
+}

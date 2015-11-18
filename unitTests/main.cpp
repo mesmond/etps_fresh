@@ -38,16 +38,32 @@ int main(int argc, char *argv[])
 	cout << "************************************" << endl;
 	cout << "Testing Operators2D_cyl ..." << endl;
 
-	SpacialArray2D<double> pressure(Vector2D<int>(20,5));
-	Vector2D<double> gradP;
-	pressure.fill(5.0);
+	Vector2D<int> size(400,400);
+
+	SpacialArray2D<double> pressure(size);
+	SpacialArray2D<Vector2D<double> > gradP(size);
+	Operators2D operate(
+		Point2D<double>(0.0,0.0),
+		Point2D<double>(10.0,5.0),
+		size);
+
+
+	//Write Pressure
+	for (int i=1; i<=pressure.getCount_dir0(); ++i)
+	for (int j=1; j<=pressure.getCount_dir1(); ++j)
+	{
+		pressure.write(i,j, i*j);
+	}
+
+	//Compute Gradient
+	for (int i=1; i<=pressure.getCount_dir0(); ++i)
+	for (int j=1; j<=pressure.getCount_dir1(); ++j)
+	{
+		gradP.write( i,j, operate.gradient(i,j, pressure) );
+	}
 	pressure.print();
-	
 
-	Operators2D operate;
-	gradP=operate.gradient(2,3, pressure);
-
-	cout << "gradP=" << gradP << endl;
+	operate.vtkOutput(pressure, gradP);
 
 }
 
