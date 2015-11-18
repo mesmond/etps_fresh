@@ -130,6 +130,19 @@ template <class type> class Vector2D : public Point2D<type>
 
 
 //Define Operators***********************************************************
+template <typename T> Vector2D<T> operator*(const Vector2D<T>& vector, const T& value)
+{
+	Vector2D<T> result;
+	result.write_dir0(vector.get_dir0() * value);
+	result.write_dir1(vector.get_dir1() * value);
+	return result;
+}
+
+template <typename T> Vector2D<T> operator*(const T& value, const Vector2D<T>& vector)
+{
+	return vector*value;
+}
+
 template <typename T> T dotProduct(const Vector2D<T>& vec1, const Vector2D<T>& vec2)
 {
 	T product0=vec1.get_dir0()*vec2.get_dir0();

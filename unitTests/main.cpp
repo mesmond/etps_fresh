@@ -2,20 +2,11 @@
 //***************************************************************************
 /*
  * File: main.cpp
- * Project: euler2D
- * Description: main.cpp executes the euler2D simulation code. The simulation
- * 	domain is divided into several regions.  The data for each region is
- * 	stored in a MeshBlock object and processed by an individual MPI process.
- * 	MeshBlock objects are stored in a single vector.
+ * Project: unitTests
+ * Description: main.cpp executes the unitTests project which tests the code
+ * 	under development for bugs and deficiencies.
  *
- * 	An init() function is used to initialize the simulation variables.
- * 	The governing equations are used to advance the simulation in
- * 	euler2D_timeIntegration().
- *
- * 	The simulation wall time is tracked and information is written to a log
- * 	file periodically.  Output files are announced in the terminal console.
- *
- * Date: October 7, 2015
+ * Date: November 17, 2015
  * Author: Micah Esmond, mesmond@vt.edu
 */
 //***************************************************************************
@@ -47,21 +38,22 @@ int main(int argc, char *argv[])
 	cout << "Testing PerfectGas2D ..." << endl;
 	PerfectGas2D air(Vector2D<int>(15,30));
 
-
-	double air_massDensity=1.205; 	//kg/m^3
-	double air_temperature=20.0;	//deg C
+	double air_temperature=400.0;	//deg C
 	air.fill_temperature(air_temperature+273.15);	//K
-	air.fill_massDensity(air_massDensity);
-	air.update_pressure();
-
-	air.print_pressure();
-
-	cout << "pressure=" << air.getPressure(2,3) << endl;
+	air.fill_pressure(101325.0);					//Pa
+	air.fill_velocity(Vector2D<double>(0.0,0.0));	//m/s
+	air.init_fromBasicProps();
 
 
 	
 	int soundSpeed=(int)air.getSoundSpeed(2,3);
-	assert(soundSpeed == 343); // m/s
+	cout << "soundSpeed=" << soundSpeed << endl;
+	cout << "thermalConductivity=" << air.getThermalConductivity(2,3) << endl;
+	
+	//~ assert(soundSpeed == 343); // m/s
+	
+	
+	//~ assert( (int)air.getPressure(2,3) == 101382 ); // Pa
 
 
 
