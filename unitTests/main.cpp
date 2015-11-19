@@ -32,15 +32,19 @@ using namespace std;
 
 
 void test_SpacialArray2D();
+void test_Dyad2D();
 
 int main(int argc, char *argv[])
 {
+	//~ test_Dyad2D();
+	//~ return 0;
 	cout << "************************************" << endl;
 	cout << "Testing Operators2D_cyl ..." << endl;
 
-	Vector2D<int> size(400,400);
+	Vector2D<int> size(20,20);
 
 	SpacialArray2D<double> pressure(size);
+	SpacialArray2D<double> divergence(size);
 	SpacialArray2D<Vector2D<double> > gradP(size);
 	Operators2D operate(
 		Point2D<double>(0.0,0.0),
@@ -55,15 +59,27 @@ int main(int argc, char *argv[])
 		pressure.write(i,j, i*j);
 	}
 
+	pressure.set_adiabaticBdyValues();
+
 	//Compute Gradient
 	for (int i=1; i<=pressure.getCount_dir0(); ++i)
 	for (int j=1; j<=pressure.getCount_dir1(); ++j)
 	{
 		gradP.write( i,j, operate.gradient(i,j, pressure) );
 	}
-	pressure.print();
 
-	operate.vtkOutput(pressure, gradP);
+	for (int i=1; i<=pressure.getCount_dir0(); ++i)
+	for (int j=1; j<=pressure.getCount_dir1(); ++j)
+	{
+		divergence.write( i,j, operate.divergence(i,j, pressure, gradP) );
+	}
+
+	//~ pressure.print();
+
+	operate.vtkOutput(pressure, gradP, divergence);
+
+	int i=3, j=3;
+	operate.divergence(i,j, pressure, gradP, gradP);
 
 }
 
@@ -182,13 +198,26 @@ void test_Dyad2D()
 	Vector2D<double> vec2(3,5);
 
 	Dyad2D dyad;
+	double scalar=5.0;
 
-	cout << "vec =" << vec << endl;
-	cout << "vec2=" << vec2 << endl;
+	cout << "vec    =" << vec << endl;
+	cout << "vec2   =" << vec2 << endl;
+	cout << "scalar =" << scalar << endl;
 	
 	cout << "dyad (init)=" << dyad << endl;
+	
 	dyad=vec*vec2;
 	cout << "dyad=vec*vec2 : dyad=" << dyad << endl;
+
+	dyad=scalar*dyad;
+	cout << "dyad=scalar*dyad : dyad=" << dyad << endl;
+
+	cout << "dyad.get_dir0()=" << dyad.get_dir0() << endl;
+	cout << "dyad.get_dir1()=" << dyad.get_dir1() << endl;
+
+
+	assert( isEqual(dyad.get_dir1().get_dir0(),
+		vec.get_dir0()*vec2.get_dir1()*scalar));
 }
 
 

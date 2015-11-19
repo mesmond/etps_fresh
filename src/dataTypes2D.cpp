@@ -13,6 +13,9 @@
 //***************************************************************************
 //Point2D********************************************************************
 
+
+
+
 //***************************************************************************
 //***************************************************************************
 //***************************************************************************
@@ -47,7 +50,17 @@ Dyad2D operator*(const Vector2D<double>& vec0, const Vector2D<double>& vec1)
 	return dyad;
 }
 
+Dyad2D operator*(const double& scalar, const Dyad2D& dyad)
+{
+	Dyad2D result;
 
+	result.value_00=dyad.value_00*scalar;
+	result.value_01=dyad.value_01*scalar;
+	result.value_10=dyad.value_10*scalar;
+	result.value_11=dyad.value_11*scalar;
+
+	return result;
+}
 
 //***************************************************************************
 //***************************************************************************
@@ -66,6 +79,7 @@ template <typename type> void StructuredLocalField2D<type>::print() const
 }
 
 template class StructuredLocalField2D<Vector2D<double> >;
+template class StructuredLocalField2D<Dyad2D >;
 template class StructuredLocalField2D<double>;
 template class StructuredLocalField2D<int>;
 
@@ -163,6 +177,29 @@ template <typename type> StructuredLocalField2D<type>
 		return field;
 	}
 }
+
+template <typename type> void SpacialArray2D<type>::set_adiabaticBdyValues()
+{
+	for (int i=1; i<=size.get_dir0(); ++i)
+	{
+		int j=0;
+		write(i,j, array[i][j+1]);
+
+		j=size.get_dir1()+1;
+		write(i,j, array[i][j-1]);
+	}
+
+	for (int j=1; j<=size.get_dir1(); ++j)
+	{
+		int i=0;
+		write(i,j, array[i+1][j]);
+
+		i=size.get_dir0()+1;
+		write(i,j, array[i-1][j]);
+	}
+	
+}
+
 
 template class SpacialArray2D<Vector2D<double> >;
 template class SpacialArray2D<double>;
@@ -507,7 +544,41 @@ void StructuredGeometry2D::vtkOutput(
 	cout.unsetf (ios::floatfield); // unsets fixed
 }
 
+void StructuredGeometry2D::vtkOutput(const SpacialArray2D<double>& scalar,
+	const SpacialArray2D<Vector2D<double> >& vector,
+	const SpacialArray2D<double>& divergence,
+	const char* fileName) const
+{
+	vtkOutput(scalar, vector, fileName);
 
+	//Store the output precision so that it can be returned to its
+	//	usual value after this function.
+	streamsize ss = cout.precision();
+
+	assert(divergence.getCount_dir0() == numZones.get_dir0());
+	assert(divergence.getCount_dir1() == numZones.get_dir1());
+
+	ofstream output;
+	output.open(fileName, ios::app);
+
+	if ( output.is_open() )
+	{
+		output << "\nSCALARS " << "divergence" << " float" << endl;
+		output << "LOOKUP_TABLE default" << endl;
+		for (int j=1; j<=numZones.get_dir1(); ++j){
+		for (int i=1; i<=numZones.get_dir0(); ++i)
+		{
+			output << divergence.get(i,j) << endl;
+		}}
+		output << endl;
+		
+		output.close();
+	}
+
+	//Restore original cout precision.
+	cout.precision (ss);
+	cout.unsetf (ios::floatfield); // unsets fixed
+}
 
 
 

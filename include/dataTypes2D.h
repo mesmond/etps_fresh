@@ -144,6 +144,27 @@ template <typename T> Vector2D<T> operator*(const T& value, const Vector2D<T>& v
 	return vector*value;
 }
 
+template <typename T> Vector2D<T> operator-(const Vector2D<T>& p1, const Vector2D<T>& p2)
+{
+	Vector2D<T> result;
+
+	result.write_dir0(p1.get_dir0() - p2.get_dir0());
+	result.write_dir1(p1.get_dir1() - p2.get_dir1());
+
+	return result;
+}
+
+template <typename T> Vector2D<T> operator+(const Vector2D<T>& p1, const Vector2D<T>& p2)
+{
+	Vector2D<T> result;
+
+	result.write_dir0(p1.get_dir0() + p2.get_dir0());
+	result.write_dir1(p1.get_dir1() + p2.get_dir1());
+
+	return result;
+}
+
+
 template <typename T> T dotProduct(const Vector2D<T>& vec1, const Vector2D<T>& vec2)
 {
 	T product0=vec1.get_dir0()*vec2.get_dir0();
@@ -182,21 +203,42 @@ class Dyad2D
 	double value_11;
 
 	public:
-	Dyad2D()
+	explicit Dyad2D(int fillValue=0)
 	{
-		value_00=0.0;
-		value_01=0.0;
-		value_10=0.0;
-		value_11=0.0;
+		value_00=(double)fillValue;
+		value_01=(double)fillValue;
+		value_10=(double)fillValue;
+		value_11=(double)fillValue;
 	}
 
 	friend ostream& operator<<(ostream& os, const Dyad2D vector);
 	friend Dyad2D operator*(const Vector2D<double>& vec0, const Vector2D<double>& vec1);
+	friend Dyad2D operator*(const double& scalar, const Dyad2D& dyad);
+
+	Vector2D<double> get_dir0() const
+	{
+		Vector2D<double> result;
+
+		result.write_dir0(value_00);
+		result.write_dir1(value_10);
+
+		return result;
+	}
+
+	Vector2D<double> get_dir1() const
+	{
+		Vector2D<double> result;
+
+		result.write_dir0(value_01);
+		result.write_dir1(value_11);
+
+		return result;
+	}
 };
 
 ostream& operator<<(ostream& os, const Dyad2D vector);
 Dyad2D operator*(const Vector2D<double>& vec0, const Vector2D<double>& vec1);
-
+Dyad2D operator*(const double& scalar, const Dyad2D& dyad);
 
 
 
@@ -295,6 +337,7 @@ template <class type> class SpacialArray2D
 	void print() const;
 
 	void fill(const type& value);
+	void set_adiabaticBdyValues();
 
 	StructuredLocalField2D<type> getLocalField(int i, int j) const;
 };
@@ -382,6 +425,10 @@ class StructuredGeometry2D
 		const char* fileName="output.vtk") const;
 	void vtkOutput(const SpacialArray2D<double>& scalar,
 		const SpacialArray2D<Vector2D<double> >& vector,
+		const char* fileName="output.vtk") const;
+	void vtkOutput(const SpacialArray2D<double>& scalar,
+		const SpacialArray2D<Vector2D<double> >& vector,
+		const SpacialArray2D<double>& divergence,
 		const char* fileName="output.vtk") const;
 
 

@@ -14,24 +14,22 @@
 */
 //***************************************************************************
 //***************************************************************************
+#ifndef INCLUDE_OPERATORS2D_H_
+#define INCLUDE_OPERATORS2D_H_
+
 #include <iostream>
 #include <math.h>
 #include <assert.h>
 
+#include "simulationConstants.h"
 #include "dataTypes2D.h"
-#include "mesmond-utils.h"
 
 using namespace std;
 
 class Operators2D : public StructuredGeometry2D
 {
 	private:
-	double help;
-
-	StructuredLocalField2D<double> deltaFactor;
-	StructuredLocalField2D<double> meshDelta;
-
-	double getVolume(int i, int j)
+	double getVolume(int i, int j) const
 	{
 		return 2.0*c_pi
 			*this->getPoint(i,j).get_dir0()
@@ -39,7 +37,7 @@ class Operators2D : public StructuredGeometry2D
 			*this->getMeshDelta(i,j).get_dir1();
 	}
 
-	StructuredLocalField2D<double> getCellAreas(int i, int j)
+	StructuredLocalField2D<double> getCellAreas(int i, int j) const
 	{
 		StructuredLocalField2D<double> area;
 
@@ -59,6 +57,8 @@ class Operators2D : public StructuredGeometry2D
 		return area;
 	}
 
+	double getDivergenceFromField(int i, int j, StructuredLocalField2D<double> field) const;
+
 	public:
 	explicit Operators2D(
 		Point2D<double> origin=Point2D<double>(0.0,0.0),
@@ -70,67 +70,44 @@ class Operators2D : public StructuredGeometry2D
 		cout << "Constructor: Operators2D" << endl;
 	}
 
-	//~ inline void print_geometry() const { this->print(); }
-	Vector2D<double> gradient(int i, int j, const SpacialArray2D<double>& scalarField)
+	Vector2D<double> gradient(int i, int j, const SpacialArray2D<double>& scalarField) const;
+	double divergence(int i, int j,
+		const SpacialArray2D<double>& scalar,
+		const SpacialArray2D<Vector2D<double> >& vector) const;
+	Vector2D<double> divergence(int i, int j,
+		const SpacialArray2D<double>& scalar,
+		const SpacialArray2D<Vector2D<double> >& vector1,
+		const SpacialArray2D<Vector2D<double> >& vector2) const;
+
+
+
+	template <typename T> T getDivergenceFromField_new(int i, int j,
+		StructuredLocalField2D<T> field) const
 	{
-		this->checkIndices(i,j);
-
-		StructuredLocalField2D<double> cellFaceValues;
-		StructuredLocalField2D<double> localField;
-	
-		Vector2D<double> gradient(0.0,0.0);
-		localField=scalarField.getLocalField(i,j);
+		StructuredLocalField2D<double> area;	
+		StructuredLocalField2D<double> deltaFactor;
+		StructuredLocalField2D<T> cellFlux;
+		
 		deltaFactor=getLocalDeltaFactors(i,j);
+		area=getCellAreas(i,j);
 
+		//Interpolate to cell faces.
+		cellFlux.N=field.P_dir1*(1.0-deltaFactor.N)+deltaFactor.N*field.N;
+		cellFlux.S=field.P_dir1*(1.0-deltaFactor.S)+deltaFactor.S*field.S;
+		cellFlux.E=field.P_dir0*(1.0-deltaFactor.E)+deltaFactor.E*field.E;
+		cellFlux.W=field.P_dir0*(1.0-deltaFactor.W)+deltaFactor.W*field.W;
 
-		cellFaceValues.N=localField.P*(1.0-deltaFactor.N)+deltaFactor.N*localField.N;
-		cellFaceValues.S=localField.P*(1.0-deltaFactor.S)+deltaFactor.S*localField.S;
-		cellFaceValues.E=localField.P*(1.0-deltaFactor.E)+deltaFactor.E*localField.E;
-		cellFaceValues.W=localField.P*(1.0-deltaFactor.W)+deltaFactor.W*localField.W;
+		//Compute Divergence.
+		T divergence=(1.0/getVolume(i,j))*(
+			 cellNormal_N*cellFlux.N*area.N
+			+cellNormal_S*cellFlux.S*area.S
+			+cellNormal_E*cellFlux.E*area.E
+			+cellNormal_W*cellFlux.W*area.W );
 
-		gradient.write_dir0((cellFaceValues.E-cellFaceValues.W)/deltaFactor.P_dir0);
-		gradient.write_dir1((cellFaceValues.N-cellFaceValues.S)/deltaFactor.P_dir1);
-
-		return gradient;
+		return divergence;
 	}
-
-	//~ double divergence(int i, int j,
-		//~ const SpacialArray2D<double>& scalar,
-		//~ const SpacialArray2D<Vector2D<double> >& vector)
-	//~ {
-		//~ this->checkIndices(i,j);
-//~ 
-		//~ StructuredLocalField2D<double> scalarField;
-		//~ StructuredLocalField2D<double> vectorField;
-		//~ StructuredLocalField2D<double> localField;
-		//~ StructuredLocalField2D<double> cellFaceValues;
-	//~ 
-		//~ scalarField=scalar.getLocalField(i,j);
-		//~ vectorField=vector.getLocalField(i,j);
-//~ 
-		//~ localField.P_dir1=scalarField.P*vectorField.P.get_dir1();
-		//~ localField.P_dir0=scalarField.P*vectorField.P.get_dir0();
-		//~ 
-		//~ localField.N=scalarField.N*vectorField.N.get_dir1();
-		//~ localField.S=scalarField.S*vectorField.S.get_dir1();
-		//~ localField.E=scalarField.E*vectorField.E.get_dir0();
-		//~ localField.W=scalarField.W*vectorField.W.get_dir0();
-		//~ 
-		//~ deltaFactor=getLocalDeltaFactors(i,j);
-//~ 
-//~ 
-		//~ cellFaceValues.N=localField.P_dir1*(1.0-deltaFactor.N)+deltaFactor.N*localField.N;
-		//~ cellFaceValues.S=localField.P_dir1*(1.0-deltaFactor.S)+deltaFactor.S*localField.S;
-		//~ cellFaceValues.E=localField.P_dir0*(1.0-deltaFactor.E)+deltaFactor.E*localField.E;
-		//~ cellFaceValues.W=localField.P_dir0*(1.0-deltaFactor.W)+deltaFactor.W*localField.W;
-//~ 
-//~ 
-//~ 
-		//~ gradient.write_dir0((cellFaceValues.E-cellFaceValues.W)/deltaFactor.P_dir0);
-		//~ gradient.write_dir1((cellFaceValues.N-cellFaceValues.S)/deltaFactor.P_dir1);
-//~ 
-		//~ return gradient;
-	//~ }
-
 	
 };
+
+
+#endif // INCLUDE_OPERATORS2D_H_

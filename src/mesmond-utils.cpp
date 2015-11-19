@@ -1,8 +1,8 @@
 //***************************************************************************
 //***************************************************************************
 /*
- * File: mesmond-utils.h
- * Description: This file contains declarations of
+ * File: mesmond-utils.cpp
+ * Description: This file contains definitions of
  * 	several useful one-off functions. It includes the folowing:
  * 		min_2arg (double)
  * 		max_array (double)
@@ -10,19 +10,29 @@
 */
 //***************************************************************************
 //***************************************************************************
-#ifndef INCLUDE_UTILS_H_
-#define INCLUDE_UTILS_H_
+#include "mesmond-utils.h"
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <stdlib.h> //exit(1)
-#include <math.h>
+double min_2arg(double arg1, double arg2)
+{
+	double min=arg1;
+	if (arg2<min) min=arg2;
+	return min;
+}
 
-using namespace std;
+double max_array(double array[],int num_elements)
+{
+	int i;
+	double max=array[0];
+	for (i=0;i<num_elements;++i)
+	{
+		if (array[i]>max)
+		{
+			max=array[i];
+		}
+	}
+	return max;
+}
 
-double min_2arg(double arg1, double arg2);
-double max_array(double array[],int num_elements);
 
 /*
  * Function: IsEqual()
@@ -33,7 +43,16 @@ double max_array(double array[],int num_elements);
  * 	This article explains that this particular approach will not behave
  * 	well with numbers very close to zero.
  */
-bool isEqual(double A, double B, double maxRelativeError=1.0e-10);
-
-
-#endif // INCLUDE_UTILS_H_
+bool isEqual(double A, double B, double maxRelativeError)
+{
+    if (A == B)
+        return true;
+    double relativeError;
+    if (fabs(B) > fabs(A))
+        relativeError = fabs((A - B) / B);
+    else
+        relativeError = fabs((A - B) / A);
+    if (relativeError <= maxRelativeError)
+        return true;
+    return false;
+}
