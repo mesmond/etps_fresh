@@ -21,6 +21,16 @@
 //***************************************************************************
 //Vector2D*******************************************************************
 
+//Define Operators***********************************************************
+bool operator==(const Vector2D<int>& vec1, const Vector2D<int>& vec2)
+{
+	if ( vec1.get_dir0() != vec2.get_dir0() )
+		return false;
+	else if ( vec1.get_dir1() != vec2.get_dir1() )
+		return false;
+
+	return true;
+}
 
 
 
@@ -89,47 +99,94 @@ template class StructuredLocalField2D<int>;
 //SpacialArray2D*************************************************************
 template <typename type> SpacialArray2D<type>::SpacialArray2D( Vector2D<int> size )
 {
-	this->size=size;
+	//Constructor
+	//~ cout << "In the constructor..." << endl;
+	init(size);
 
-	array = new type *[size.get_dir0()+2];
-	for (int i=0; i<=size.get_dir0()+1; ++i)
-	{
-		array[i]= new type [size.get_dir1()+2];
-	}
+	array = new type [length];
+	for (int i=0; i<length; ++i) 
+		array[i]=(type)0;
 
-	for (int i=0; i<=size.get_dir0()+1; ++i) {
-		for (int j=0; j<=size.get_dir1()+1; ++j)
-		{
-			array[i][j]=(type)0;
-		}}
 }
 
 template <typename type> SpacialArray2D<type>::SpacialArray2D(const SpacialArray2D<type>& that)
 {
-	size=that.size;
+	//Copy Constructor
+	//~ cout << "In the copy constructor" << endl;
+	init(that.size);
 
-	array = new type *[size.get_dir0()+2];
-	for (int i=0; i<=size.get_dir0()+1; ++i)
+	array = new type [length];
+	for (int i=0; i<length; ++i)
+		array[i]=that.array[i];
+}
+
+template <typename type> SpacialArray2D<type>::SpacialArray2D(SpacialArray2D<type>&& other)
+	:	size(0),
+		array(nullptr)
+{
+	//Move Constructor
+	cout << "In the Move Constructor..." << endl;
+
+	init(other.size);
+	array=other.array;
+
+	other.array=nullptr;
+	other.reset();
+}
+
+template <typename type> SpacialArray2D<type>&
+	SpacialArray2D<type>::operator=(SpacialArray2D<type>&& other)
+{
+	//Move Assignment Operator
+	cout << "In the Move Assignment Operator..." << endl;
+
+	if (this != &other)
 	{
-		array[i]= new type [size.get_dir1()+2];
-	}
+		//Delete Memory of the present object.
+		delete[] array;
+		array=nullptr;
+		reset();
 
-	for (int i=0; i<=size.get_dir0()+1; ++i) {
-		for (int j=0; j<=size.get_dir1()+1; ++j)
-		{
-			array[i][j]=that.get(i,j);
-		}}
+		//Transfer Data
+		init(other.size);
+		array=other.array;
+
+		//Reset the other objects pointers to
+		//	keep the memory from being freed
+		//	by the destructor.
+		other.array=nullptr;
+		other.reset();
+	}
+	return *this;
+}
+
+
+template <typename type> SpacialArray2D<type>
+	SpacialArray2D<type>::operator=(const SpacialArray2D<type>& rhs)
+{
+	//Assignment Operator
+	//~ cout << "In assignment operator.. " << endl;
+	if (this != &rhs)
+	{
+		assert(size==rhs.size);
+
+		for (int i=0; i<length; ++i)
+			array[i]=rhs.array[i];
+	}
+	return *this;
 }
 
 template <typename type> SpacialArray2D<type>::~SpacialArray2D()
 {
-	for (int i=0; i<=size.get_dir0()+1; ++i)
+	//Destructor
+	//~ cout << "In the Destructor!" << endl;
+
+	if (array != nullptr)
 	{
-		delete[] array[i];
+		delete[] array;
+		array=nullptr;
+		reset();
 	}
-	*array=0;
-	delete array;
-	array=0;
 }
 
 
@@ -139,7 +196,7 @@ template <typename type> void SpacialArray2D<type>::print() const
 	{
 		for (int i=0; i<=size.get_dir0()+1; ++i)
 		{
-			cout << array[i][j] << " ";
+			cout << get(i,j) << " ";
 		}
 		cout << endl;
 	}
@@ -150,7 +207,7 @@ template <typename type> void SpacialArray2D<type>::fill(const type& value)
 	for (int i=0; i<=size.get_dir0()+1; ++i) {
 	for (int j=0; j<=size.get_dir1()+1; ++j)
 	{
-		array[i][j]=value;
+		write(i,j, value);
 	}}
 }
 
@@ -183,19 +240,19 @@ template <typename type> void SpacialArray2D<type>::set_adiabaticBdyValues()
 	for (int i=1; i<=size.get_dir0(); ++i)
 	{
 		int j=0;
-		write(i,j, array[i][j+1]);
+		write( i,j, get(i,j+1) );
 
 		j=size.get_dir1()+1;
-		write(i,j, array[i][j-1]);
+		write( i,j, get(i,j-1) );
 	}
 
 	for (int j=1; j<=size.get_dir1(); ++j)
 	{
 		int i=0;
-		write(i,j, array[i+1][j]);
+		write( i,j, get(i+1,j) );
 
 		i=size.get_dir0()+1;
-		write(i,j, array[i-1][j]);
+		write( i,j, get(i-1,j) );
 	}
 	
 }
@@ -611,6 +668,36 @@ void StructuredGeometry2D::link_west(const StructuredGeometry2D& toLink)
 	setBdy_zoneDelta_west(toLink.get_zoneDelta_east());
 }
 
+//Set Information********************************************************
+void StructuredGeometry2D::setBdy_zoneDelta_north(double value)
+{
+	int index=numZones.get_dir1()+1;
+	zoneDelta.dir1[index] = value;
+	globalCoord.dir1[index]=extent.get_dir1()+0.5*zoneDelta.dir1[index];
+}
+
+void StructuredGeometry2D::setBdy_zoneDelta_south(double value)
+{
+	int index=0;
+	zoneDelta.dir1[index] = value;
+	globalCoord.dir1[index]=origin.get_dir1()-0.5*zoneDelta.dir1[index];
+}
+
+void StructuredGeometry2D::setBdy_zoneDelta_east(double value)
+{
+	int index=numZones.get_dir0()+1;
+	zoneDelta.dir0[index] = value;
+	globalCoord.dir0[index]=extent.get_dir0()+0.5*zoneDelta.dir0[index];
+}
+
+void StructuredGeometry2D::setBdy_zoneDelta_west(double value)
+{
+	int index=0;
+	zoneDelta.dir0[index] = value;
+	globalCoord.dir0[index]=origin.get_dir0()-0.5*zoneDelta.dir0[index];
+}
+
+//Check Information**********************************************************
 void StructuredGeometry2D::checkIndices(int i, int j) const
 {
 	assert( i > 0 );

@@ -57,31 +57,7 @@ class Operators2D : public StructuredGeometry2D
 		return area;
 	}
 
-	double getDivergenceFromField(int i, int j, StructuredLocalField2D<double> field) const;
-
-	public:
-	explicit Operators2D(
-		Point2D<double> origin=Point2D<double>(0.0,0.0),
-		Point2D<double> extent=Point2D<double>(1.0,1.0),
-		Vector2D<int> size=Vector2D<int>(10,10),
-		double refineMesh_dir0=1.0, double refineMesh_dir1=1.0)
-		:	StructuredGeometry2D(origin, extent, size, refineMesh_dir0, refineMesh_dir1)
-	{
-		cout << "Constructor: Operators2D" << endl;
-	}
-
-	Vector2D<double> gradient(int i, int j, const SpacialArray2D<double>& scalarField) const;
-	double divergence(int i, int j,
-		const SpacialArray2D<double>& scalar,
-		const SpacialArray2D<Vector2D<double> >& vector) const;
-	Vector2D<double> divergence(int i, int j,
-		const SpacialArray2D<double>& scalar,
-		const SpacialArray2D<Vector2D<double> >& vector1,
-		const SpacialArray2D<Vector2D<double> >& vector2) const;
-
-
-
-	template <typename T> T getDivergenceFromField_new(int i, int j,
+	template <typename T> T getDivergenceFromField(int i, int j,
 		StructuredLocalField2D<T> field) const
 	{
 		StructuredLocalField2D<double> area;	
@@ -106,7 +82,27 @@ class Operators2D : public StructuredGeometry2D
 
 		return divergence;
 	}
-	
+
+	public:
+	explicit Operators2D(
+		Point2D<double> origin=Point2D<double>(0.0,0.0),
+		Point2D<double> extent=Point2D<double>(1.0,1.0),
+		Vector2D<int> size=Vector2D<int>(10,10),
+		double refineMesh_dir0=1.0, double refineMesh_dir1=1.0)
+		:	StructuredGeometry2D(origin, extent, size, refineMesh_dir0, refineMesh_dir1)
+	{
+		cout << "Constructor: Operators2D" << endl;
+	}
+
+	Vector2D<double> gradient(const int i, const int j,
+		const SpacialArray2D<double>& scalarField) const;
+	double divergence(const int i, const int j,
+		const SpacialArray2D<double>& scalar,
+		const SpacialArray2D<Vector2D<double> >& vector) const;
+	Vector2D<double> divergence(const int i, const int j,
+		const SpacialArray2D<double>& scalar,
+		const SpacialArray2D<Vector2D<double> >& vector1,
+		const SpacialArray2D<Vector2D<double> >& vector2) const;
 };
 
 

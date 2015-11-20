@@ -36,12 +36,12 @@ void test_Dyad2D();
 
 int main(int argc, char *argv[])
 {
-	//~ test_Dyad2D();
+	//~ test_SpacialArray2D();
 	//~ return 0;
 	cout << "************************************" << endl;
 	cout << "Testing Operators2D_cyl ..." << endl;
 
-	Vector2D<int> size(20,20);
+	Vector2D<int> size(10,10);
 
 	SpacialArray2D<double> pressure(size);
 	SpacialArray2D<double> divergence(size);
@@ -51,6 +51,8 @@ int main(int argc, char *argv[])
 		Point2D<double>(10.0,5.0),
 		size);
 
+	cout << "Geometry:" << endl;
+	operate.print();
 
 	//Write Pressure
 	for (int i=1; i<=pressure.getCount_dir0(); ++i)
@@ -77,9 +79,11 @@ int main(int argc, char *argv[])
 	//~ pressure.print();
 
 	operate.vtkOutput(pressure, gradP, divergence);
-
+	
 	int i=3, j=3;
-	operate.divergence(i,j, pressure, gradP, gradP);
+
+	operate.gradient(i,j, pressure);
+	operate.divergence(i,j, pressure, gradP, gradP*3.0);
 
 }
 
@@ -111,7 +115,10 @@ void test_SpacialArray2D()
 	cout << "************************************" << endl;
 	cout << "Testing SpacialArray2D ..." << endl;
 
-	SpacialArray2D< Vector2D<double> > velocity(Vector2D<int>(10,5));
+	Vector2D<int> size(10,5);
+
+	cout << "Creating velocity..." << endl;
+	SpacialArray2D< Vector2D<double> > velocity(size);
 	Vector2D<double> localVel(4.5,3.4);
 
 	velocity.fill(Vector2D<double>(2.0,3.0));
@@ -126,6 +133,28 @@ void test_SpacialArray2D()
 	assert( isEqual(velocity.get(2,0).get_dir0(), localField.S.get_dir0()) );
 	assert( isEqual(velocity.get(3,1).get_dir0(), localField.E.get_dir0()) );
 	assert( isEqual(velocity.get(1,1).get_dir0(), localField.W.get_dir0()) );
+
+
+	//Test Assignment********************************************************
+	SpacialArray2D<Vector2D<double> > testVec(size);
+	double scalar=3.0;
+
+	testVec=velocity*scalar;
+
+
+	for (int i=0; i<=testVec.getCount_dir0()+1; ++i)
+		for (int j=0; j<=testVec.getCount_dir1()+1; ++j)
+		{
+			assert( isEqual( testVec.get(i,j).get_dir0() ,
+				velocity.get(i,j).get_dir0()*scalar) );
+		}
+
+
+
+	
+	
+
+
 }
 
 void test_Point2D_Vector2D()

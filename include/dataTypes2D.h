@@ -144,22 +144,22 @@ template <typename T> Vector2D<T> operator*(const T& value, const Vector2D<T>& v
 	return vector*value;
 }
 
-template <typename T> Vector2D<T> operator-(const Vector2D<T>& p1, const Vector2D<T>& p2)
+template <typename T> Vector2D<T> operator-(const Vector2D<T>& v1, const Vector2D<T>& v2)
 {
 	Vector2D<T> result;
 
-	result.write_dir0(p1.get_dir0() - p2.get_dir0());
-	result.write_dir1(p1.get_dir1() - p2.get_dir1());
+	result.write_dir0(v1.get_dir0() - v2.get_dir0());
+	result.write_dir1(v1.get_dir1() - v2.get_dir1());
 
 	return result;
 }
 
-template <typename T> Vector2D<T> operator+(const Vector2D<T>& p1, const Vector2D<T>& p2)
+template <typename T> Vector2D<T> operator+(const Vector2D<T>& v1, const Vector2D<T>& v2)
 {
 	Vector2D<T> result;
 
-	result.write_dir0(p1.get_dir0() + p2.get_dir0());
-	result.write_dir1(p1.get_dir1() + p2.get_dir1());
+	result.write_dir0(v1.get_dir0() + v2.get_dir0());
+	result.write_dir1(v1.get_dir1() + v2.get_dir1());
 
 	return result;
 }
@@ -276,17 +276,6 @@ template <class type> class StructuredLocalField2D
 	type E;
 	type W;
 
-	StructuredLocalField2D()
-	{
-		P=(type)0;
-		P_dir0=(type)0;
-		P_dir1=(type)0;
-		N=(type)0;
-		S=(type)0;
-		E=(type)0;
-		W=(type)0;
-	}
-
 	void print() const;
 };
 
@@ -320,33 +309,67 @@ template <class type> class SpacialArray2D
 {
 	private:
 	Vector2D<int> size;
-	type **array;
+	size_t length;
+	size_t width;
+	type *array;
+
+	void init(Vector2D<int> size_to_init)
+	{
+		size=size_to_init;
+		length=(size.get_dir0()+2)*(size.get_dir0()+2);
+			//Add extra slots for bdy cells
+		width=size.get_dir0()+2;
+	}
+
+	void reset()
+	{
+		size=Vector2D<int>(0,0);
+		length=0;
+		width=0;
+	}
+	
 
 	public:
-	explicit SpacialArray2D( Vector2D<int> size=Vector2D<int>(10,10) );
-	SpacialArray2D(const SpacialArray2D<type>& that);
-	~SpacialArray2D();
+	explicit SpacialArray2D( Vector2D<int> size=Vector2D<int>(10,10) ); //Con
+	SpacialArray2D(const SpacialArray2D<type>& that); //Copy Con
+	SpacialArray2D(SpacialArray2D<type>&& other); //Move Con
+	SpacialArray2D<type>& operator=(SpacialArray2D<type>&& other); //Move Assign
+	SpacialArray2D<type> operator=(const SpacialArray2D<type>& rhs); //Copy Assign
+	~SpacialArray2D(); //Destructor
 
-	inline type get(int i, int j) const { return array[i][j]; }
+	inline type get(int i, int j) const { return array[i*width+j]; }
+	inline Vector2D<int> getSize() const { return size; }
 	inline int getSize_dir0() const { return size.get_dir0(); }
 	inline int getSize_dir1() const { return size.get_dir1(); }
 	inline int getCount_dir0() const { return size.get_dir0(); }
 	inline int getCount_dir1() const { return size.get_dir1(); }
-	inline void write(int i, int j, const type& value) { array[i][j]=value; }
+	inline void write(int i, int j, const type& value) { array[i*width+j]=value; }
 
 	void print() const;
-
 	void fill(const type& value);
 	void set_adiabaticBdyValues();
 
 	StructuredLocalField2D<type> getLocalField(int i, int j) const;
 };
 
+//Define Operators***********************************************************
+template <typename T> SpacialArray2D<T> operator*(
+	const SpacialArray2D<T>& array, const double& scalar)
+{
+	SpacialArray2D<T> result=array;
+
+	for (int i=0; i<=result.getCount_dir0()+1; ++i)
+	for (int j=0; j<=result.getCount_dir1()+1; ++j)
+	{
+		//~ cout << "Loop: i=" << i << ", j=" << j << endl;
+		result.write(i,j, array.get(i,j)*scalar);
+	}
+	return result;
+}
 
 
 
-
-
+		
 
 
 
@@ -388,13 +411,16 @@ class StructuredGeometry2D
 	double minMeshSpacing;
 
 	public:
-	StructuredGeometry2D(const StructuredGeometry2D& that);
 	explicit StructuredGeometry2D(
 		Point2D<double> origin=Point2D<double>(0.0,0.0),
 		Point2D<double> extent=Point2D<double>(1.0,1.0),
 		Vector2D<int> size=Vector2D<int>(10,10),
-		double refineMesh_dir0=1.0, double refineMesh_dir1=1.0);
-	~StructuredGeometry2D();
+		double refineMesh_dir0=1.0, double refineMesh_dir1=1.0); // Con
+	StructuredGeometry2D(const StructuredGeometry2D& that); // Copy Con
+	StructuredGeometry2D(StructuredGeometry2D&& other) = delete; //Move Con
+	StructuredGeometry2D& operator=(StructuredGeometry2D&& other) = delete; //Move Assign
+	StructuredGeometry2D operator=(const StructuredGeometry2D& rhs) = delete; //Copy Assign
+	~StructuredGeometry2D(); // Deconstructor
 
 	//Get Information********************************************************
 	inline double get_zoneDelta_north() const
@@ -441,150 +467,16 @@ class StructuredGeometry2D
 
 	private:
 	//Set Information********************************************************
-	inline void setBdy_zoneDelta_north(double value)
-	{
-		int index=numZones.get_dir1()+1;
-		zoneDelta.dir1[index] = value;
-		globalCoord.dir1[index]=extent.get_dir1()+0.5*zoneDelta.dir1[index];
-	}
-
-	inline void setBdy_zoneDelta_south(double value)
-	{
-		int index=0;
-		zoneDelta.dir1[index] = value;
-		globalCoord.dir1[index]=origin.get_dir1()-0.5*zoneDelta.dir1[index];
-	}
-
-	inline void setBdy_zoneDelta_east(double value)
-	{
-		int index=numZones.get_dir0()+1;
-		zoneDelta.dir0[index] = value;
-		globalCoord.dir0[index]=extent.get_dir0()+0.5*zoneDelta.dir0[index];
-	}
-
-	inline void setBdy_zoneDelta_west(double value)
-	{
-		int index=0;
-		zoneDelta.dir0[index] = value;
-		globalCoord.dir0[index]=origin.get_dir0()-0.5*zoneDelta.dir0[index];
-	}
+	void setBdy_zoneDelta_north(double value);
+	void setBdy_zoneDelta_south(double value);
+	void setBdy_zoneDelta_east(double value);
+	void setBdy_zoneDelta_west(double value);
 
 	protected:
 	//Check Information******************************************************
 	void checkIndices(int i, int j) const;
-
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//~ 
-//~ 
-//~ 
-//~ 
-//~ 
-//~ /*
- //~ * Class: spacialArray2D
- //~ * Purpose: Provide a basic object for spacial arrays.
- //~ */
-//~ class spacialArray2D
-//~ {
-	//~ protected:
-	//~ struct arraySize
-	//~ {
-		//~ int dir0;
-		//~ int dir1;
-	//~ } numZones;
-//~ 
-	//~ double **array;
-//~ 
-	//~ public:
-	//~ spacialArray2D(const spacialArray2D& that);
-	//~ spacialArray2D(int size_dir0=10, int size_dir1=10, double valueInit=0.0);
-	//~ spacialArray2D& operator=(const spacialArray2D& that);
-//~ 
-	//~ 
-	//~ ~spacialArray2D();
-//~ 
-	//~ double get(int i, int j) const;
-	//~ void write(int i, int j, double value);
-//~ 
-	//~ int getSize_dir0() const;
-	//~ int getSize_dir1() const;
-//~ 
-	//~ cellDirections getLocalField(int i, int j) const;
-//~ };
-//~ 
-//~ /*
- //~ * class: scalarArray2D
- //~ * Purpose: Store and process 2D scalar arrays.
- //~ */
-//~ class scalarArray2D : public spacialArray2D
-//~ {
-	//~ public:
-	//~ scalarArray2D(const scalarArray2D& that) : spacialArray2D(that){}
-	//~ scalarArray2D(int size_dir0=10, int size_dir1=10)
-		//~ : spacialArray2D(size_dir0, size_dir1) {}
-//~ };
-//~ 
-//~ /*
- //~ * class: vectorArray2D
- //~ * Purpose: Store and process 2D vector arrays.
- //~ */
-//~ class vectorArray2D
-//~ {
-	//~ private:
-	//~ spacialArray2D array_dir0;
-	//~ spacialArray2D array_dir1;
-//~ 
-	//~ public:
-	//~ vectorArray2D(const vectorArray2D& that)
-		//~ : 	array_dir0(that.array_dir0),
-			//~ array_dir1(that.array_dir1) {}
-	//~ vectorArray2D(int size_dir0=10, int size_dir1=10)
-		//~ :	array_dir0(size_dir0, size_dir1),
-			//~ array_dir1(size_dir0, size_dir1) {}
-//~ 
-	//~ double getMagnitude(int i, int j);
-	//~ void writeComponent_dir0(int i, int j, double value);
-	//~ void writeComponent_dir1(int i, int j, double value);
-//~ 
-	//~ double component_dir0(int i, int j);
-	//~ double component_dir1(int i, int j);
-//~ 
-	//~ int getSize_dir0();
-	//~ int getSize_dir1();
-//~ 
-	//~ spacialArray2D dir0() {return array_dir0;}
-//~ 
-	//~ spacialArray2D dir1() {return array_dir1;}
-//~ 
-	//~ cellDirections product(cellDirections scalarField, int i, int j) const;
-//~ 
-	//~ cellDirections localField_dir0(int i, int j)
-	//~ {
-		//~ return array_dir0.getLocalField(i,j);
-	//~ }
-	//~ cellDirections localField_dir1(int i, int j)
-	//~ {
-		//~ return array_dir1.getLocalField(i,j);
-	//~ }
-//~ };
 
 
 #endif  // INCLUDE_DATATYPES2D_H_
