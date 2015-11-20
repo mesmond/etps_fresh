@@ -5,10 +5,9 @@
  * Description: This file contains the definitions for various
  * 	discretization operators in 2D.
  * 	The operators included are:
- * 		Gradient (cylindrical)
- * 		Divergence (cylindrical)
- * 		Gradient (cartesion)
- * 		Divergence (cartesion)
+ * 		Gradient (scalar)
+ * 		Divergence (scalar, vector)
+ * 		Deivergence (scalar, vector, vector)
  *
  * 	The operators depend on the StructuredGeometry2D() class.
 */
@@ -16,6 +15,10 @@
 //***************************************************************************
 #include "operators2D.h"
 
+//***************************************************************************
+//***************************************************************************
+//***************************************************************************
+//Operators2D****************************************************************
 Vector2D<double> Operators2D::gradient(int i, int j, const SpacialArray2D<double>& scalarField) const
 {
 	this->checkIndices(i,j);
@@ -97,3 +100,37 @@ Vector2D<double> Operators2D::divergence(int i, int j,
 
 	return getDivergenceFromField(i,j, localField);
 }
+
+//***************************************************************************
+//***************************************************************************
+//***************************************************************************
+//Operators2D_cyl************************************************************
+double Operators2D_cyl::getVolume(int i, int j) const
+{
+	return 2.0*c_pi
+		*getPoint(i,j).get_dir1()
+		*getMeshDelta(i,j).get_dir1()
+		*getMeshDelta(i,j).get_dir2();
+}
+
+StructuredLocalField2D<double> Operators2D_cyl::getCellAreas(int i, int j) const
+{
+	StructuredLocalField2D<double> area;
+
+	area.N=2.0*c_pi
+		*getPoint(i,j).get_dir1()
+		*getMeshDelta(i,j).get_dir1();
+	area.S=area.N;
+	area.E=2.0*c_pi
+		*(getPoint(i,j).get_dir1()
+			+0.5*getMeshDelta(i,j).get_dir1())
+		*getMeshDelta(i,j).get_dir2();
+	area.W=2.0*c_pi
+		*(getPoint(i,j).get_dir1()
+			-0.5*getMeshDelta(i,j).get_dir1())
+		*getMeshDelta(i,j).get_dir2();
+
+	return area;
+}
+
+

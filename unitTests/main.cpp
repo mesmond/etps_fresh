@@ -38,21 +38,22 @@ void test_PerfectGas2D();
 
 int main(int argc, char *argv[])
 {
-	test_Point2D_Vector2D();
-	test_Dyad2D();
-	test_SpacialArray2D();
-	test_StructuredGeometry2D();
-	test_PerfectGas2D();
+	//~ test_Point2D_Vector2D();
+	//~ test_Dyad2D();
+	//~ test_SpacialArray2D();
+	//~ test_StructuredGeometry2D();
+	//~ test_PerfectGas2D();
+	//~ 
+	//~ return 0;
 	
-	return 0;
 	cout << "************************************" << endl;
-	cout << "Testing Operators2D ..." << endl;
+	cout << "Testing Operators2D_cyl ..." << endl;
 
 	Vector2D<int> size(10,10); //Do not change
 	SpacialArray2D<double> pressure(size);
 	SpacialArray2D<double> divergence(size);
 	SpacialArray2D<Vector2D<double> > gradP(size);
-	Operators2D operate(
+	Operators2D_cyl operate(
 		Point2D<double>(0.0,0.0),
 		Point2D<double>(10.0,5.0),
 		size);
@@ -96,6 +97,9 @@ int main(int argc, char *argv[])
 	
 	assert( isEqual(grad.get_dir1(), 3.0) );
 	assert( isEqual(grad.get_dir2(), 6.0) );
+
+	cout << "Done**************************************" << endl;
+	cout << "******************************************" << endl;
 	
 
 }
