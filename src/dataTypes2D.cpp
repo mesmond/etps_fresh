@@ -272,36 +272,6 @@ template class SpacialArray2D<int>;
 //***************************************************************************
 //***************************************************************************
 //StructuredGeometry2D*******************************************************
-StructuredGeometry2D::StructuredGeometry2D(const StructuredGeometry2D& that)
-{
-	this->origin=that.origin;
-	this->extent=that.extent;
-
-	this->length=that.length;
-	this->numZones=that.numZones;
-	
-	this->zoneDelta.dir0 = new double [numZones.get_dir0()+2];
-	this->zoneDelta.dir1 = new double [numZones.get_dir1()+2];
-
-	for (int i=0; i<=numZones.get_dir0()+1; ++i)
-		this->zoneDelta.dir0[i]=that.zoneDelta.dir0[i];
-
-	for (int j=0; j<=numZones.get_dir1()+1; ++j)
-		this->zoneDelta.dir1[j]=that.zoneDelta.dir1[j];
-
-	this->globalCoord.dir0 = new double [numZones.get_dir0()+2];
-	this->globalCoord.dir1 = new double [numZones.get_dir1()+2];
-
-	for (int i=0; i<=numZones.get_dir0()+1; ++i)
-		this->globalCoord.dir0[i]=that.globalCoord.dir0[i];
-
-	for (int j=0; j<=numZones.get_dir1()+1; ++j)
-		this->globalCoord.dir1[j]=that.globalCoord.dir1[j];
-
-	this->minMeshSpacing=that.minMeshSpacing;
-
-}
-
 StructuredGeometry2D::StructuredGeometry2D(
 		Point2D<double> origin,
 		Point2D<double> extent,
@@ -391,37 +361,52 @@ StructuredGeometry2D::StructuredGeometry2D(
 	minMeshSpacing=minValue;
 }
 
+StructuredGeometry2D::StructuredGeometry2D(const StructuredGeometry2D& that)
+{
+	this->origin=that.origin;
+	this->extent=that.extent;
+
+	this->length=that.length;
+	this->numZones=that.numZones;
+	
+	this->zoneDelta.dir0 = new double [numZones.get_dir0()+2];
+	this->zoneDelta.dir1 = new double [numZones.get_dir1()+2];
+
+	for (int i=0; i<=numZones.get_dir0()+1; ++i)
+		this->zoneDelta.dir0[i]=that.zoneDelta.dir0[i];
+
+	for (int j=0; j<=numZones.get_dir1()+1; ++j)
+		this->zoneDelta.dir1[j]=that.zoneDelta.dir1[j];
+
+	this->globalCoord.dir0 = new double [numZones.get_dir0()+2];
+	this->globalCoord.dir1 = new double [numZones.get_dir1()+2];
+
+	for (int i=0; i<=numZones.get_dir0()+1; ++i)
+		this->globalCoord.dir0[i]=that.globalCoord.dir0[i];
+
+	for (int j=0; j<=numZones.get_dir1()+1; ++j)
+		this->globalCoord.dir1[j]=that.globalCoord.dir1[j];
+
+	this->minMeshSpacing=that.minMeshSpacing;
+
+}
+
 StructuredGeometry2D::~StructuredGeometry2D()
 {
 	delete[] zoneDelta.dir0;
 	delete[] zoneDelta.dir1;
 
-	zoneDelta.dir0=NULL;
-	zoneDelta.dir1=NULL;
+	zoneDelta.dir0=nullptr;
+	zoneDelta.dir1=nullptr;
 
 	delete[] globalCoord.dir0;
 	delete[] globalCoord.dir1;
 
-	globalCoord.dir0=NULL;
-	globalCoord.dir1=NULL;
+	globalCoord.dir0=nullptr;
+	globalCoord.dir1=nullptr;
 }
 
-StructuredLocalField2D<double>
-	StructuredGeometry2D::getLocalDeltaFactors(int i, int j) const
-{
-	StructuredLocalField2D<double> result;
-
-	result.N=zoneDelta.dir1[j]/(zoneDelta.dir1[j]+zoneDelta.dir1[j+1]);
-	result.S=zoneDelta.dir1[j]/(zoneDelta.dir1[j]+zoneDelta.dir1[j-1]);
-	result.E=zoneDelta.dir0[i]/(zoneDelta.dir0[i]+zoneDelta.dir0[i+1]);
-	result.W=zoneDelta.dir0[i]/(zoneDelta.dir0[i]+zoneDelta.dir0[i-1]);
-
-	result.P_dir0=zoneDelta.dir0[i];
-	result.P_dir1=zoneDelta.dir1[j];
-
-	return result;
-}
-
+//Output*********************************************************************
 void StructuredGeometry2D::print() const
 {
 	int maxi=numZones.get_dir0()+1;
@@ -446,25 +431,6 @@ void StructuredGeometry2D::print() const
 
 }
 
-Point2D<double> StructuredGeometry2D::getPoint(int i, int j) const
-{
-	Point2D<double> point;
-
-	point.write_dir0(globalCoord.dir0[i]);
-	point.write_dir1(globalCoord.dir1[j]);
-
-	return point;
-}
-
-Vector2D<double> StructuredGeometry2D::getMeshDelta(int i, int j) const
-{
-	Vector2D<double> delta;
-
-	delta.write_dir0(zoneDelta.dir0[i]);
-	delta.write_dir1(zoneDelta.dir1[j]);
-
-	return delta;
-}
 
 void StructuredGeometry2D::vtkOutput(const char* fileName) const
 {
@@ -601,7 +567,8 @@ void StructuredGeometry2D::vtkOutput(
 	cout.unsetf (ios::floatfield); // unsets fixed
 }
 
-void StructuredGeometry2D::vtkOutput(const SpacialArray2D<double>& scalar,
+void StructuredGeometry2D::vtkOutput(
+	const SpacialArray2D<double>& scalar,
 	const SpacialArray2D<Vector2D<double> >& vector,
 	const SpacialArray2D<double>& divergence,
 	const char* fileName) const
@@ -637,9 +604,7 @@ void StructuredGeometry2D::vtkOutput(const SpacialArray2D<double>& scalar,
 	cout.unsetf (ios::floatfield); // unsets fixed
 }
 
-
-
-
+//Mutation Handling**********************************************************
 void StructuredGeometry2D::link_north(const StructuredGeometry2D& toLink)
 {
 	assert(getCount_dir0() == toLink.getCount_dir0());
@@ -667,6 +632,36 @@ void StructuredGeometry2D::link_west(const StructuredGeometry2D& toLink)
 	assert( isEqual(get_origin().get_dir0(), toLink.get_extent().get_dir0()));
 	setBdy_zoneDelta_west(toLink.get_zoneDelta_east());
 }
+
+//Get Information************************************************************
+StructuredLocalField2D<double>
+	StructuredGeometry2D::getLocalDeltaFactors(int i, int j) const
+{
+	StructuredLocalField2D<double> result;
+
+	result.N=zoneDelta.dir1[j]/(zoneDelta.dir1[j]+zoneDelta.dir1[j+1]);
+	result.S=zoneDelta.dir1[j]/(zoneDelta.dir1[j]+zoneDelta.dir1[j-1]);
+	result.E=zoneDelta.dir0[i]/(zoneDelta.dir0[i]+zoneDelta.dir0[i+1]);
+	result.W=zoneDelta.dir0[i]/(zoneDelta.dir0[i]+zoneDelta.dir0[i-1]);
+
+	result.P_dir0=zoneDelta.dir0[i];
+	result.P_dir1=zoneDelta.dir1[j];
+
+	return result;
+}
+
+Point2D<double> StructuredGeometry2D::getPoint(int i, int j) const
+{
+	return Point2D<double>(globalCoord.dir0[i], globalCoord.dir1[j]);
+}
+
+Vector2D<double> StructuredGeometry2D::getMeshDelta(int i, int j) const
+{
+	return Vector2D<double>(zoneDelta.dir0[i], zoneDelta.dir1[j]);
+}
+
+
+
 
 //Set Information********************************************************
 void StructuredGeometry2D::setBdy_zoneDelta_north(double value)

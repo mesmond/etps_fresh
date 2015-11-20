@@ -64,30 +64,20 @@ template <typename T> ostream& operator<<(ostream& os, Point2D<T> point)
 
 template <typename T> Point2D<T> operator-(const Point2D<T>& p1, const Point2D<T>& p2)
 {
-	Point2D<T> result;
-
-	result.write_dir0(p1.get_dir0() - p2.get_dir0());
-	result.write_dir1(p1.get_dir1() - p2.get_dir1());
-
-	return result;
+	return Point2D<T>(	p1.get_dir0() - p2.get_dir0(),
+						p1.get_dir1() - p2.get_dir1() 	);
 }
 
 template <typename T> Point2D<T> operator+(const Point2D<T>& p1, const Point2D<T>& p2)
 {
-	Point2D<T> result;
-
-	result.write_dir0(p1.get_dir0() + p2.get_dir0());
-	result.write_dir1(p1.get_dir1() + p2.get_dir1());
-
-	return result;
+	return Point2D<T>(	p1.get_dir0() + p2.get_dir0(),
+						p1.get_dir1() + p2.get_dir1() 	);
 }
 
 template <typename T> Point2D<T> operator*(const Point2D<T>& point, const T& value)
 {
-	Point2D<T> result;
-	result.write_dir0(point.get_dir0() * value);
-	result.write_dir1(point.get_dir1() * value);
-	return result;
+	return Point2D<T>(	point.get_dir0() * value,
+						point.get_dir1() * value 	);
 }
 
 template <typename T> Point2D<T> operator*(const T& value, const Point2D<T>& point)
@@ -133,10 +123,8 @@ template <class type> class Vector2D : public Point2D<type>
 //Define Operators***********************************************************
 template <typename T> Vector2D<T> operator*(const Vector2D<T>& vector, const T& value)
 {
-	Vector2D<T> result;
-	result.write_dir0(vector.get_dir0() * value);
-	result.write_dir1(vector.get_dir1() * value);
-	return result;
+	return Vector2D<T>(	vector.get_dir0() * value,
+						vector.get_dir1() * value 	);
 }
 
 template <typename T> Vector2D<T> operator*(const T& value, const Vector2D<T>& vector)
@@ -146,22 +134,14 @@ template <typename T> Vector2D<T> operator*(const T& value, const Vector2D<T>& v
 
 template <typename T> Vector2D<T> operator-(const Vector2D<T>& v1, const Vector2D<T>& v2)
 {
-	Vector2D<T> result;
-
-	result.write_dir0(v1.get_dir0() - v2.get_dir0());
-	result.write_dir1(v1.get_dir1() - v2.get_dir1());
-
-	return result;
+	return Vector2D<T>(	v1.get_dir0() - v2.get_dir0(),
+						v1.get_dir1() - v2.get_dir1() 	);
 }
 
 template <typename T> Vector2D<T> operator+(const Vector2D<T>& v1, const Vector2D<T>& v2)
 {
-	Vector2D<T> result;
-
-	result.write_dir0(v1.get_dir0() + v2.get_dir0());
-	result.write_dir1(v1.get_dir1() + v2.get_dir1());
-
-	return result;
+	return Vector2D<T>(	v1.get_dir0() + v2.get_dir0(),
+						v1.get_dir1() + v2.get_dir1() 	);
 }
 
 
@@ -192,7 +172,7 @@ template <typename T> T dotProduct(const Vector2D<T>& vec1, const Vector2D<T>& v
  *
  * Description: This class stores and processes Dyad objects in 2D.  Only a
  * 	double type is allowed for its members.  When two vectors are multiplied
- * 	together, the result will be this Dyad2D as in normal mathematics.
+ * 	together, the result will be a Dyad2D as in normal mathematics.
  */
 class Dyad2D
 {
@@ -215,6 +195,13 @@ class Dyad2D
 	friend Dyad2D operator*(const Vector2D<double>& vec0, const Vector2D<double>& vec1);
 	friend Dyad2D operator*(const double& scalar, const Dyad2D& dyad);
 
+	/*
+	 * Function: get_dir0()
+	 * Purpose: Returns the portion of the Dyad realated to the
+	 * 	primary direction (i.e. x in (x,y), r in (r,z)).
+	 *
+	 * Description: The Dyad in 2D is a 2x2 matrix.
+	 */
 	Vector2D<double> get_dir0() const
 	{
 		Vector2D<double> result;
@@ -391,7 +378,7 @@ template <typename T> SpacialArray2D<T> operator*(
  * 	regarding the mesh spacing and mesh density.
  * 	Global Coordinates of structured cells
  * 	are specified using a cell-centered scheme.
- * 	This struct is designed for an orthogonal grid.
+ * 	This class is designed for an orthogonal grid.
  */
 class StructuredGeometry2D
 {
@@ -422,30 +409,8 @@ class StructuredGeometry2D
 	StructuredGeometry2D operator=(const StructuredGeometry2D& rhs) = delete; //Copy Assign
 	~StructuredGeometry2D(); // Deconstructor
 
-	//Get Information********************************************************
-	inline double get_zoneDelta_north() const
-		{ return zoneDelta.dir1[numZones.get_dir1()]; }
-
-	inline double get_zoneDelta_south() const
-		{ return zoneDelta.dir1[1]; }
-
-	inline double get_zoneDelta_east() const
-		{ return zoneDelta.dir0[numZones.get_dir0()]; }
-
-	inline double get_zoneDelta_west() const { return zoneDelta.dir0[1]; }
-
-	inline int getCount_dir0() const { return numZones.get_dir0(); }
-	inline int getCount_dir1() const { return numZones.get_dir1(); }
-	inline Point2D<double> get_origin() const { return origin; }
-	inline Point2D<double> get_extent() const { return extent; }
-
-	StructuredLocalField2D<double> getLocalDeltaFactors(int i, int j) const;
-
+	//Output*****************************************************************
 	void print() const;
-
-	Point2D<double> getPoint(int i, int j) const;
-	Vector2D<double> getMeshDelta(int i, int j) const;
-
 	void vtkOutput(const char* fileName="output.vtk") const;
 	void vtkOutput(const SpacialArray2D<double>& scalar,
 		const char* fileName="output.vtk") const;
@@ -457,13 +422,28 @@ class StructuredGeometry2D
 		const SpacialArray2D<double>& divergence,
 		const char* fileName="output.vtk") const;
 
-
 	//Mutation Handling******************************************************
 	void link_north(const StructuredGeometry2D& toLink);
 	void link_south(const StructuredGeometry2D& toLink);
 	void link_east(const StructuredGeometry2D& toLink);
 	void link_west(const StructuredGeometry2D& toLink);
 
+	//Get Information********************************************************
+	inline double get_zoneDelta_north() const
+		{ return zoneDelta.dir1[numZones.get_dir1()]; }
+	inline double get_zoneDelta_south() const
+		{ return zoneDelta.dir1[1]; }
+	inline double get_zoneDelta_east() const
+		{ return zoneDelta.dir0[numZones.get_dir0()]; }
+	inline double get_zoneDelta_west() const { return zoneDelta.dir0[1]; }
+	inline int getCount_dir0() const { return numZones.get_dir0(); }
+	inline int getCount_dir1() const { return numZones.get_dir1(); }
+	inline Point2D<double> get_origin() const { return origin; }
+	inline Point2D<double> get_extent() const { return extent; }
+
+	StructuredLocalField2D<double> getLocalDeltaFactors(int i, int j) const;
+	Point2D<double> getPoint(int i, int j) const;
+	Vector2D<double> getMeshDelta(int i, int j) const;
 
 	private:
 	//Set Information********************************************************
