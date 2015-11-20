@@ -106,8 +106,8 @@ class PerfectGas2D
 
 	void init_fromBasicProps()
 	{
-		for (int i=0; i<=size.get_dir0()+1; ++i)
-		for (int j=0; j<=size.get_dir1()+1; ++j)
+		for (int i=0; i<=size.get_dir1()+1; ++i)
+		for (int j=0; j<=size.get_dir2()+1; ++j)
 		{
 			double localTemp=temperature.get(i,j); 	//units: K
 			double localPress=pressure.get(i,j);	//units: Pa

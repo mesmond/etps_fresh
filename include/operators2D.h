@@ -32,9 +32,9 @@ class Operators2D : public StructuredGeometry2D
 	double getVolume(int i, int j) const
 	{
 		return 2.0*c_pi
-			*getPoint(i,j).get_dir0()
-			*getMeshDelta(i,j).get_dir0()
-			*getMeshDelta(i,j).get_dir1();
+			*getPoint(i,j).get_dir1()
+			*getMeshDelta(i,j).get_dir1()
+			*getMeshDelta(i,j).get_dir2();
 	}
 
 	StructuredLocalField2D<double> getCellAreas(int i, int j) const
@@ -42,17 +42,17 @@ class Operators2D : public StructuredGeometry2D
 		StructuredLocalField2D<double> area;
 
 		area.N=2.0*c_pi
-			*getPoint(i,j).get_dir0()
-			*getMeshDelta(i,j).get_dir0();
+			*getPoint(i,j).get_dir1()
+			*getMeshDelta(i,j).get_dir1();
 		area.S=area.N;
 		area.E=2.0*c_pi
-			*(getPoint(i,j).get_dir0()
-				+0.5*getMeshDelta(i,j).get_dir0())
-			*getMeshDelta(i,j).get_dir1();
+			*(getPoint(i,j).get_dir1()
+				+0.5*getMeshDelta(i,j).get_dir1())
+			*getMeshDelta(i,j).get_dir2();
 		area.W=2.0*c_pi
-			*(getPoint(i,j).get_dir0()
-				-0.5*getMeshDelta(i,j).get_dir0())
-			*getMeshDelta(i,j).get_dir1();
+			*(getPoint(i,j).get_dir1()
+				-0.5*getMeshDelta(i,j).get_dir1())
+			*getMeshDelta(i,j).get_dir2();
 
 		return area;
 	}
@@ -68,10 +68,10 @@ class Operators2D : public StructuredGeometry2D
 		area=getCellAreas(i,j);
 
 		//Interpolate to cell faces.
-		cellFlux.N=field.P_dir1*(1.0-deltaFactor.N)+deltaFactor.N*field.N;
-		cellFlux.S=field.P_dir1*(1.0-deltaFactor.S)+deltaFactor.S*field.S;
-		cellFlux.E=field.P_dir0*(1.0-deltaFactor.E)+deltaFactor.E*field.E;
-		cellFlux.W=field.P_dir0*(1.0-deltaFactor.W)+deltaFactor.W*field.W;
+		cellFlux.N=field.P_dir2*(1.0-deltaFactor.N)+deltaFactor.N*field.N;
+		cellFlux.S=field.P_dir2*(1.0-deltaFactor.S)+deltaFactor.S*field.S;
+		cellFlux.E=field.P_dir1*(1.0-deltaFactor.E)+deltaFactor.E*field.E;
+		cellFlux.W=field.P_dir1*(1.0-deltaFactor.W)+deltaFactor.W*field.W;
 
 		//Compute Divergence.
 		T divergence=(1.0/getVolume(i,j))*(
@@ -88,8 +88,8 @@ class Operators2D : public StructuredGeometry2D
 		Point2D<double> origin=Point2D<double>(0.0,0.0),
 		Point2D<double> extent=Point2D<double>(1.0,1.0),
 		Vector2D<int> size=Vector2D<int>(10,10),
-		double refineMesh_dir0=1.0, double refineMesh_dir1=1.0)
-		:	StructuredGeometry2D(origin, extent, size, refineMesh_dir0, refineMesh_dir1)
+		double refineMesh_dir1=1.0, double refineMesh_dir2=1.0)
+		:	StructuredGeometry2D(origin, extent, size, refineMesh_dir1, refineMesh_dir2)
 	{
 		cout << "Constructor: Operators2D" << endl;
 	}

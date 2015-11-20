@@ -34,8 +34,8 @@ Vector2D<double> Operators2D::gradient(int i, int j, const SpacialArray2D<double
 	cellFaceValues.E=localField.P*(1.0-deltaFactor.E)+deltaFactor.E*localField.E;
 	cellFaceValues.W=localField.P*(1.0-deltaFactor.W)+deltaFactor.W*localField.W;
 
-	gradient.write_dir0((cellFaceValues.E-cellFaceValues.W)/deltaFactor.P_dir0);
-	gradient.write_dir1((cellFaceValues.N-cellFaceValues.S)/deltaFactor.P_dir1);
+	gradient.write_dir1((cellFaceValues.E-cellFaceValues.W)/deltaFactor.P_dir1);
+	gradient.write_dir2((cellFaceValues.N-cellFaceValues.S)/deltaFactor.P_dir2);
 
 	return gradient;
 }
@@ -53,13 +53,13 @@ double Operators2D::divergence(int i, int j,
 	scalarField=scalar.getLocalField(i,j);
 	vectorField=vector.getLocalField(i,j);
 
+	localField.P_dir2=scalarField.P*vectorField.P.get_dir2();
 	localField.P_dir1=scalarField.P*vectorField.P.get_dir1();
-	localField.P_dir0=scalarField.P*vectorField.P.get_dir0();
 	
-	localField.N=scalarField.N*vectorField.N.get_dir1();
-	localField.S=scalarField.S*vectorField.S.get_dir1();
-	localField.E=scalarField.E*vectorField.E.get_dir0();
-	localField.W=scalarField.W*vectorField.W.get_dir0();
+	localField.N=scalarField.N*vectorField.N.get_dir2();
+	localField.S=scalarField.S*vectorField.S.get_dir2();
+	localField.E=scalarField.E*vectorField.E.get_dir1();
+	localField.W=scalarField.W*vectorField.W.get_dir1();
 	
 	return getDivergenceFromField(i,j,localField);
 }
@@ -88,12 +88,12 @@ Vector2D<double> Operators2D::divergence(int i, int j,
 	dyadField.E=scalar_field.E*(vec1_field.E*vec2_field.E);
 	dyadField.W=scalar_field.W*(vec1_field.W*vec2_field.W);
 
-	localField.P_dir0=dyadField.P.get_dir0();
 	localField.P_dir1=dyadField.P.get_dir1();
-	localField.N=dyadField.N.get_dir1();
-	localField.S=dyadField.S.get_dir1();
-	localField.E=dyadField.E.get_dir0();
-	localField.W=dyadField.W.get_dir0();
+	localField.P_dir2=dyadField.P.get_dir2();
+	localField.N=dyadField.N.get_dir2();
+	localField.S=dyadField.S.get_dir2();
+	localField.E=dyadField.E.get_dir1();
+	localField.W=dyadField.W.get_dir1();
 
 	return getDivergenceFromField(i,j, localField);
 }

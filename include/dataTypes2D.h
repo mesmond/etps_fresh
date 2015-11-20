@@ -33,51 +33,51 @@ using namespace std;
 //Point2D********************************************************************
 /*
  * Class: Point2D
- * Purpose: Store coordinates of a particular point in (dir0, dir1).
+ * Purpose: Store coordinates of a particular point in (dir1, dir2).
  *
- * Description: dir0 and dir1 correspond to x and y in cartesion, or r and z
- * 	in cylindrical coordinates.  dir0 is along the  horizontal
- * 	axis, and dir1 is along the vertical axis.
+ * Description: dir1 and dir2 correspond to x and y in cartesion, or r and z
+ * 	in cylindrical coordinates.  dir1 is along the  horizontal
+ * 	axis, and dir2 is along the vertical axis.
  */
 template <class type> class Point2D
 {
 	protected:
-	type dir0;
 	type dir1;
+	type dir2;
 
 	public:
-	explicit Point2D(type dir0=0, type dir1=0)
-		: dir0(dir0), dir1(dir1) {};
+	explicit Point2D(type dir1=0, type dir2=0)
+		: dir1(dir1), dir2(dir2) {};
 
-	inline void write_dir0(const type& value) { dir0=value; }
-	inline void write_dir1(const type& value)	{ dir1=value; }
-	inline type get_dir0() const { return dir0; }
+	inline void write_dir1(const type& value) { dir1=value; }
+	inline void write_dir2(const type& value)	{ dir2=value; }
 	inline type get_dir1() const { return dir1; }
+	inline type get_dir2() const { return dir2; }
 };
 
 //Define Operators***********************************************************
 template <typename T> ostream& operator<<(ostream& os, Point2D<T> point)
 {
-	os << "(" << point.get_dir0() << "," << point.get_dir1() << ")";
+	os << "(" << point.get_dir1() << "," << point.get_dir2() << ")";
 	return os;
 }
 
 template <typename T> Point2D<T> operator-(const Point2D<T>& p1, const Point2D<T>& p2)
 {
-	return Point2D<T>(	p1.get_dir0() - p2.get_dir0(),
-						p1.get_dir1() - p2.get_dir1() 	);
+	return Point2D<T>(	p1.get_dir1() - p2.get_dir1(),
+						p1.get_dir2() - p2.get_dir2() 	);
 }
 
 template <typename T> Point2D<T> operator+(const Point2D<T>& p1, const Point2D<T>& p2)
 {
-	return Point2D<T>(	p1.get_dir0() + p2.get_dir0(),
-						p1.get_dir1() + p2.get_dir1() 	);
+	return Point2D<T>(	p1.get_dir1() + p2.get_dir1(),
+						p1.get_dir2() + p2.get_dir2() 	);
 }
 
 template <typename T> Point2D<T> operator*(const Point2D<T>& point, const T& value)
 {
-	return Point2D<T>(	point.get_dir0() * value,
-						point.get_dir1() * value 	);
+	return Point2D<T>(	point.get_dir1() * value,
+						point.get_dir2() * value 	);
 }
 
 template <typename T> Point2D<T> operator*(const T& value, const Point2D<T>& point)
@@ -108,19 +108,19 @@ template <typename T> Point2D<T> operator*(const T& value, const Point2D<T>& poi
 template <class type> class Vector2D : public Point2D<type>
 {
 	public:
-	explicit Vector2D(type dir0=0, type dir1=0)
-		: Point2D<type>(dir0, dir1) {};
+	explicit Vector2D(type dir1=0, type dir2=0)
+		: Point2D<type>(dir1, dir2) {};
 
 	inline type get_magnitude() const
-		{ return sqrt(pow(this->get_dir0(),2.0)+pow(this->get_dir1(),2.0)); }
+		{ return sqrt(pow(this->get_dir1(),2.0)+pow(this->get_dir2(),2.0)); }
 };
 
 
 //Define Operators***********************************************************
 template <typename T> Vector2D<T> operator*(const Vector2D<T>& vector, const T& value)
 {
-	return Vector2D<T>(	vector.get_dir0() * value,
-						vector.get_dir1() * value 	);
+	return Vector2D<T>(	vector.get_dir1() * value,
+						vector.get_dir2() * value 	);
 }
 
 template <typename T> Vector2D<T> operator*(const T& value, const Vector2D<T>& vector)
@@ -130,21 +130,21 @@ template <typename T> Vector2D<T> operator*(const T& value, const Vector2D<T>& v
 
 template <typename T> Vector2D<T> operator-(const Vector2D<T>& v1, const Vector2D<T>& v2)
 {
-	return Vector2D<T>(	v1.get_dir0() - v2.get_dir0(),
-						v1.get_dir1() - v2.get_dir1() 	);
+	return Vector2D<T>(	v1.get_dir1() - v2.get_dir1(),
+						v1.get_dir2() - v2.get_dir2() 	);
 }
 
 template <typename T> Vector2D<T> operator+(const Vector2D<T>& v1, const Vector2D<T>& v2)
 {
-	return Vector2D<T>(	v1.get_dir0() + v2.get_dir0(),
-						v1.get_dir1() + v2.get_dir1() 	);
+	return Vector2D<T>(	v1.get_dir1() + v2.get_dir1(),
+						v1.get_dir2() + v2.get_dir2() 	);
 }
 
 
 template <typename T> T dotProduct(const Vector2D<T>& vec1, const Vector2D<T>& vec2)
 {
-	T product0=vec1.get_dir0()*vec2.get_dir0();
-	T product1=vec1.get_dir1()*vec2.get_dir1();
+	T product0=vec1.get_dir1()*vec2.get_dir1();
+	T product1=vec1.get_dir2()*vec2.get_dir2();
 	return product0+product1;
 }
 
@@ -199,22 +199,22 @@ class Dyad2D
 	friend Dyad2D operator*(const double& scalar, const Dyad2D& dyad);
 
 	/*
-	 * Function: get_dir0()
+	 * Function: get_dir1()
 	 * Purpose: Returns the portion of the Dyad realated to the
 	 * 	primary direction (i.e. x in (x,y), r in (r,z)).
 	 *
 	 * Description: If the multiplication of the vectors is assumed to
-	 * 	u*v where u and v are 2D vectors, get_dir0() of the resulting
+	 * 	u*v where u and v are 2D vectors, get_dir1() of the resulting
 	 * 	dyad provides the "amount" the zeroth component of
-	 * 	vector v carried by vector u.  Similarly, get_dir1()
+	 * 	vector v carried by vector u.  Similarly, get_dir2()
 	 * 	returns the "amount" amount of the first component of
 	 * 	vector v carried by vector u.
 	 * 	
 	 */
-	Vector2D<double> get_dir0() const
+	Vector2D<double> get_dir1() const
 		{ return Vector2D<double>(value_00, value_10); }
 
-	Vector2D<double> get_dir1() const
+	Vector2D<double> get_dir2() const
 		{ return Vector2D<double>(value_01, value_11); }
 };
 
@@ -241,18 +241,18 @@ Dyad2D operator*(const double& scalar, const Dyad2D& dyad);
  * 	information relevant to a particular cell.
  *
  * Description: North, South, East, and West are determined according to
- * 	the convention that dir0 (x or r) points to the East, while
- * 	dir1 (y or z) points to the North.
+ * 	the convention that dir1 (x or r) points to the East, while
+ * 	dir2 (y or z) points to the North.
  * 	The P stands for Point and is a placeholder for values at the cell
- * 	center. The directions dir0 and dir1 are included for the P placeholder
+ * 	center. The directions dir1 and dir2 are included for the P placeholder
  * 	so that fluxes in these directions can be stored and used.
  */
 template <class type> class StructuredLocalField2D
 {
 	public:
 	type P;
-	type P_dir0;
 	type P_dir1;
+	type P_dir2;
 	type N;
 	type S;
 	type E;
@@ -291,23 +291,23 @@ template <class type> class SpacialArray2D
 {
 	private:
 	Vector2D<int> size;
-	size_t length;
-	size_t width;
+	int numElements;
+	int maxHeight;
 	type *array;
 
 	void init(Vector2D<int> size_to_init)
 	{
 		size=size_to_init;
-		length=(size.get_dir0()+2)*(size.get_dir0()+2);
+		numElements=(size.get_dir1()+2)*(size.get_dir2()+2);
 			//Add extra slots for bdy cells
-		width=size.get_dir0()+2;
+		maxHeight=size.get_dir2()+2;
 	}
 
-	void reset()
+	void reset()	
 	{
 		size=Vector2D<int>(0,0);
-		length=0;
-		width=0;
+		numElements=0;
+		maxHeight=0;
 	}
 	
 
@@ -319,13 +319,13 @@ template <class type> class SpacialArray2D
 	SpacialArray2D<type> operator=(const SpacialArray2D<type>& rhs); //Copy Assign
 	~SpacialArray2D(); //Destructor
 
-	inline type get(int i, int j) const { return array[i*width+j]; }
+	inline type get(int i, int j) const { return array[i*maxHeight+j]; }
 	inline Vector2D<int> getSize() const { return size; }
-	inline int getSize_dir0() const { return size.get_dir0(); }
 	inline int getSize_dir1() const { return size.get_dir1(); }
-	inline int getCount_dir0() const { return size.get_dir0(); }
+	inline int getSize_dir2() const { return size.get_dir2(); }
 	inline int getCount_dir1() const { return size.get_dir1(); }
-	inline void write(int i, int j, const type& value) { array[i*width+j]=value; }
+	inline int getCount_dir2() const { return size.get_dir2(); }
+	inline void write(int i, int j, const type& value) { array[i*maxHeight+j]=value; }
 
 	void print() const;
 	void fill(const type& value);
@@ -340,10 +340,9 @@ template <typename T> SpacialArray2D<T> operator*(
 {
 	SpacialArray2D<T> result=array;
 
-	for (int i=0; i<=result.getCount_dir0()+1; ++i)
-	for (int j=0; j<=result.getCount_dir1()+1; ++j)
+	for (int i=0; i<=result.getCount_dir1()+1; ++i)
+	for (int j=0; j<=result.getCount_dir2()+1; ++j)
 	{
-		//~ cout << "Loop: i=" << i << ", j=" << j << endl;
 		result.write(i,j, array.get(i,j)*scalar);
 	}
 	return result;
@@ -386,8 +385,8 @@ class StructuredGeometry2D
 
 	struct MeshSpacing
 	{
-		double *dir0;
 		double *dir1;
+		double *dir2;
 	} zoneDelta, globalCoord;
 
 	double minMeshSpacing;
@@ -397,7 +396,7 @@ class StructuredGeometry2D
 		Point2D<double> origin=Point2D<double>(0.0,0.0),
 		Point2D<double> extent=Point2D<double>(1.0,1.0),
 		Vector2D<int> size=Vector2D<int>(10,10),
-		double refineMesh_dir0=1.0, double refineMesh_dir1=1.0); // Con
+		double refineMesh_dir1=1.0, double refineMesh_dir2=1.0); // Con
 	StructuredGeometry2D(const StructuredGeometry2D& that); // Copy Con
 	StructuredGeometry2D(StructuredGeometry2D&& other) = delete; //Move Con
 	StructuredGeometry2D& operator=(StructuredGeometry2D&& other) = delete; //Move Assign
@@ -425,14 +424,14 @@ class StructuredGeometry2D
 
 	//Get Information********************************************************
 	inline double get_zoneDelta_north() const
-		{ return zoneDelta.dir1[numZones.get_dir1()]; }
+		{ return zoneDelta.dir2[numZones.get_dir2()]; }
 	inline double get_zoneDelta_south() const
-		{ return zoneDelta.dir1[1]; }
+		{ return zoneDelta.dir2[1]; }
 	inline double get_zoneDelta_east() const
-		{ return zoneDelta.dir0[numZones.get_dir0()]; }
-	inline double get_zoneDelta_west() const { return zoneDelta.dir0[1]; }
-	inline int getCount_dir0() const { return numZones.get_dir0(); }
+		{ return zoneDelta.dir1[numZones.get_dir1()]; }
+	inline double get_zoneDelta_west() const { return zoneDelta.dir1[1]; }
 	inline int getCount_dir1() const { return numZones.get_dir1(); }
+	inline int getCount_dir2() const { return numZones.get_dir2(); }
 	inline Point2D<double> get_origin() const { return origin; }
 	inline Point2D<double> get_extent() const { return extent; }
 

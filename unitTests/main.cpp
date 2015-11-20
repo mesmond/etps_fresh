@@ -30,14 +30,21 @@
 using namespace std;
 
 
-
-void test_SpacialArray2D();
+void test_Point2D_Vector2D();
 void test_Dyad2D();
+void test_SpacialArray2D();
+void test_StructuredGeometry2D();
+void test_PerfectGas2D();
 
 int main(int argc, char *argv[])
 {
-	//~ test_SpacialArray2D();
-	//~ return 0;
+	test_Point2D_Vector2D();
+	test_Dyad2D();
+	test_SpacialArray2D();
+	test_StructuredGeometry2D();
+	test_PerfectGas2D();
+	
+	return 0;
 	cout << "************************************" << endl;
 	cout << "Testing Operators2D ..." << endl;
 
@@ -51,8 +58,8 @@ int main(int argc, char *argv[])
 		size);
 
 	//Write Pressure
-	for (int i=1; i<=pressure.getCount_dir0(); ++i)
-	for (int j=1; j<=pressure.getCount_dir1(); ++j)
+	for (int i=1; i<=pressure.getCount_dir1(); ++i)
+	for (int j=1; j<=pressure.getCount_dir2(); ++j)
 	{
 		pressure.write(i,j, i*j);
 	}
@@ -60,14 +67,14 @@ int main(int argc, char *argv[])
 	pressure.set_adiabaticBdyValues();
 
 	//Compute Gradient
-	for (int i=1; i<=pressure.getCount_dir0(); ++i)
-	for (int j=1; j<=pressure.getCount_dir1(); ++j)
+	for (int i=1; i<=pressure.getCount_dir1(); ++i)
+	for (int j=1; j<=pressure.getCount_dir2(); ++j)
 	{
 		gradP.write( i,j, operate.gradient(i,j, pressure) );
 	}
 
-	for (int i=1; i<=pressure.getCount_dir0(); ++i)
-	for (int j=1; j<=pressure.getCount_dir1(); ++j)
+	for (int i=1; i<=pressure.getCount_dir1(); ++i)
+	for (int j=1; j<=pressure.getCount_dir2(); ++j)
 	{
 		divergence.write( i,j, operate.divergence(i,j, pressure, gradP) );
 	}
@@ -84,11 +91,11 @@ int main(int argc, char *argv[])
 	cout << "div2(scalar,vector,vector)=" << div2 << endl;
 
 	assert( isEqual(div1, 55.8) );
-	assert( isEqual(div2.get_dir0(), 826.2) );
-	assert( isEqual(div2.get_dir1(), 1177.2) );
+	assert( isEqual(div2.get_dir1(), 826.2) );
+	assert( isEqual(div2.get_dir2(), 1177.2) );
 	
-	assert( isEqual(grad.get_dir0(), 3.0) );
-	assert( isEqual(grad.get_dir1(), 6.0) );
+	assert( isEqual(grad.get_dir1(), 3.0) );
+	assert( isEqual(grad.get_dir2(), 6.0) );
 	
 
 }
@@ -97,21 +104,43 @@ void test_PerfectGas2D()
 {
 	cout << "************************************" << endl;
 	cout << "Testing PerfectGas2D ..." << endl;
-	PerfectGas2D air(Vector2D<int>(15,30));
 
-	double air_temperature=20;	//deg C
-	air.fill_temperature(air_temperature+273.15);	//K
-	air.fill_pressure(101325.0);					//Pa
-	air.fill_velocity(Vector2D<double>(0.0,0.0));	//m/s
-	air.init_fromBasicProps();
+	//Test for a memory Leak.
+	int i=0;
+	while (i < 100)
+	{
+		PerfectGas2D air(Vector2D<int>(99,100));
+
+		double air_temperature=20.0;	//deg C
+		air.fill_temperature(air_temperature+273.15);	//K
+		air.fill_pressure(101325.0);					//Pa
+		air.fill_velocity(Vector2D<double>(0.0,0.0));	//m/s
+
+		//~ air.print_temperature();	//K
+
+		i++;
+	}
+
+	//~ if (0==0)
+	//~ {
+		//~ PerfectGas2D air(Vector2D<int>(15,30));
+//~ 
+		//~ double air_temperature=20.0;	//deg C
+		//~ air.fill_temperature(air_temperature+273.15);	//K
+		//~ air.fill_pressure(101325.0);					//Pa
+		//~ air.fill_velocity(Vector2D<double>(0.0,0.0));	//m/s
+//~ 
+		//~ cout << "about to destroy!" << endl;
+	//~ }
+	//~ air.init_fromBasicProps();
 
 
 	
-	int soundSpeed=(int)air.getSoundSpeed(2,3);
-	cout << "soundSpeed=" << soundSpeed << endl;
-	cout << "thermalConductivity=" << air.getThermalConductivity(2,3) << endl;
-	
-	assert(soundSpeed == 343); // m/s
+	//~ int soundSpeed=(int)air.getSoundSpeed(2,3);
+	//~ cout << "soundSpeed=" << soundSpeed << endl;
+	//~ cout << "thermalConductivity=" << air.getThermalConductivity(2,3) << endl;
+	//~ 
+	//~ assert(soundSpeed == 343); // m/s
 	cout << "Done***************************************" << endl;
 }
 
@@ -135,24 +164,36 @@ void test_SpacialArray2D()
 	StructuredLocalField2D<Vector2D<double> > localField=velocity.getLocalField(2,1);
 	localField.print();	
 
-	assert( isEqual(velocity.get(2,2).get_dir0(), localField.N.get_dir0()) );
-	assert( isEqual(velocity.get(2,0).get_dir0(), localField.S.get_dir0()) );
-	assert( isEqual(velocity.get(3,1).get_dir0(), localField.E.get_dir0()) );
-	assert( isEqual(velocity.get(1,1).get_dir0(), localField.W.get_dir0()) );
+	assert( isEqual(velocity.get(2,2).get_dir1(), localField.N.get_dir1()) );
+	assert( isEqual(velocity.get(2,0).get_dir1(), localField.S.get_dir1()) );
+	assert( isEqual(velocity.get(3,1).get_dir1(), localField.E.get_dir1()) );
+	assert( isEqual(velocity.get(1,1).get_dir1(), localField.W.get_dir1()) );
 
 
 	//Test Assignment********************************************************
 	SpacialArray2D<Vector2D<double> > testVec(size);
 	double scalar=3.0;
 
+
+
 	testVec=velocity*scalar;
 
+	//~ cout << "print (velocity*scalar)..." << endl;
+	//~ (velocity*scalar).print();
+//~ 
+	//~ cout << "print testVec..." << endl;
+	//~ testVec.print();
 
-	for (int i=0; i<=testVec.getCount_dir0()+1; ++i)
-		for (int j=0; j<=testVec.getCount_dir1()+1; ++j)
+	for (int i=0; i<=testVec.getCount_dir1()+1; ++i)
+		for (int j=0; j<=testVec.getCount_dir2()+1; ++j)
 		{
-			assert( isEqual( testVec.get(i,j).get_dir0() ,
-				velocity.get(i,j).get_dir0()*scalar) );
+			//~ double value1=testVec.get(i,j).get_dir1();
+			//~ double value2=velocity.get(i,j).get_dir1()*scalar;
+			
+			//~ cout << "Checking stuff, i=" << i << ", j=" << j;
+			//~ cout << ", value1=" << value1 << ", value2=" << value2 << endl;
+			assert( isEqual( testVec.get(i,j).get_dir1() ,
+				velocity.get(i,j).get_dir1()*scalar) );
 		}
 
 
@@ -184,8 +225,8 @@ void test_Point2D_Vector2D()
 	cout << "scale=" << scale << endl;
 	cout << "vec*scale=" << vec	*scale << endl;
 	cout << "point*scale=" << point*scale << endl;
+	assert( isEqual(point2.get_dir2(), vec.get_dir2()*scale) );
 	assert( isEqual(point2.get_dir1(), vec.get_dir1()*scale) );
-	assert( isEqual(point2.get_dir0(), vec.get_dir0()*scale) );
 
 
 	cout << "------------------------------------" << endl;
@@ -195,8 +236,8 @@ void test_Point2D_Vector2D()
 	cout << "vec=vec2:" << endl;
 	cout << "vec =" << vec << endl;
 	cout << "vec2=" << vec2 << endl;
+	assert( isEqual(vec.get_dir2(), vec2.get_dir2()) );
 	assert( isEqual(vec.get_dir1(), vec2.get_dir1()) );
-	assert( isEqual(vec.get_dir0(), vec2.get_dir0()) );
 
 	cout << "------------------------------------" << endl;
 	cout << "Vector Magnitude--------------------" << endl;
@@ -247,12 +288,12 @@ void test_Dyad2D()
 	dyad=scalar*dyad;
 	cout << "dyad=scalar*dyad : dyad=" << dyad << endl;
 
-	cout << "dyad.get_dir0()=" << dyad.get_dir0() << endl;
 	cout << "dyad.get_dir1()=" << dyad.get_dir1() << endl;
+	cout << "dyad.get_dir2()=" << dyad.get_dir2() << endl;
 
 
-	assert( isEqual(dyad.get_dir1().get_dir0(),
-		vec.get_dir0()*vec2.get_dir1()*scalar));
+	assert( isEqual(dyad.get_dir2().get_dir1(),
+		vec.get_dir1()*vec2.get_dir2()*scalar));
 }
 
 
@@ -285,4 +326,7 @@ void test_StructuredGeometry2D()
 
 	block_north.link_east(block_east);
 	block_east.link_west(block_north);
+
+
+	cout << "Done***************************************" << endl;
 }
