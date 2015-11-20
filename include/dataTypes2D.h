@@ -112,11 +112,7 @@ template <class type> class Vector2D : public Point2D<type>
 		: Point2D<type>(dir0, dir1) {};
 
 	inline type get_magnitude() const
-	{
-		return sqrt(
-			 pow(this->get_dir0(),2.0)
-			+pow(this->get_dir1(),2.0));
-	}
+		{ return sqrt(pow(this->get_dir0(),2.0)+pow(this->get_dir1(),2.0)); }
 };
 
 
@@ -149,7 +145,6 @@ template <typename T> T dotProduct(const Vector2D<T>& vec1, const Vector2D<T>& v
 {
 	T product0=vec1.get_dir0()*vec2.get_dir0();
 	T product1=vec1.get_dir1()*vec2.get_dir1();
-
 	return product0+product1;
 }
 
@@ -173,6 +168,14 @@ template <typename T> T dotProduct(const Vector2D<T>& vec1, const Vector2D<T>& v
  * Description: This class stores and processes Dyad objects in 2D.  Only a
  * 	double type is allowed for its members.  When two vectors are multiplied
  * 	together, the result will be a Dyad2D as in normal mathematics.
+ *
+ * The Dyad in 2D is a 2x2 matrix.  It is output from
+ * 	the dyadic product of two vectors.  Each element of a
+ * 	dyad is a multiplicative arrangment of the two components of the
+ * 	vectors of interest.  In this implementation, value_01 is the
+ * 	product of of the zeroth component of the first vector in the
+ * 	multiplication and the first component of the second vector in the
+ * 	multiplication.
  */
 class Dyad2D
 {
@@ -200,27 +203,19 @@ class Dyad2D
 	 * Purpose: Returns the portion of the Dyad realated to the
 	 * 	primary direction (i.e. x in (x,y), r in (r,z)).
 	 *
-	 * Description: The Dyad in 2D is a 2x2 matrix.
+	 * Description: If the multiplication of the vectors is assumed to
+	 * 	u*v where u and v are 2D vectors, get_dir0() of the resulting
+	 * 	dyad provides the "amount" the zeroth component of
+	 * 	vector v carried by vector u.  Similarly, get_dir1()
+	 * 	returns the "amount" amount of the first component of
+	 * 	vector v carried by vector u.
+	 * 	
 	 */
 	Vector2D<double> get_dir0() const
-	{
-		Vector2D<double> result;
-
-		result.write_dir0(value_00);
-		result.write_dir1(value_10);
-
-		return result;
-	}
+		{ return Vector2D<double>(value_00, value_10); }
 
 	Vector2D<double> get_dir1() const
-	{
-		Vector2D<double> result;
-
-		result.write_dir0(value_01);
-		result.write_dir1(value_11);
-
-		return result;
-	}
+		{ return Vector2D<double>(value_01, value_11); }
 };
 
 ostream& operator<<(ostream& os, const Dyad2D vector);

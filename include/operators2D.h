@@ -32,9 +32,9 @@ class Operators2D : public StructuredGeometry2D
 	double getVolume(int i, int j) const
 	{
 		return 2.0*c_pi
-			*this->getPoint(i,j).get_dir0()
-			*this->getMeshDelta(i,j).get_dir0()
-			*this->getMeshDelta(i,j).get_dir1();
+			*getPoint(i,j).get_dir0()
+			*getMeshDelta(i,j).get_dir0()
+			*getMeshDelta(i,j).get_dir1();
 	}
 
 	StructuredLocalField2D<double> getCellAreas(int i, int j) const
@@ -42,17 +42,17 @@ class Operators2D : public StructuredGeometry2D
 		StructuredLocalField2D<double> area;
 
 		area.N=2.0*c_pi
-			*this->getPoint(i,j).get_dir0()
-			*this->getMeshDelta(i,j).get_dir0();
+			*getPoint(i,j).get_dir0()
+			*getMeshDelta(i,j).get_dir0();
 		area.S=area.N;
 		area.E=2.0*c_pi
-			*(this->getPoint(i,j).get_dir0()
-				+0.5*this->getMeshDelta(i,j).get_dir0())
-			*this->getMeshDelta(i,j).get_dir1();
+			*(getPoint(i,j).get_dir0()
+				+0.5*getMeshDelta(i,j).get_dir0())
+			*getMeshDelta(i,j).get_dir1();
 		area.W=2.0*c_pi
-			*(this->getPoint(i,j).get_dir0()
-				-0.5*this->getMeshDelta(i,j).get_dir0())
-			*this->getMeshDelta(i,j).get_dir1();
+			*(getPoint(i,j).get_dir0()
+				-0.5*getMeshDelta(i,j).get_dir0())
+			*getMeshDelta(i,j).get_dir1();
 
 		return area;
 	}

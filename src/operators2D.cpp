@@ -37,17 +37,6 @@ Vector2D<double> Operators2D::gradient(int i, int j, const SpacialArray2D<double
 	gradient.write_dir0((cellFaceValues.E-cellFaceValues.W)/deltaFactor.P_dir0);
 	gradient.write_dir1((cellFaceValues.N-cellFaceValues.S)/deltaFactor.P_dir1);
 
-
-	cout << "Gradient********************************" << endl;
-	cout << "localField:" << endl;
-	localField.print();
-	
-	cout << "cellFaces:" << endl;
-	cellFaceValues.print();
-
-	cout << "gradient=" << gradient << endl;
-	
-
 	return gradient;
 }
 
@@ -71,19 +60,6 @@ double Operators2D::divergence(int i, int j,
 	localField.S=scalarField.S*vectorField.S.get_dir1();
 	localField.E=scalarField.E*vectorField.E.get_dir0();
 	localField.W=scalarField.W*vectorField.W.get_dir0();
-
-
-
-	cout << "Divergence (scalar*vector)****************" << endl;
-	cout << "scalar:" << endl;
-	scalarField.print();
-	cout << "vector" << endl;
-	vectorField.print();
-	cout << "divergence=" << getDivergenceFromField(i,j,localField) << endl;
-
-
-
-
 	
 	return getDivergenceFromField(i,j,localField);
 }
@@ -118,21 +94,6 @@ Vector2D<double> Operators2D::divergence(int i, int j,
 	localField.S=dyadField.S.get_dir1();
 	localField.E=dyadField.E.get_dir0();
 	localField.W=dyadField.W.get_dir0();
-
-	cout << "scalarField:" << endl;
-	scalar_field.print();
-	cout << "vec1_field:" << endl;
-	vec1_field.print();
-	cout << "vec2_field:" << endl;
-	vec2_field.print();
-
-	cout << "dyad Field:" << endl;
-	dyadField.print();
-	
-	//~ localField.print();
-	//~ cout << "localField.P=" << localField.P << endl; 
-
-	cout << "divergence=" << getDivergenceFromField(i,j, localField) << endl;
 
 	return getDivergenceFromField(i,j, localField);
 }

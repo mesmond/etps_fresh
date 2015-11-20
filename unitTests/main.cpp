@@ -39,10 +39,9 @@ int main(int argc, char *argv[])
 	//~ test_SpacialArray2D();
 	//~ return 0;
 	cout << "************************************" << endl;
-	cout << "Testing Operators2D_cyl ..." << endl;
+	cout << "Testing Operators2D ..." << endl;
 
-	Vector2D<int> size(10,10);
-
+	Vector2D<int> size(10,10); //Do not change
 	SpacialArray2D<double> pressure(size);
 	SpacialArray2D<double> divergence(size);
 	SpacialArray2D<Vector2D<double> > gradP(size);
@@ -50,9 +49,6 @@ int main(int argc, char *argv[])
 		Point2D<double>(0.0,0.0),
 		Point2D<double>(10.0,5.0),
 		size);
-
-	cout << "Geometry:" << endl;
-	operate.print();
 
 	//Write Pressure
 	for (int i=1; i<=pressure.getCount_dir0(); ++i)
@@ -76,14 +72,24 @@ int main(int argc, char *argv[])
 		divergence.write( i,j, operate.divergence(i,j, pressure, gradP) );
 	}
 
-	//~ pressure.print();
-
 	operate.vtkOutput(pressure, gradP, divergence);
 	
 	int i=3, j=3;
+	Vector2D<double> grad=operate.gradient(i,j, pressure);
+	double div1=operate.divergence(i,j, pressure, gradP);
+	Vector2D<double> div2=operate.divergence(i,j, pressure, gradP, gradP*3.0);
 
-	operate.gradient(i,j, pressure);
-	operate.divergence(i,j, pressure, gradP, gradP*3.0);
+	cout << "grad                      =" << grad << endl;
+	cout << "div1(scalar,vector)       =" << div1 << endl;
+	cout << "div2(scalar,vector,vector)=" << div2 << endl;
+
+	assert( isEqual(div1, 55.8) );
+	assert( isEqual(div2.get_dir0(), 826.2) );
+	assert( isEqual(div2.get_dir1(), 1177.2) );
+	
+	assert( isEqual(grad.get_dir0(), 3.0) );
+	assert( isEqual(grad.get_dir1(), 6.0) );
+	
 
 }
 
