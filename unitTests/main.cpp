@@ -35,6 +35,7 @@ void test_Dyad2D();
 void test_SpacialArray2D();
 void test_StructuredGeometry2D();
 void test_PerfectGas2D();
+void test_Operators2D_cyl();
 
 int main(int argc, char *argv[])
 {
@@ -43,9 +44,59 @@ int main(int argc, char *argv[])
 	//~ test_SpacialArray2D();
 	//~ test_StructuredGeometry2D();
 	//~ test_PerfectGas2D();
-	//~ 
+	//~ test_Operators2D_cyl();
 	//~ return 0;
+
+	Vector2D<int> size(10,10);
+	Point2D<double> origin(0.0,0.0);
+	Point2D<double> extent(10.0,5.0);
+	Operators2D_cyl cylindrical(
+		origin,
+		extent,
+		size);
+
+	Operators2D_rec rectangular(
+		origin,
+		extent,
+		size);
+
+	Operators2D* operate;
+
+	operate=&cylindrical;
+	cout << "operate(cyl)=" << operate << endl;
+	operate=&rectangular;
+	cout << "operate(rec)=" << operate << endl;
+
+
+	int i=2, j=3;
+	operate=&cylindrical;
+	cout << "operate->getVolume(" << i << "," << j << ") (cyl)=" <<
+		operate->getVolume(i,j) << endl;
+
+	operate=&rectangular;
+	cout << "operate->getVolume(" << i << "," << j << ") (rec)=" <<
+		operate->getVolume(i,j) << endl;
+
+
+	//~ operate=&cylindrical;
+	//~ 
+	//~ Euler2D euler(operate);
+//~ 
+	//~ PerfectGas2D air(;
+//~ 
+	//~ air.euler.get_continuity_rhs()
+	//~ air.euler.get_continuity_rhs()
+	//~ air.euler.get_continuity_rhs()
+	//~ 
 	
+
+	
+
+
+}
+
+void test_Operators2D_cyl()
+{
 	cout << "************************************" << endl;
 	cout << "Testing Operators2D_cyl ..." << endl;
 
@@ -100,9 +151,11 @@ int main(int argc, char *argv[])
 
 	cout << "Done**************************************" << endl;
 	cout << "******************************************" << endl;
-	
-
 }
+
+
+
+
 
 void test_PerfectGas2D()
 {

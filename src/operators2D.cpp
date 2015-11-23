@@ -133,4 +133,25 @@ StructuredLocalField2D<double> Operators2D_cyl::getCellAreas(int i, int j) const
 	return area;
 }
 
+//***************************************************************************
+//***************************************************************************
+//***************************************************************************
+//Operators2D_rec************************************************************
+double Operators2D_rec::getVolume(int i, int j) const
+{
+	double unitWidth=1.0;
+	return unitWidth
+		*getMeshDelta(i,j).get_dir1()*getMeshDelta(i,j).get_dir2();
+}
 
+StructuredLocalField2D<double> Operators2D_rec::getCellAreas(int i, int j) const
+{
+	double unitWidth=1.0;
+	StructuredLocalField2D<double> area;
+	area.N=unitWidth*getMeshDelta(i,j).get_dir1();
+	area.S=area.N;
+	area.E=unitWidth*getMeshDelta(i,j).get_dir2();
+	area.W=area.E;
+
+	return area;
+}

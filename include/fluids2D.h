@@ -14,6 +14,7 @@
 #include <iostream>
 
 #include "dataTypes2D.h"
+#include "operators2D.h"
 #include "simulationConstants.h"
 
 using namespace std;
@@ -104,65 +105,28 @@ class PerfectGas2D
 	inline void fill_velocity(const Vector2D<double>& vector) { velocity.fill(vector); }
 	inline void fill_pressure(const double& scalar) { pressure.fill(scalar); }
 
-	void init_fromBasicProps()
-	{
-		for (int i=0; i<=size.get_dir1()+1; ++i)
-		for (int j=0; j<=size.get_dir2()+1; ++j)
-		{
-			double localTemp=temperature.get(i,j); 	//units: K
-			double localPress=pressure.get(i,j);	//units: Pa
-			Vector2D<double> localVelocity=velocity.get(i,j);	//units: m/s
+	void init_fromBasicProps();
 
-
-			double localMolarDensity=localPress/(c_univGasConst*localTemp);
-				//units: mol/m^3
-
-			double localMassDensity=localMolarDensity*c_Avagadro*particleMass;
-				//units: kg/m^3
-				
-			Vector2D<double> localMomentum=localMassDensity*localVelocity;
-				//units: [kg/(m^2 s)]
-			
-			double localInternalEnergy=localMolarDensity*Cv_J_per_mol_K()
-				*localTemp; //units: J/m^3
-
-			double localKineticEnergy=0.5*localMassDensity
-				*pow(localVelocity.get_magnitude(), 2.0); //units: J/m^3
-
-			//Dependent Variables********************************************
-			molarDensity.write(i,j, localMolarDensity);
-			massDensity.write(i,j, localMassDensity);
-			momentum.write(i,j, localMomentum);
-			internalEnergy.write(i,j, localInternalEnergy);
-			totalEnergy.write(i,j, localInternalEnergy+localKineticEnergy);
-
-
-			//Right Hand Sides***********************************************
-			continuity_rhs.write(i,j, 0.0);
-			momentum_rhs.write(i,j, Vector2D<double>(0.0,0.0));
-			totalEnergy_rhs.write(i,j, 0.0);
-
-			//Properties*****************************************************
-			soundSpeed.write(i,j, getSoundSpeed(i,j));
-			thermalConductivity.write(i,j, getThermalConductivity(i,j));
-			thermalDiffusivity.write(i,j, getThermalDiffusivity(i,j));
-			dynamicViscosity.write(i,j, getDynamicViscosity(i,j));
-			kinematicViscosity.write(i,j, getKinematicViscosity(i,j));
-		}
-	}
+	//***********************************************************************
+	//Calculate Data*********************************************************
+	/*
+	 * Functions: calcPressure(), calcInternalEnergy()
+	 * Purpose: Calculate and return the specified value based on
+	 * 	other properties in the fluid.
+	 *
+	 * Description:
+	 * 	calcPressure() returns the pressure
+	 * 		as computed from the molar density and the temperature.
+	 * 	calcInternalEnergy() returns the internal fluid energy based on the
+	 * 		molar density and the temperature.
+	 *
+	 * 	Units are as shown by each function.
+	 */
+	double calcPressure(int i, int j) const; //units: Pa
+	double calcInternalEnergy(int i, int j) const; //units: J/m^3
 
 	//***********************************************************************
 	//Get Data***************************************************************
-	inline double getPressure(int i, int j) const //units: Pa
-	{
-		return molarDensity.get(i,j)*c_univGasConst*temperature.get(i,j);
-			//units: Pa
-	}
-	inline double getInternalEnergy(int i, int j) const //units: J/m^3
-	{
-		return molarDensity.get(i,j)*Cv_J_per_mol_K()*temperature.get(i,j);
-			//units: J/m^3
-	}
 	inline Vector2D<int> getSize() const { return size; }
 
 	//***********************************************************************
@@ -193,19 +157,14 @@ class PerfectGas2D
 
 	//***********************************************************************
 	//Collisions*************************************************************
-
 	/*
 	 * 	Function: collFreq()
 	 * 	Purpose: Return the self collision frequency for the fluid assuming
 	 * 		electrically neutral.
+	 *
+	 * 	Description: See Woods (1993) pg. 40.
 	 */
-	inline double collFreq(int i, int j) const
-	{
-		//Woods (1993) (pg. 40)
-		return 1.414213562*c_pi*molarDensity.get(i,j)*c_Avagadro
-			*thermalVelocity_avg(i,j)
-			*4.0*particleRadius*particleRadius; // units: 1/s
-	}
+	inline double collFreq(int i, int j) const; //units: 1/s
 
 
 	//***********************************************************************
@@ -215,64 +174,38 @@ class PerfectGas2D
 	 *	Purpose: Return the thermal conductivity based on
 	 * 		self collisions only and assuming electrically neutral.
 	 */
-	inline double getThermalConductivity(int i, int j) const
-	{
-		//See Bukowski (1996).
-		//See Woods (1993) pg. 64.
-		return (5.0/2.0)*molarDensity.get(i,j)*c_Avagadro
-			*c_k*c_k*temperature.get(i,j)
-			/(particleMass*collFreq(i,j)); //units: [W m^{-1} K{-1}]
-	}
+	double getThermalConductivity(int i, int j) const; //units: [W m^{-1} K{-1}]
 
 	/*
 	 * 	Function: getThermalDiffusivity()
 	 *	Purpose: Return the thermal diffusivity based on
 	 * 		the local thermal conductivity and density.
 	 */
-	inline double getThermalDiffusivity(int i, int j) const //units: m^2/s
-	{
-		return getThermalConductivity(i,j)
-			/(massDensity.get(i,j)*Cv_J_per_kg_K());
-			//units: m^2/s
-	}
+	double getThermalDiffusivity(int i, int j) const; //units: m^2/s
 
 	/*
 	 * 	Function: getDynamicViscosity()
 	 *	Purpose: Return the dynamic viscosity based on
 	 * 		the assumption of electrical neutrality.
+	 *
+	 * 	Description: See Woods (1993) pg. 50
 	 */
-	inline double getDynamicViscosity(int i, int j) const //units: [Pa s]
-	{
-		//See Woods (1993) pg. 50
-		return 1.4962*(2.0/3.0)
-			*(1.0/(c_pi*4.0*pow(particleRadius,2.0)))
-			*sqrt( particleMass*c_k*temperature.get(i,j)/c_pi);
-			//units: Pa s
-	}
+	double getDynamicViscosity(int i, int j) const; //units: [Pa s]
 
 	/*
 	 * 	Function: getKinematicViscosity()
 	 *	Purpose: Return the kinematic viscosity based on
 	 * 		the dynamic viscosity and the density.
 	 */
-	inline double getKinematicViscosity(int i, int j) const //units: [m^2/s]
-	{
-		//See Woods (1993) pg. 50
-		return getDynamicViscosity(i,j)
-			/(massDensity.get(i,j));
-			//units: [m^2/s]
-	}
+	double getKinematicViscosity(int i, int j) const; //units: [m^2/s]
 
 
 	/*
 	 * Function: getSoundSpeed()
 	 * Purpose: Return the local fluid sound speed.
 	 */
-	inline double getSoundSpeed(int i, int j) const
-	{
-		return sqrt(gamma*c_k*temperature.get(i,j)/particleMass);
-			// units: m/s
-	}
+	inline double getSoundSpeed(int i, int j) const //units: m/s
+		{ return sqrt(gamma*c_k*temperature.get(i,j)/particleMass); }
 	
 	/*
 	 * Function: Cv_J_per_kg_K()
@@ -280,9 +213,7 @@ class PerfectGas2D
 	 * 	Units are J/(kg K).
 	 */
 	inline double Cv_J_per_kg_K() const //units: J/(kg K)
-	{
-		return c_k/((gamma-1.0)*particleMass); //units: J/(kg K)
-	}
+		{ return c_k/((gamma-1.0)*particleMass); }
 
 	/*
 	 * Function: Cv_J_per_mol_K()
@@ -290,12 +221,28 @@ class PerfectGas2D
 	 * 	Units are J/(mol K).
 	 */
 	inline double Cv_J_per_mol_K() const //units: J/(mol K)
-	{
-		return c_univGasConst/(gamma-1.0); //units: J/(mol K)
-	}
+		{ return c_univGasConst/(gamma-1.0); }
 
 };
 
+class Euler2D
+{
+	public:
+	Operators2D* operate;
+	Euler2D(Operators2D* ptr)
+	{
+		operate=ptr;
+
+		cout << "operate->getVolume(i,j)=" << operate->getVolume(2,3) << endl;
+	}
+
+
+
+	double continuity_rhs(const PerfectGas2D& fluid)
+	{
+		return 0.0;
+	}
+};
 
 class ThreeComponentPlasma2D
 {

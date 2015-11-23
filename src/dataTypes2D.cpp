@@ -281,14 +281,15 @@ StructuredGeometry2D::StructuredGeometry2D(
 		Point2D<double> origin,
 		Point2D<double> extent,
 		Vector2D<int> size,
-		double refineMesh_dir1,
-		double refineMesh_dir2)
+		Vector2D<double> refineMesh)
 {
 	this->origin=origin;
 	this->extent=extent;
 
 	length.write_dir1(extent.get_dir1()-origin.get_dir1());
 	length.write_dir2(extent.get_dir2()-origin.get_dir2());
+
+	this->refineMesh=refineMesh;
 
 	assert(length.get_dir1() > 0.0);
 	assert(length.get_dir2() > 0.0);
@@ -309,7 +310,7 @@ StructuredGeometry2D::StructuredGeometry2D(
 	//Get origin mesh spacing.
 	double sum_dir1=0.0;
 	for (int i=0; i<numZones.get_dir1(); ++i)
-		sum_dir1+=pow(refineMesh_dir1, (double)i);
+		sum_dir1+=pow(refineMesh.get_dir1(), (double)i);
 
 	//Set mesh spacing values
 	//The ghost cells dimensions are set to the
@@ -319,13 +320,13 @@ StructuredGeometry2D::StructuredGeometry2D(
 	zoneDelta.dir1[0]=initialSpacing_dir1;
 	zoneDelta.dir1[1]=zoneDelta.dir1[0];
 	for (int i=2; i<=numZones.get_dir1(); ++i)
-		zoneDelta.dir1[i]=pow(refineMesh_dir1,i-1)*zoneDelta.dir1[1];
+		zoneDelta.dir1[i]=pow(refineMesh.get_dir1(),i-1)*zoneDelta.dir1[1];
 	zoneDelta.dir1[numZones.get_dir1()+1]=zoneDelta.dir1[numZones.get_dir1()];
 
 	//Get origin mesh spacing.
 	double sum_dir2=0.0;
 	for (int i=0; i<numZones.get_dir2(); ++i)
-		sum_dir2+=pow(refineMesh_dir2, (double)i);
+		sum_dir2+=pow(refineMesh.get_dir2(), (double)i);
 
 	//Set mesh spacing values
 	//The ghost cells dimensions are set to the
@@ -335,7 +336,7 @@ StructuredGeometry2D::StructuredGeometry2D(
 	zoneDelta.dir2[0]=initialSpacing_dir2;
 	zoneDelta.dir2[1]=zoneDelta.dir2[0];
 	for (int j=2; j<=numZones.get_dir2(); ++j)
-		zoneDelta.dir2[j]=pow(refineMesh_dir2,j-1)*zoneDelta.dir2[1];
+		zoneDelta.dir2[j]=pow(refineMesh.get_dir2(),j-1)*zoneDelta.dir2[1];
 	zoneDelta.dir2[numZones.get_dir2()+1]=zoneDelta.dir2[numZones.get_dir2()];
 
 	//Global Cell Coordinates************************************************

@@ -33,8 +33,8 @@ class Operators2D : public StructuredGeometry2D
 		Point2D<double> origin=Point2D<double>(0.0,0.0),
 		Point2D<double> extent=Point2D<double>(1.0,1.0),
 		Vector2D<int> size=Vector2D<int>(10,10),
-		double refineMesh_dir1=1.0, double refineMesh_dir2=1.0)
-		:	StructuredGeometry2D(origin, extent, size, refineMesh_dir1, refineMesh_dir2) {}
+		Vector2D<double> refineMesh=Vector2D<double>(1.0,1.0))
+		:	StructuredGeometry2D(origin, extent, size, refineMesh) {}
 
 	Vector2D<double> gradient(const int i, const int j,
 		const SpacialArray2D<double>& scalarField) const;
@@ -47,7 +47,7 @@ class Operators2D : public StructuredGeometry2D
 		const SpacialArray2D<Vector2D<double> >& vector2) const;
 
 
-	private:
+	public:
 	virtual double getVolume(int i, int j) const = 0;
 	virtual StructuredLocalField2D<double> getCellAreas(int i, int j) const = 0;
 
@@ -85,13 +85,32 @@ class Operators2D_cyl : public Operators2D
 		Point2D<double> origin=Point2D<double>(0.0,0.0),
 		Point2D<double> extent=Point2D<double>(1.0,1.0),
 		Vector2D<int> size=Vector2D<int>(10,10),
-		double refineMesh_dir1=1.0, double refineMesh_dir2=1.0)
-		:	Operators2D(origin, extent, size, refineMesh_dir1, refineMesh_dir2)
+		Vector2D<double> refineMesh=Vector2D<double>(1.0,1.0))
+		:	Operators2D(origin, extent, size, refineMesh)
 	{
-		cout << "Constructor: Operators2D" << endl;
+		cout << "Constructor: Operators2D_cyl" << endl;
 	}
 
-	private:
+	public:
+	double getVolume(int i, int j) const;
+	StructuredLocalField2D<double> getCellAreas(int i, int j) const;
+};
+
+
+class Operators2D_rec : public Operators2D
+{
+	public:
+	explicit Operators2D_rec(
+		Point2D<double> origin=Point2D<double>(0.0,0.0),
+		Point2D<double> extent=Point2D<double>(1.0,1.0),
+		Vector2D<int> size=Vector2D<int>(10,10),
+		Vector2D<double> refineMesh=Vector2D<double>(1.0,1.0))
+		:	Operators2D(origin, extent, size, refineMesh)
+	{
+		cout << "Constructor: Operators2D_rec" << endl;
+	}
+
+	public:
 	double getVolume(int i, int j) const;
 	StructuredLocalField2D<double> getCellAreas(int i, int j) const;
 };

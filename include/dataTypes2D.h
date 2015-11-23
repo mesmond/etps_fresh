@@ -22,7 +22,6 @@
 #include <stdlib.h>
 #include <iomanip>
 
-
 #include "mesmond-utils.h"
 
 using namespace std;
@@ -381,6 +380,8 @@ class StructuredGeometry2D
 	Point2D<double> extent;
 	Vector2D<double> length;
 
+	Vector2D<double> refineMesh;
+
 	Vector2D<int> numZones;
 
 	struct MeshSpacing
@@ -396,7 +397,7 @@ class StructuredGeometry2D
 		Point2D<double> origin=Point2D<double>(0.0,0.0),
 		Point2D<double> extent=Point2D<double>(1.0,1.0),
 		Vector2D<int> size=Vector2D<int>(10,10),
-		double refineMesh_dir1=1.0, double refineMesh_dir2=1.0); // Con
+		Vector2D<double> refineMesh=Vector2D<double>(1.0,1.0)); // Con
 	StructuredGeometry2D(const StructuredGeometry2D& that); // Copy Con
 	StructuredGeometry2D(StructuredGeometry2D&& other) = delete; //Move Con
 	StructuredGeometry2D& operator=(StructuredGeometry2D&& other) = delete; //Move Assign
