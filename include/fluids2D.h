@@ -12,7 +12,8 @@
 #define INCLUDE_FLUIDS2D_H_
 
 #include <iostream>
-#include <typeinfo>
+#include <string.h>
+//~ #include <typeinfo>
 
 #include "dataTypes2D.h"
 #include "operators2D.h"
@@ -63,6 +64,7 @@ class PerfectGas2D
 	public:
 	PerfectGas2D(
 		StructuredGeometry2D& geom,
+		const char* coordSys="rec",
 		double gamma=1.4,
 		double particleMass=28.97/(1000.0*c_Avagadro),
 		double particleRadius=65.0e-12)
@@ -90,11 +92,22 @@ class PerfectGas2D
 			particleMass(particleMass),
 			particleRadius(particleRadius)
 	{
-		cout << "Constructing PerfectGas2D with "
-			<< typeid(geom).name() << endl;
+		cout << "Constructing PerfectGas2D" << endl;
+		cout << "&geom=" << &geom << endl;
+		cout << "coordSys=" << coordSys << endl;
 
-		geometry=&geom;
+		if (strcmp(coordSys,"rec") == 0)
+			geometry = new StructuredGeometry2D(geom);
+		else if (strcmp(coordSys,"cyl") == 0)
+			geometry = new StructuredCylGeometry2D(geom);
+		else
+		{
+			cout << "Bad argument for coordSystem." << endl;
+			exit(1);
+		}
 	}
+	~PerfectGas2D();
+	
 
 
 

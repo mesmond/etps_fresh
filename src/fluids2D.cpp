@@ -9,6 +9,16 @@
 //***************************************************************************
 #include "fluids2D.h"
 
+
+
+PerfectGas2D::~PerfectGas2D()
+{
+	delete geometry;
+	geometry=nullptr;
+}
+
+
+
 //***************************************************************************
 //Fill Data******************************************************************
 void PerfectGas2D::init_fromBasicProps()
@@ -114,3 +124,5 @@ double PerfectGas2D::getKinematicViscosity(int i, int j) const //units: [m^2/s]
 		/(massDensity.get(i,j));
 		//units: [m^2/s]
 }
+
+

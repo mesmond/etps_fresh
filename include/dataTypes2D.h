@@ -403,7 +403,7 @@ class StructuredGeometry2D
 	StructuredGeometry2D(StructuredGeometry2D&& other) = delete; //Move Con
 	StructuredGeometry2D& operator=(StructuredGeometry2D&& other) = delete; //Move Assign
 	StructuredGeometry2D operator=(const StructuredGeometry2D& rhs) = delete; //Copy Assign
-	~StructuredGeometry2D(); // Deconstructor
+	virtual ~StructuredGeometry2D(); // Deconstructor
 
 	//Output*****************************************************************
 	void print() const;
@@ -481,6 +481,13 @@ class StructuredCylGeometry2D : public StructuredGeometry2D
 		Vector2D<int> size=Vector2D<int>(10,10),
 		Vector2D<double> refineMesh=Vector2D<double>(1.0,1.0)) 
 		:	StructuredGeometry2D(origin, extent, size, refineMesh) {} // Con
+
+	StructuredCylGeometry2D(const StructuredCylGeometry2D& that)
+		:	StructuredGeometry2D(that) {}
+
+	StructuredCylGeometry2D(const StructuredGeometry2D& that)
+		:	StructuredGeometry2D(that) {}
+
 	//Coordinate System Specific Functions.
 	double getVolume(int i, int j) const;
 	StructuredLocalField2D<double> getCellAreas(int i, int j) const;

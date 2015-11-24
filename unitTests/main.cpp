@@ -169,20 +169,23 @@ void test_PerfectGas2D()
 	StructuredGeometry2D geom(origin, extent, size);
 
 	//Test for a memory Leak.
-	//~ int i=0;
-	//~ while (i < 100)
-	//~ {
-		//~ PerfectGas2D air(geom);
-//~ 
-		//~ double air_temperature=20.0;	//deg C
-		//~ air.fill_temperature(air_temperature+273.15);	//K
-		//~ air.fill_pressure(101325.0);					//Pa
-		//~ air.fill_velocity(Vector2D<double>(0.0,0.0));	//m/s
-//~ 
-		//~ //air.print_temperature();	//K
-//~ 
-		//~ i++;
-	//~ }
+	int i=0;
+
+
+	
+	while (i < 10)
+	{
+		PerfectGas2D air(geom, "cyl");
+
+		double air_temperature=20.0;	//deg C
+		air.fill_temperature(air_temperature+273.15);	//K
+		air.fill_pressure(101325.0);					//Pa
+		air.fill_velocity(Vector2D<double>(0.0,0.0));	//m/s
+
+		//air.print_temperature();	//K
+
+		i++;
+	}
 
 
 	PerfectGas2D air(geom);
@@ -207,13 +210,13 @@ void test_PerfectGas2D()
 
 	//Different Fluid.
 
-	int i=2;
+	i=2;
 	int j=3;
 	origin=Point2D<double>(0.0,0.0);
 	extent=Point2D<double>(1.0,1.0);
 	size=Vector2D<int>(4,4);
 	StructuredCylGeometry2D geom_cyl(origin, extent, size);
-	PerfectGas2D air_cyl(geom_cyl);
+	PerfectGas2D air_cyl(geom_cyl, "cyl");
 
 	StructuredGeometry2D geom_rec(origin, extent, size);
 	PerfectGas2D air_rec(geom_rec);
