@@ -23,6 +23,7 @@
 #include <iomanip>
 
 #include "mesmond-utils.h"
+#include "simulationConstants.h"
 
 using namespace std;
 
@@ -433,12 +434,17 @@ class StructuredGeometry2D
 	inline double get_zoneDelta_west() const { return zoneDelta.dir1[1]; }
 	inline int getCount_dir1() const { return numZones.get_dir1(); }
 	inline int getCount_dir2() const { return numZones.get_dir2(); }
+	inline Vector2D<int> getSize() const { return numZones; }
 	inline Point2D<double> get_origin() const { return origin; }
 	inline Point2D<double> get_extent() const { return extent; }
 
 	StructuredLocalField2D<double> getLocalDeltaFactors(int i, int j) const;
 	Point2D<double> getPoint(int i, int j) const;
 	Vector2D<double> getMeshDelta(int i, int j) const;
+
+	//Coordinate System Specific Functions: Default to rectangular.
+	double getVolume(int i, int j) const;
+	StructuredLocalField2D<double> getCellAreas(int i, int j) const;
 
 	private:
 	//Set Information********************************************************
@@ -450,6 +456,27 @@ class StructuredGeometry2D
 	protected:
 	//Check Information******************************************************
 	void checkIndices(int i, int j) const;
+};
+
+
+/*
+ * class: StructuredCylindricalGeometry2D
+ * Purpose: Hold and process geometric parameters for a structured geometry
+ * 	in cylindrical coordinates.
+ *
+ * Description: StructuredCylindricalGeometry2D holds information
+ * 	on the spacial placement
+ * 	of a particular geometry in cyilindrical. It also holds information
+ * 	regarding the mesh spacing and mesh density.
+ * 	Global Coordinates of structured cells
+ * 	are specified using a cell-centered scheme.
+ * 	This class is designed for an orthogonal grid.
+ */
+class StructuredCylindricalGeometry2D : public StructuredGeometry2D
+{
+	//Coordinate System Specific Functions: Default to rectangular.
+	double getVolume(int i, int j) const;
+	StructuredLocalField2D<double> getCellAreas(int i, int j) const;
 };
 
 

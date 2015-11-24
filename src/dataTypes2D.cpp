@@ -666,6 +666,26 @@ Vector2D<double> StructuredGeometry2D::getMeshDelta(int i, int j) const
 	return Vector2D<double>(zoneDelta.dir1[i], zoneDelta.dir2[j]);
 }
 
+//Coordinate System Specific Functions: Default to rectangular.
+double StructuredGeometry2D::getVolume(int i, int j) const
+{
+	double unitWidth=1.0;
+	return unitWidth
+		*getMeshDelta(i,j).get_dir1()*getMeshDelta(i,j).get_dir2();
+}
+
+StructuredLocalField2D<double> StructuredGeometry2D::getCellAreas(int i, int j) const
+{
+	double unitWidth=1.0;
+	StructuredLocalField2D<double> area;
+	area.N=unitWidth*getMeshDelta(i,j).get_dir1();
+	area.S=area.N;
+	area.E=unitWidth*getMeshDelta(i,j).get_dir2();
+	area.W=area.E;
+
+	return area;
+}
+
 
 
 
@@ -707,3 +727,42 @@ void StructuredGeometry2D::checkIndices(int i, int j) const
 	assert( i <= numZones.get_dir1() );
 	assert( j <= numZones.get_dir2() );
 }
+
+
+
+//***************************************************************************
+//***************************************************************************
+//***************************************************************************
+//StructuredCylindricalGeometry2D********************************************
+double StructuredCylindricalGeometry2D::getVolume(int i, int j) const
+{
+	return 2.0*c_pi
+		*getPoint(i,j).get_dir1()
+		*getMeshDelta(i,j).get_dir1()
+		*getMeshDelta(i,j).get_dir2();
+}
+
+StructuredLocalField2D<double> StructuredCylindricalGeometry2D::getCellAreas(int i, int j) const
+{
+	StructuredLocalField2D<double> area;
+
+	area.N=2.0*c_pi
+		*getPoint(i,j).get_dir1()
+		*getMeshDelta(i,j).get_dir1();
+	area.S=area.N;
+	area.E=2.0*c_pi
+		*(getPoint(i,j).get_dir1()
+			+0.5*getMeshDelta(i,j).get_dir1())
+		*getMeshDelta(i,j).get_dir2();
+	area.W=2.0*c_pi
+		*(getPoint(i,j).get_dir1()
+			-0.5*getMeshDelta(i,j).get_dir1())
+		*getMeshDelta(i,j).get_dir2();
+
+	return area;
+}
+
+
+
+
+

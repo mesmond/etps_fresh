@@ -23,7 +23,7 @@ class PerfectGas2D
 {
 	private:
 	//Mesh Size**************************************************************
-	Vector2D<int> size;
+	StructuredGeometry2D geometry;
 
 	//Dependent Variables****************************************************
 	SpacialArray2D<double> molarDensity; 					//mol/m^3
@@ -60,31 +60,31 @@ class PerfectGas2D
 
 	public:
 	PerfectGas2D(
-		Vector2D<int> size=Vector2D<int>(10,10),
+		StructuredGeometry2D geometry,
 		double gamma=1.4,
 		double particleMass=28.97/(1000.0*c_Avagadro),
 		double particleRadius=65.0e-12)
 		:
-			size(size),
+			geometry(geometry),
 			//Dependent Variables********************************************
-			molarDensity(size),
-			massDensity(size),
-			velocity(size),
-			momentum(size),
-			temperature(size),
-			internalEnergy(size),
-			totalEnergy(size),
-			pressure(size),
+			molarDensity(geometry.getSize()),
+			massDensity(geometry.getSize()),
+			velocity(geometry.getSize()),
+			momentum(geometry.getSize()),
+			temperature(geometry.getSize()),
+			internalEnergy(geometry.getSize()),
+			totalEnergy(geometry.getSize()),
+			pressure(geometry.getSize()),
 			//Right hand sides***********************************************
-			continuity_rhs(size),
-			momentum_rhs(size),
-			totalEnergy_rhs(size),
+			continuity_rhs(geometry.getSize()),
+			momentum_rhs(geometry.getSize()),
+			totalEnergy_rhs(geometry.getSize()),
 			//Properties*****************************************************
-			soundSpeed(size),
-			thermalConductivity(size),
-			thermalDiffusivity(size),
-			dynamicViscosity(size),
-			kinematicViscosity(size),
+			soundSpeed(geometry.getSize()),
+			thermalConductivity(geometry.getSize()),
+			thermalDiffusivity(geometry.getSize()),
+			dynamicViscosity(geometry.getSize()),
+			kinematicViscosity(geometry.getSize()),
 			gamma(gamma),
 			particleMass(particleMass),
 			particleRadius(particleRadius) {}
@@ -98,6 +98,7 @@ class PerfectGas2D
 	inline void print_temperature() const { temperature.print(); }
 	inline void print_pressure() const { pressure.print(); }
 	inline void print_thermalConductivity() const { thermalConductivity.print(); }
+	inline void print_geometry() const { geometry.print(); }
 
 	//***********************************************************************
 	//Fill Data**************************************************************
@@ -127,7 +128,7 @@ class PerfectGas2D
 
 	//***********************************************************************
 	//Get Data***************************************************************
-	inline Vector2D<int> getSize() const { return size; }
+	inline Vector2D<int> getSize() const { return geometry.getSize(); }
 
 	//***********************************************************************
 	//Thermal Speeds*********************************************************
@@ -244,25 +245,25 @@ class Euler2D
 	}
 };
 
-class ThreeComponentPlasma2D
-{
-	private:
-	Vector2D<int> size;
-	
-	PerfectGas2D elec;
-	PerfectGas2D ions;
-	PerfectGas2D neut;
-
-	public:
-	ThreeComponentPlasma2D(
-		Vector2D<int> size=Vector2D<int>(10,10),
-		double gamma=5.0/3.0,
-		double particleMass=2.3258671e-26,
-		double particleRadius=65.0e-12)
-		:	elec(size, 5.0/3.0, c_eMass, 0.0),
-			ions(size, gamma, particleMass, particleRadius),
-			neut(size, gamma, particleMass, particleRadius) {}
-};
+//~ class ThreeComponentPlasma2D
+//~ {
+	//~ private:
+	//~ Vector2D<int> size;
+	//~ 
+	//~ PerfectGas2D elec;
+	//~ PerfectGas2D ions;
+	//~ PerfectGas2D neut;
+//~ 
+	//~ public:
+	//~ ThreeComponentPlasma2D(
+		//~ Vector2D<int> size=Vector2D<int>(10,10),
+		//~ double gamma=5.0/3.0,
+		//~ double particleMass=2.3258671e-26,
+		//~ double particleRadius=65.0e-12)
+		//~ :	elec(size, 5.0/3.0, c_eMass, 0.0),
+			//~ ions(size, gamma, particleMass, particleRadius),
+			//~ neut(size, gamma, particleMass, particleRadius) {}
+//~ };
 
 
 #endif // INCLUDE_FLUIDS2D_H_

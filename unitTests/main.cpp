@@ -42,40 +42,40 @@ int main(int argc, char *argv[])
 	//~ test_Point2D_Vector2D();
 	//~ test_Dyad2D();
 	//~ test_SpacialArray2D();
-	//~ test_StructuredGeometry2D();
+	test_StructuredGeometry2D();
 	//~ test_PerfectGas2D();
 	//~ test_Operators2D_cyl();
-	//~ return 0;
+	return 0;
 
-	Vector2D<int> size(10,10);
-	Point2D<double> origin(0.0,0.0);
-	Point2D<double> extent(10.0,5.0);
-	Operators2D_cyl cylindrical(
-		origin,
-		extent,
-		size);
-
-	Operators2D_rec rectangular(
-		origin,
-		extent,
-		size);
-
-	Operators2D* operate;
-
-	operate=&cylindrical;
-	cout << "operate(cyl)=" << operate << endl;
-	operate=&rectangular;
-	cout << "operate(rec)=" << operate << endl;
-
-
-	int i=2, j=3;
-	operate=&cylindrical;
-	cout << "operate->getVolume(" << i << "," << j << ") (cyl)=" <<
-		operate->getVolume(i,j) << endl;
-
-	operate=&rectangular;
-	cout << "operate->getVolume(" << i << "," << j << ") (rec)=" <<
-		operate->getVolume(i,j) << endl;
+	//~ Vector2D<int> size(10,10);
+	//~ Point2D<double> origin(0.0,0.0);
+	//~ Point2D<double> extent(10.0,5.0);
+	//~ Operators2D_cyl cylindrical(
+		//~ origin,
+		//~ extent,
+		//~ size);
+//~ 
+	//~ Operators2D_rec rectangular(
+		//~ origin,
+		//~ extent,
+		//~ size);
+//~ 
+	//~ Operators2D* operate;
+//~ 
+	//~ operate=&cylindrical;
+	//~ cout << "operate(cyl)=" << operate << endl;
+	//~ operate=&rectangular;
+	//~ cout << "operate(rec)=" << operate << endl;
+//~ 
+//~ 
+	//~ int i=2, j=3;
+	//~ operate=&cylindrical;
+	//~ cout << "operate->getVolume(" << i << "," << j << ") (cyl)=" <<
+		//~ operate->getVolume(i,j) << endl;
+//~ 
+	//~ operate=&rectangular;
+	//~ cout << "operate->getVolume(" << i << "," << j << ") (rec)=" <<
+		//~ operate->getVolume(i,j) << endl;
 
 
 	//~ operate=&cylindrical;
@@ -162,11 +162,17 @@ void test_PerfectGas2D()
 	cout << "************************************" << endl;
 	cout << "Testing PerfectGas2D ..." << endl;
 
+	Point2D<double> origin(0.0,0.0);
+	Point2D<double> extent(1.0,10.0);
+	Vector2D<int> size(10,10);
+
+	StructuredGeometry2D geom(origin, extent, size);
+
 	//Test for a memory Leak.
 	int i=0;
 	while (i < 100)
 	{
-		PerfectGas2D air(Vector2D<int>(99,100));
+		PerfectGas2D air(geom);
 
 		double air_temperature=20.0;	//deg C
 		air.fill_temperature(air_temperature+273.15);	//K
@@ -178,26 +184,24 @@ void test_PerfectGas2D()
 		i++;
 	}
 
-	//~ if (0==0)
-	//~ {
-		//~ PerfectGas2D air(Vector2D<int>(15,30));
-//~ 
-		//~ double air_temperature=20.0;	//deg C
-		//~ air.fill_temperature(air_temperature+273.15);	//K
-		//~ air.fill_pressure(101325.0);					//Pa
-		//~ air.fill_velocity(Vector2D<double>(0.0,0.0));	//m/s
-//~ 
-		//~ cout << "about to destroy!" << endl;
-	//~ }
-	//~ air.init_fromBasicProps();
 
+	PerfectGas2D air(geom);
+
+	double air_temperature=20.0;	//deg C
+	air.fill_temperature(air_temperature+273.15);	//K
+	air.fill_pressure(101325.0);					//Pa
+	air.fill_velocity(Vector2D<double>(0.0,0.0));	//m/s
+
+	air.init_fromBasicProps();
+
+	air.print_geometry();
 
 	
-	//~ int soundSpeed=(int)air.getSoundSpeed(2,3);
-	//~ cout << "soundSpeed=" << soundSpeed << endl;
-	//~ cout << "thermalConductivity=" << air.getThermalConductivity(2,3) << endl;
-	//~ 
-	//~ assert(soundSpeed == 343); // m/s
+	int soundSpeed=(int)air.getSoundSpeed(2,3);
+	cout << "soundSpeed=" << soundSpeed << endl;
+	cout << "thermalConductivity=" << air.getThermalConductivity(2,3) << endl;
+	
+	assert(soundSpeed == 343); // m/s
 	cout << "Done***************************************" << endl;
 }
 
@@ -383,6 +387,10 @@ void test_StructuredGeometry2D()
 
 	block_north.link_east(block_east);
 	block_east.link_west(block_north);
+
+
+
+	
 
 
 	cout << "Done***************************************" << endl;
