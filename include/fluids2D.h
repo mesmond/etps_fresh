@@ -12,6 +12,7 @@
 #define INCLUDE_FLUIDS2D_H_
 
 #include <iostream>
+#include <typeinfo>
 
 #include "dataTypes2D.h"
 #include "operators2D.h"
@@ -23,7 +24,8 @@ class PerfectGas2D
 {
 	private:
 	//Mesh Size**************************************************************
-	StructuredGeometry2D geometry;
+	StructuredGeometry2D* geometry;
+
 
 	//Dependent Variables****************************************************
 	SpacialArray2D<double> molarDensity; 					//mol/m^3
@@ -60,34 +62,39 @@ class PerfectGas2D
 
 	public:
 	PerfectGas2D(
-		StructuredGeometry2D geometry,
+		StructuredGeometry2D& geom,
 		double gamma=1.4,
 		double particleMass=28.97/(1000.0*c_Avagadro),
 		double particleRadius=65.0e-12)
 		:
-			geometry(geometry),
 			//Dependent Variables********************************************
-			molarDensity(geometry.getSize()),
-			massDensity(geometry.getSize()),
-			velocity(geometry.getSize()),
-			momentum(geometry.getSize()),
-			temperature(geometry.getSize()),
-			internalEnergy(geometry.getSize()),
-			totalEnergy(geometry.getSize()),
-			pressure(geometry.getSize()),
+			molarDensity(geom.getSize()),
+			massDensity(geom.getSize()),
+			velocity(geom.getSize()),
+			momentum(geom.getSize()),
+			temperature(geom.getSize()),
+			internalEnergy(geom.getSize()),
+			totalEnergy(geom.getSize()),
+			pressure(geom.getSize()),
 			//Right hand sides***********************************************
-			continuity_rhs(geometry.getSize()),
-			momentum_rhs(geometry.getSize()),
-			totalEnergy_rhs(geometry.getSize()),
+			continuity_rhs(geom.getSize()),
+			momentum_rhs(geom.getSize()),
+			totalEnergy_rhs(geom.getSize()),
 			//Properties*****************************************************
-			soundSpeed(geometry.getSize()),
-			thermalConductivity(geometry.getSize()),
-			thermalDiffusivity(geometry.getSize()),
-			dynamicViscosity(geometry.getSize()),
-			kinematicViscosity(geometry.getSize()),
+			soundSpeed(geom.getSize()),
+			thermalConductivity(geom.getSize()),
+			thermalDiffusivity(geom.getSize()),
+			dynamicViscosity(geom.getSize()),
+			kinematicViscosity(geom.getSize()),
 			gamma(gamma),
 			particleMass(particleMass),
-			particleRadius(particleRadius) {}
+			particleRadius(particleRadius)
+	{
+		cout << "Constructing PerfectGas2D with "
+			<< typeid(geom).name() << endl;
+
+		geometry=&geom;
+	}
 
 
 
@@ -98,7 +105,7 @@ class PerfectGas2D
 	inline void print_temperature() const { temperature.print(); }
 	inline void print_pressure() const { pressure.print(); }
 	inline void print_thermalConductivity() const { thermalConductivity.print(); }
-	inline void print_geometry() const { geometry.print(); }
+	inline void print_geometry() const { geometry->print(); }
 
 	//***********************************************************************
 	//Fill Data**************************************************************
@@ -107,6 +114,14 @@ class PerfectGas2D
 	inline void fill_pressure(const double& scalar) { pressure.fill(scalar); }
 
 	void init_fromBasicProps();
+
+	//***********************************************************************
+	//Get Data***************************************************************
+	StructuredLocalField2D<double> getCellAreas(int i, int j)
+		{ return geometry->getCellAreas(i,j); }
+
+	double getVolume(int i, int j)
+		{ return geometry->getVolume(i,j); }
 
 	//***********************************************************************
 	//Calculate Data*********************************************************
@@ -128,7 +143,7 @@ class PerfectGas2D
 
 	//***********************************************************************
 	//Get Data***************************************************************
-	inline Vector2D<int> getSize() const { return geometry.getSize(); }
+	inline Vector2D<int> getSize() const { return geometry->getSize(); }
 
 	//***********************************************************************
 	//Thermal Speeds*********************************************************

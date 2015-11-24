@@ -734,7 +734,7 @@ void StructuredGeometry2D::checkIndices(int i, int j) const
 //***************************************************************************
 //***************************************************************************
 //StructuredCylindricalGeometry2D********************************************
-double StructuredCylindricalGeometry2D::getVolume(int i, int j) const
+double StructuredCylGeometry2D::getVolume(int i, int j) const
 {
 	return 2.0*c_pi
 		*getPoint(i,j).get_dir1()
@@ -742,7 +742,7 @@ double StructuredCylindricalGeometry2D::getVolume(int i, int j) const
 		*getMeshDelta(i,j).get_dir2();
 }
 
-StructuredLocalField2D<double> StructuredCylindricalGeometry2D::getCellAreas(int i, int j) const
+StructuredLocalField2D<double> StructuredCylGeometry2D::getCellAreas(int i, int j) const
 {
 	StructuredLocalField2D<double> area;
 

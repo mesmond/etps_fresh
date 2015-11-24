@@ -443,8 +443,8 @@ class StructuredGeometry2D
 	Vector2D<double> getMeshDelta(int i, int j) const;
 
 	//Coordinate System Specific Functions: Default to rectangular.
-	double getVolume(int i, int j) const;
-	StructuredLocalField2D<double> getCellAreas(int i, int j) const;
+	virtual double getVolume(int i, int j) const;
+	virtual StructuredLocalField2D<double> getCellAreas(int i, int j) const;
 
 	private:
 	//Set Information********************************************************
@@ -460,7 +460,7 @@ class StructuredGeometry2D
 
 
 /*
- * class: StructuredCylindricalGeometry2D
+ * class: StructuredCylGeometry2D
  * Purpose: Hold and process geometric parameters for a structured geometry
  * 	in cylindrical coordinates.
  *
@@ -472,13 +472,18 @@ class StructuredGeometry2D
  * 	are specified using a cell-centered scheme.
  * 	This class is designed for an orthogonal grid.
  */
-class StructuredCylindricalGeometry2D : public StructuredGeometry2D
+class StructuredCylGeometry2D : public StructuredGeometry2D
 {
-	//Coordinate System Specific Functions: Default to rectangular.
+	public:
+	StructuredCylGeometry2D(
+		Point2D<double> origin=Point2D<double>(0.0,0.0),
+		Point2D<double> extent=Point2D<double>(1.0,1.0),
+		Vector2D<int> size=Vector2D<int>(10,10),
+		Vector2D<double> refineMesh=Vector2D<double>(1.0,1.0)) 
+		:	StructuredGeometry2D(origin, extent, size, refineMesh) {} // Con
+	//Coordinate System Specific Functions.
 	double getVolume(int i, int j) const;
 	StructuredLocalField2D<double> getCellAreas(int i, int j) const;
 };
-
-
 
 #endif  // INCLUDE_DATATYPES2D_H_
