@@ -15,8 +15,9 @@
 #include <string.h>
 //~ #include <typeinfo>
 
-#include "dataTypes2D.h"
 #include "simulationConstants.h"
+#include "dataTypes2D.h"
+#include "structuredGeometry2D.h"
 
 using namespace std;
 

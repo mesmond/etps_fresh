@@ -23,6 +23,7 @@
 #include "dataTypes2D.h"
 #include "userInputClass.h"
 #include "mesmond-utils.h"
+#include "structuredGeometry2D.h"
 #include "fluids2D.h"
 
 
