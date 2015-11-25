@@ -16,7 +16,6 @@
 //~ #include <typeinfo>
 
 #include "dataTypes2D.h"
-#include "operators2D.h"
 #include "simulationConstants.h"
 
 using namespace std;
@@ -214,24 +213,24 @@ class PerfectGas2D
 
 };
 
-class Euler2D
-{
-	public:
-	Operators2D* operate;
-	Euler2D(Operators2D* ptr)
-	{
-		operate=ptr;
-
-		cout << "operate->getVolume(i,j)=" << operate->getVolume(2,3) << endl;
-	}
-
-
-
-	double continuity_rhs(const PerfectGas2D& fluid)
-	{
-		return 0.0;
-	}
-};
+//~ class Euler2D
+//~ {
+	//~ public:
+	//~ Operators2D* operate;
+	//~ Euler2D(Operators2D* ptr)
+	//~ {
+		//~ operate=ptr;
+//~ 
+		//~ cout << "operate->getVolume(i,j)=" << operate->getVolume(2,3) << endl;
+	//~ }
+//~ 
+//~ 
+//~ 
+	//~ double continuity_rhs(const PerfectGas2D& fluid)
+	//~ {
+		//~ return 0.0;
+	//~ }
+//~ };
 
 //~ class ThreeComponentPlasma2D
 //~ {

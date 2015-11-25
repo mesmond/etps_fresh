@@ -24,7 +24,6 @@
 #include "userInputClass.h"
 #include "mesmond-utils.h"
 #include "fluids2D.h"
-#include "operators2D.h"
 
 
 using namespace std;
@@ -35,7 +34,6 @@ void test_Dyad2D();
 void test_SpacialArray2D();
 void test_StructuredGeometry2D();
 void test_PerfectGas2D();
-void test_Operators2D_cyl();
 
 int main(int argc, char *argv[])
 {
@@ -44,7 +42,6 @@ int main(int argc, char *argv[])
 	test_SpacialArray2D();
 	test_StructuredGeometry2D();
 	test_PerfectGas2D();
-	test_Operators2D_cyl();
 	return 0;
 
 	//~ Vector2D<int> size(10,10);
@@ -94,67 +91,6 @@ int main(int argc, char *argv[])
 
 
 }
-
-void test_Operators2D_cyl()
-{
-	cout << "************************************" << endl;
-	cout << "Testing Operators2D_cyl ..." << endl;
-
-	Vector2D<int> size(10,10); //Do not change
-	SpacialArray2D<double> pressure(size);
-	SpacialArray2D<double> divergence(size);
-	SpacialArray2D<Vector2D<double> > gradP(size);
-	Operators2D_cyl operate(
-		Point2D<double>(0.0,0.0),
-		Point2D<double>(10.0,5.0),
-		size);
-
-	//Write Pressure
-	for (int i=1; i<=pressure.getCount_dir1(); ++i)
-	for (int j=1; j<=pressure.getCount_dir2(); ++j)
-	{
-		pressure.write(i,j, i*j);
-	}
-
-	pressure.set_adiabaticBdyValues();
-
-	//Compute Gradient
-	for (int i=1; i<=pressure.getCount_dir1(); ++i)
-	for (int j=1; j<=pressure.getCount_dir2(); ++j)
-	{
-		gradP.write( i,j, operate.gradient(i,j, pressure) );
-	}
-
-	for (int i=1; i<=pressure.getCount_dir1(); ++i)
-	for (int j=1; j<=pressure.getCount_dir2(); ++j)
-	{
-		divergence.write( i,j, operate.divergence(i,j, pressure, gradP) );
-	}
-
-	operate.vtkOutput(pressure, gradP, divergence);
-	
-	int i=3, j=3;
-	Vector2D<double> grad=operate.gradient(i,j, pressure);
-	double div1=operate.divergence(i,j, pressure, gradP);
-	Vector2D<double> div2=operate.divergence(i,j, pressure, gradP, gradP*3.0);
-
-	cout << "grad                      =" << grad << endl;
-	cout << "div1(scalar,vector)       =" << div1 << endl;
-	cout << "div2(scalar,vector,vector)=" << div2 << endl;
-
-	assert( isEqual(div1, 55.8) );
-	assert( isEqual(div2.get_dir1(), 826.2) );
-	assert( isEqual(div2.get_dir2(), 1177.2) );
-	
-	assert( isEqual(grad.get_dir1(), 3.0) );
-	assert( isEqual(grad.get_dir2(), 6.0) );
-
-	cout << "Done**************************************" << endl;
-	cout << "******************************************" << endl;
-}
-
-
-
 
 
 void test_PerfectGas2D()
@@ -439,6 +375,57 @@ void test_StructuredGeometry2D()
 	//~ StructuredLocalField2D<double> localField_rec=rec.getCellAreas(i,j);
 	//~ StructuredLocalField2D<double> localField_cyl=cyl.getCellAreas(i,j);
 
+
+	//Test Differential Operators********************************************
+	size=Vector2D<int>(10,10); //Do not change
+	SpacialArray2D<double> pressure(size);
+	SpacialArray2D<double> divergence(size);
+	SpacialArray2D<Vector2D<double> > gradP(size);
+	StructuredCylGeometry2D operate(
+		Point2D<double>(0.0,0.0),
+		Point2D<double>(10.0,5.0),
+		size);
+
+	//Write Pressure
+	for (i=1; i<=pressure.getCount_dir1(); ++i)
+	for (j=1; j<=pressure.getCount_dir2(); ++j)
+	{
+		pressure.write(i,j, i*j);
+	}
+
+	pressure.set_adiabaticBdyValues();
+
+	//Compute Gradient
+	for (i=1; i<=pressure.getCount_dir1(); ++i)
+	for (j=1; j<=pressure.getCount_dir2(); ++j)
+	{
+		gradP.write( i,j, operate.gradient(i,j, pressure) );
+	}
+
+	for (i=1; i<=pressure.getCount_dir1(); ++i)
+	for (j=1; j<=pressure.getCount_dir2(); ++j)
+	{
+		divergence.write( i,j, operate.divergence(i,j, pressure, gradP) );
+	}
+
+	operate.vtkOutput(pressure, gradP, divergence);
+	
+	i=3;
+	j=3;
+	Vector2D<double> grad=operate.gradient(i,j, pressure);
+	double div1=operate.divergence(i,j, pressure, gradP);
+	Vector2D<double> div2=operate.divergence(i,j, pressure, gradP, gradP*3.0);
+
+	cout << "grad                      =" << grad << endl;
+	cout << "div1(scalar,vector)       =" << div1 << endl;
+	cout << "div2(scalar,vector,vector)=" << div2 << endl;
+
+	assert( isEqual(div1, 55.8) );
+	assert( isEqual(div2.get_dir1(), 826.2) );
+	assert( isEqual(div2.get_dir2(), 1177.2) );
+	
+	assert( isEqual(grad.get_dir1(), 3.0) );
+	assert( isEqual(grad.get_dir2(), 6.0) );
 	
 
 

@@ -418,6 +418,49 @@ class StructuredGeometry2D
 		const SpacialArray2D<double>& divergence,
 		const char* fileName="output.vtk") const;
 
+	//Diferential Operators**************************************************
+	private:
+	template <typename T> T getDivergenceFromField(int i, int j,
+		StructuredLocalField2D<T> field) const
+	{
+		StructuredLocalField2D<double> area;	
+		StructuredLocalField2D<double> deltaFactor;
+		StructuredLocalField2D<T> cellFlux;
+		
+		deltaFactor=getLocalDeltaFactors(i,j);
+		area=getCellAreas(i,j);
+
+		//Interpolate to cell faces.
+		cellFlux.N=field.P_dir2*(1.0-deltaFactor.N)+deltaFactor.N*field.N;
+		cellFlux.S=field.P_dir2*(1.0-deltaFactor.S)+deltaFactor.S*field.S;
+		cellFlux.E=field.P_dir1*(1.0-deltaFactor.E)+deltaFactor.E*field.E;
+		cellFlux.W=field.P_dir1*(1.0-deltaFactor.W)+deltaFactor.W*field.W;
+
+		//Compute Divergence.
+		T divergence=(1.0/getVolume(i,j))*(
+			 cellNormal_N*cellFlux.N*area.N
+			+cellNormal_S*cellFlux.S*area.S
+			+cellNormal_E*cellFlux.E*area.E
+			+cellNormal_W*cellFlux.W*area.W );
+
+		return divergence;
+	}
+
+	public:
+	Vector2D<double> gradient(const int i, const int j,
+		const SpacialArray2D<double>& scalarField) const;
+	double divergence(const int i, const int j,
+		const SpacialArray2D<double>& scalar,
+		const SpacialArray2D<Vector2D<double> >& vector) const;
+	Vector2D<double> divergence(const int i, const int j,
+		const SpacialArray2D<double>& scalar,
+		const SpacialArray2D<Vector2D<double> >& vector1,
+		const SpacialArray2D<Vector2D<double> >& vector2) const;
+
+
+
+
+
 	//Mutation Handling******************************************************
 	void link_north(const StructuredGeometry2D& toLink);
 	void link_south(const StructuredGeometry2D& toLink);
