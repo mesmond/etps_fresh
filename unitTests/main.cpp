@@ -39,12 +39,12 @@ void test_Operators2D_cyl();
 
 int main(int argc, char *argv[])
 {
-	//~ test_Point2D_Vector2D();
-	//~ test_Dyad2D();
-	//~ test_SpacialArray2D();
-	//~ test_StructuredGeometry2D();
+	test_Point2D_Vector2D();
+	test_Dyad2D();
+	test_SpacialArray2D();
+	test_StructuredGeometry2D();
 	test_PerfectGas2D();
-	//~ test_Operators2D_cyl();
+	test_Operators2D_cyl();
 	return 0;
 
 	//~ Vector2D<int> size(10,10);
@@ -164,13 +164,11 @@ void test_PerfectGas2D()
 
 	Point2D<double> origin(0.0,0.0);
 	Point2D<double> extent(1.0,10.0);
-	Vector2D<int> size(10,20);
-
+	Vector2D<int> size(50,50);
 	StructuredGeometry2D geom(origin, extent, size);
 
 	//Test for a memory Leak.
 	int i=0;
-
 	while (i < 10)
 	{
 		PerfectGas2D air(geom);
@@ -182,56 +180,61 @@ void test_PerfectGas2D()
 		i++;
 	}
 
-
 	PerfectGas2D air(geom);
 
 	double air_temperature=20.0;	//deg C
 	air.fill_temperature(air_temperature+273.15);	//K
 	air.fill_pressure(101325.0);					//Pa
 	air.fill_velocity(Vector2D<double>(0.0,0.0));	//m/s
-
 	air.init_fromBasicProps();
+	//~ air.print_geometry();
 
-	air.print_geometry();
-
-	
 	int soundSpeed=(int)air.getSoundSpeed(2,3);
 	cout << "soundSpeed=" << soundSpeed << endl;
 	cout << "thermalConductivity=" << air.getThermalConductivity(2,3) << endl;
-	
 	assert(soundSpeed == 343); // m/s
 
 
 
-	//Different Fluid.
-
+	//Cylindrical vs. Rectangular Geometry***********************************
 	i=2;
 	int j=3;
 	origin=Point2D<double>(0.0,0.0);
 	extent=Point2D<double>(1.0,1.0);
-	size=Vector2D<int>(4,4);
+	size=Vector2D<int>(10,10);
+
+	//Cylindrical Geometry***************************************************
 	StructuredCylGeometry2D geom_cyl(origin, extent, size);
 	PerfectGas2D air_cyl(geom_cyl);
-
-	StructuredGeometry2D geom_rec(origin, extent, size);
-	PerfectGas2D air_rec(geom_rec);
-
-	assert(sizeof(geom_cyl) == sizeof(geom_rec));
-	
 	cout << "air_cyl.getVolume(" << i << "," << j << ")="
 		<< air_cyl.getVolume(i,j) << endl;
 
+	//Rectangular Geometry***************************************************
+	StructuredGeometry2D geom_rec(origin, extent, size);
+	PerfectGas2D air_rec(geom_rec);
 	cout << "air_rec.getVolume(" << i << "," << j << ")="
 		<< air_rec.getVolume(i,j) << endl;
 
 
+	
+	assert(sizeof(geom_cyl) == sizeof(geom_rec));
+	assert( !isEqual(air_cyl.getVolume(i,j) , air_rec.getVolume(i,j)) );
 
-	cout << "air_test..." << endl;
+
+
+	//Copy Constructor Test**************************************************
+	cout << "Copy Constructor..." << endl;
 	PerfectGas2D air_test(air_cyl);
 
+	assert( isEqual(air_cyl.getVolume(i,j) , air_test.getVolume(i,j)) );
 	assert(sizeof(air_cyl) == sizeof(air_test));
 
+	PerfectGas2D air_test_rec(air_rec);
+
+	assert( isEqual(air_test_rec.getVolume(i,j) , air_rec.getVolume(i,j)) );
+	assert(sizeof(air_test_rec) == sizeof(air_rec));
 	
+	cout << "*******************************************" << endl;
 	cout << "Done***************************************" << endl;
 }
 
@@ -394,6 +397,7 @@ void test_StructuredGeometry2D()
 	cout << "************************************" << endl;
 	cout << "Testing StructuredGeometry2D ..." << endl;
 
+	//Testing Block Linking Functions****************************************
 	Point2D<double> origin(0.0,0.0);
 	Point2D<double> extent(1.0,3.5);
 	Vector2D<int> size(34,34);
@@ -420,15 +424,24 @@ void test_StructuredGeometry2D()
 
 
 
-	//Get the area
+	//Test Rectangular vs. Cylindrical***************************************
 	int i=2, j=3;
-	StructuredLocalField2D<double> area=block.getCellAreas(i,j);
-	area.print();
+	origin=Point2D<double>(0.0,3.5);
+	extent=Point2D<double>(1.0,4.5);
+	size=Vector2D<int>(34,15);
 	
+	StructuredGeometry2D rec(origin, extent, size);
+	StructuredCylGeometry2D cyl(origin, extent, size);
+
+	assert( sizeof(rec) == sizeof(cyl) );
+	assert( !isEqual(cyl.getVolume(i,j), rec.getVolume(i,j) ) );
 	
+	//~ StructuredLocalField2D<double> localField_rec=rec.getCellAreas(i,j);
+	//~ StructuredLocalField2D<double> localField_cyl=cyl.getCellAreas(i,j);
 
 	
 
 
+	cout << "*******************************************" << endl;
 	cout << "Done***************************************" << endl;
 }

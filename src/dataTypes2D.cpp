@@ -683,6 +683,10 @@ StructuredLocalField2D<double> StructuredGeometry2D::getCellAreas(int i, int j) 
 	area.E=unitWidth*getMeshDelta(i,j).get_dir2();
 	area.W=area.E;
 
+	area.P=0.0;
+	area.P_dir1=0.0;
+	area.P_dir2=0.0;
+
 	return area;
 }
 
@@ -758,6 +762,10 @@ StructuredLocalField2D<double> StructuredCylGeometry2D::getCellAreas(int i, int 
 		*(getPoint(i,j).get_dir1()
 			-0.5*getMeshDelta(i,j).get_dir1())
 		*getMeshDelta(i,j).get_dir2();
+
+	area.P=0.0;
+	area.P_dir1=0.0;
+	area.P_dir2=0.0;
 
 	return area;
 }
