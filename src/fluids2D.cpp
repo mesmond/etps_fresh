@@ -9,12 +9,93 @@
 //***************************************************************************
 #include "fluids2D.h"
 
+PerfectGas2D::PerfectGas2D( //Constructor
+	StructuredGeometry2D& geom,
+	double gamma,
+	double particleMass,
+	double particleRadius)
+	:	//Dependent Variables************************************************
+		molarDensity(geom.getSize()),
+		massDensity(geom.getSize()),
+		velocity(geom.getSize()),
+		momentum(geom.getSize()),
+		temperature(geom.getSize()),
+		internalEnergy(geom.getSize()),
+		totalEnergy(geom.getSize()),
+		pressure(geom.getSize()),
+		//Right hand sides***************************************************
+		continuity_rhs(geom.getSize()),
+		momentum_rhs(geom.getSize()),
+		totalEnergy_rhs(geom.getSize()),
+		//Properties*********************************************************
+		soundSpeed(geom.getSize()),
+		thermalConductivity(geom.getSize()),
+		thermalDiffusivity(geom.getSize()),
+		dynamicViscosity(geom.getSize()),
+		kinematicViscosity(geom.getSize()),
+		gamma(gamma),
+		particleMass(particleMass),
+		particleRadius(particleRadius)
+{
+	//Check to see if the input Structured Geometry is Cylindrical.
+	StructuredCylGeometry2D* test=dynamic_cast<StructuredCylGeometry2D*>(&geom);
+	if (test)
+	{
+		cout << "Initializing PerfectGas2D in Cylindrical Coordinates." << endl;
+		geometry = new StructuredCylGeometry2D(geom);
+	}
+	else
+	{
+		cout << "Initializing PerfectGas2D in Rectangular Coordinates." << endl;
+		geometry = new StructuredGeometry2D(geom);
+	}
+}
 
+PerfectGas2D::PerfectGas2D(const PerfectGas2D& that) //Copy Constructor
+	:	//Dependent Variables************************************************
+		molarDensity(that.geometry->getSize()),
+		massDensity(that.geometry->getSize()),
+		velocity(that.geometry->getSize()),
+		momentum(that.geometry->getSize()),
+		temperature(that.geometry->getSize()),
+		internalEnergy(that.geometry->getSize()),
+		totalEnergy(that.geometry->getSize()),
+		pressure(that.geometry->getSize()),
+		//Right hand sides***************************************************
+		continuity_rhs(that.geometry->getSize()),
+		momentum_rhs(that.geometry->getSize()),
+		totalEnergy_rhs(that.geometry->getSize()),
+		//Properties*********************************************************
+		soundSpeed(that.geometry->getSize()),
+		thermalConductivity(that.geometry->getSize()),
+		thermalDiffusivity(that.geometry->getSize()),
+		dynamicViscosity(that.geometry->getSize()),
+		kinematicViscosity(that.geometry->getSize()),
+		gamma(that.gamma),
+		particleMass(that.particleMass),
+		particleRadius(that.particleRadius)
+{
+	//Check to see if the input Structured Geometry is Cylindrical.
+	StructuredCylGeometry2D* test=dynamic_cast<StructuredCylGeometry2D*>(that.geometry);
+	if (test)
+	{
+		cout << "Copy Constructor: PerfectGas2D in Cylindrical Coordinates." << endl;
+		geometry = new StructuredCylGeometry2D(*that.geometry);
+	}
+	else
+	{
+		cout << "Copy Constructor: PerfectGas2D in Rectangular Coordinates." << endl;
+		geometry = new StructuredGeometry2D(*that.geometry);
+	}
+}
 
 PerfectGas2D::~PerfectGas2D()
 {
-	delete geometry;
-	geometry=nullptr;
+	if (geometry != nullptr)
+	{
+		delete geometry;
+		geometry=nullptr;
+	}
 }
 
 

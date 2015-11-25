@@ -27,7 +27,6 @@ class PerfectGas2D
 	//Mesh Size**************************************************************
 	StructuredGeometry2D* geometry;
 
-
 	//Dependent Variables****************************************************
 	SpacialArray2D<double> molarDensity; 					//mol/m^3
 	SpacialArray2D<double> massDensity;						//kg/m^3
@@ -53,7 +52,6 @@ class PerfectGas2D
 	SpacialArray2D<double> dynamicViscosity;	//Pa s
 	SpacialArray2D<double> kinematicViscosity;	//m^2/s
 
-
 	double gamma;						//Specific Heat Ratio (constant)
 	double particleMass;				//kg/particle
 	double particleRadius;				//m
@@ -64,52 +62,14 @@ class PerfectGas2D
 	public:
 	PerfectGas2D(
 		StructuredGeometry2D& geom,
-		const char* coordSys="rec",
 		double gamma=1.4,
 		double particleMass=28.97/(1000.0*c_Avagadro),
-		double particleRadius=65.0e-12)
-		:
-			//Dependent Variables********************************************
-			molarDensity(geom.getSize()),
-			massDensity(geom.getSize()),
-			velocity(geom.getSize()),
-			momentum(geom.getSize()),
-			temperature(geom.getSize()),
-			internalEnergy(geom.getSize()),
-			totalEnergy(geom.getSize()),
-			pressure(geom.getSize()),
-			//Right hand sides***********************************************
-			continuity_rhs(geom.getSize()),
-			momentum_rhs(geom.getSize()),
-			totalEnergy_rhs(geom.getSize()),
-			//Properties*****************************************************
-			soundSpeed(geom.getSize()),
-			thermalConductivity(geom.getSize()),
-			thermalDiffusivity(geom.getSize()),
-			dynamicViscosity(geom.getSize()),
-			kinematicViscosity(geom.getSize()),
-			gamma(gamma),
-			particleMass(particleMass),
-			particleRadius(particleRadius)
-	{
-		cout << "Constructing PerfectGas2D" << endl;
-		cout << "&geom=" << &geom << endl;
-		cout << "coordSys=" << coordSys << endl;
-
-		if (strcmp(coordSys,"rec") == 0)
-			geometry = new StructuredGeometry2D(geom);
-		else if (strcmp(coordSys,"cyl") == 0)
-			geometry = new StructuredCylGeometry2D(geom);
-		else
-		{
-			cout << "Bad argument for coordSystem." << endl;
-			exit(1);
-		}
-	}
-	~PerfectGas2D();
-	
-
-
+		double particleRadius=65.0e-12); //Constructor
+	PerfectGas2D(const PerfectGas2D& that); //Copy Constructor
+	PerfectGas2D operator=(const PerfectGas2D& rhs) = delete; //Copy Assign
+	PerfectGas2D(PerfectGas2D&& other) = delete; //Move Con
+	PerfectGas2D& operator=(PerfectGas2D&& other) = delete; //Move Assign
+	~PerfectGas2D(); //Deconstructor
 
 	//***********************************************************************
 	//Print Data*************************************************************
