@@ -19,6 +19,14 @@ double min_2arg(double arg1, double arg2)
 	return min;
 }
 
+double max_2arg(double arg1, double arg2)
+{
+	double max=arg1;
+	if (arg2>max) max=arg2;
+	return max;
+}
+
+
 double max_array(double array[],int num_elements)
 {
 	int i;

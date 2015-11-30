@@ -38,59 +38,66 @@ void test_PerfectGas2D();
 
 int main(int argc, char *argv[])
 {
-	test_Point2D_Vector2D();
-	test_Dyad2D();
-	test_SpacialArray2D();
-	test_StructuredGeometry2D();
-	test_PerfectGas2D();
+	//~ test_Point2D_Vector2D();
+	//~ test_Dyad2D();
+	//~ test_SpacialArray2D();
+	//~ test_StructuredGeometry2D();
+	//~ test_PerfectGas2D();
+	//~ return 0;
+//~
+
+	Point2D<double> origin(0.0,0.0);
+	Point2D<double> length(1.0,1.0);
+	Vector2D<int> size(20,20);
+	StructuredGeometry2D geom(origin, origin+length, size);
+
+	PerfectGas2D air(geom);
+	
+	//~ double air_temperature=20.0;	//deg C
+	//~ air.fill_temperature(air_temperature+273.15);	//K
+	//~ air.fill_pressure(101325.0);					//Pa
+	//~ air.fill_velocity(Vector2D<double>(0.0,0.0));	//m/s
+	//~ 
+	//~ air.init_fromBasicProps();
+
+	air.init_test();
+
+	Euler2D euler;
+	double simTime=0.0;
+	double timeStep=1.0e-12;
+
+	//~ air.set_boundary_conditions();
+
+	while (simTime <1e-10)
+	{
+		for (int i=1; i<=air.getSize().get_dir1(); ++i)
+			for (int j=1; j<=air.getSize().get_dir2(); ++j)
+			{
+				double continuity_rhs=euler.get_continuity_rhs(i,j, air);
+				Vector2D<double> momentum_rhs=euler.get_momentum_rhs(i,j, air);
+				double totEnergy_rhs=euler.get_totEnergy_rhs(i,j, air);
+
+				air.continuity_write_rhs(i,j, continuity_rhs);
+				air.momentum_write_rhs(i,j, momentum_rhs);
+				air.totalEnergy_write_rhs(i,j, totEnergy_rhs);
+			}
+
+		for (int i=1; i<=air.getSize().get_dir1(); ++i)
+			for (int j=1; j<=air.getSize().get_dir2(); ++j)
+			{
+				air.update_from_rhs(i,j, timeStep);
+			}
+
+		simTime+=timeStep;
+		air.update_boundary_values();
+		timeStep=air.get_explicit_timeStep();
+	}
+
+	cout << "Simulation Done!" << endl;
+	
+	
+
 	return 0;
-
-	//~ Vector2D<int> size(10,10);
-	//~ Point2D<double> origin(0.0,0.0);
-	//~ Point2D<double> extent(10.0,5.0);
-	//~ Operators2D_cyl cylindrical(
-		//~ origin,
-		//~ extent,
-		//~ size);
-//~ 
-	//~ Operators2D_rec rectangular(
-		//~ origin,
-		//~ extent,
-		//~ size);
-//~ 
-	//~ Operators2D* operate;
-//~ 
-	//~ operate=&cylindrical;
-	//~ cout << "operate(cyl)=" << operate << endl;
-	//~ operate=&rectangular;
-	//~ cout << "operate(rec)=" << operate << endl;
-//~ 
-//~ 
-	//~ int i=2, j=3;
-	//~ operate=&cylindrical;
-	//~ cout << "operate->getVolume(" << i << "," << j << ") (cyl)=" <<
-		//~ operate->getVolume(i,j) << endl;
-//~ 
-	//~ operate=&rectangular;
-	//~ cout << "operate->getVolume(" << i << "," << j << ") (rec)=" <<
-		//~ operate->getVolume(i,j) << endl;
-
-
-	//~ operate=&cylindrical;
-	//~ 
-	//~ Euler2D euler(operate);
-//~ 
-	//~ PerfectGas2D air(;
-//~ 
-	//~ air.euler.get_continuity_rhs()
-	//~ air.euler.get_continuity_rhs()
-	//~ air.euler.get_continuity_rhs()
-	//~ 
-	
-
-	
-
-
 }
 
 
@@ -126,9 +133,9 @@ void test_PerfectGas2D()
 	air.init_fromBasicProps();
 	//~ air.print_geometry();
 
-	int soundSpeed=(int)air.getSoundSpeed(2,3);
+	int soundSpeed=(int)air.calcSoundSpeed(2,3);
 	cout << "soundSpeed=" << soundSpeed << endl;
-	cout << "thermalConductivity=" << air.getThermalConductivity(2,3) << endl;
+	cout << "thermalConductivity=" << air.calcThermalConductivity(2,3) << endl;
 	assert(soundSpeed == 343); // m/s
 
 
@@ -394,7 +401,7 @@ void test_StructuredGeometry2D()
 		pressure.write(i,j, i*j);
 	}
 
-	pressure.set_adiabaticBdyValues();
+	pressure.set_NeumannBdyValues_all();
 
 	//Compute Gradient
 	for (i=1; i<=pressure.getCount_dir1(); ++i)

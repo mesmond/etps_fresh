@@ -22,6 +22,7 @@
 using namespace std;
 
 double min_2arg(double arg1, double arg2);
+double max_2arg(double arg1, double arg2);
 double max_array(double array[],int num_elements);
 
 /*

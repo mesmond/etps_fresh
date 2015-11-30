@@ -240,7 +240,7 @@ template <typename type> StructuredLocalField2D<type>
 	}
 }
 
-template <typename type> void SpacialArray2D<type>::set_adiabaticBdyValues()
+template <typename type> void SpacialArray2D<type>::set_NeumannBdyValues_all()
 {
 	for (int i=1; i<=size.get_dir1(); ++i)
 	{
@@ -262,6 +262,39 @@ template <typename type> void SpacialArray2D<type>::set_adiabaticBdyValues()
 	
 }
 
+template <typename type> void SpacialArray2D<type>::set_DirichletBdyValues_all(const type& value)
+{
+	for (int i=1; i<=size.get_dir1(); ++i)
+	{
+		int j=0;
+		write( i,j, value );
+
+		j=size.get_dir2()+1;
+		write( i,j, value );
+	}
+
+	for (int j=1; j<=size.get_dir2(); ++j)
+	{
+		int i=0;
+		write( i,j, value );
+
+		i=size.get_dir1()+1;
+		write( i,j, value );
+	}
+}
+
+template <typename type> type SpacialArray2D<type>::get_max() const	
+{
+	type maxValue=get(1,1);
+	for (int i=1; i<=size.get_dir1(); ++i)
+	for (int j=1; j<=size.get_dir2(); ++j)
+		{
+			type localValue=get(i,j);
+			if (localValue > maxValue)
+				maxValue = localValue;
+		}
+	return maxValue;
+}
 
 template class SpacialArray2D<Vector2D<double> >;
 template class SpacialArray2D<double>;

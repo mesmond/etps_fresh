@@ -98,6 +98,8 @@ PerfectGas2D::~PerfectGas2D()
 	}
 }
 
+//***************************************************************************
+//Print Data*****************************************************************
 
 
 //***************************************************************************
@@ -141,12 +143,69 @@ void PerfectGas2D::init_fromBasicProps()
 		totalEnergy_rhs.write(i,j, 0.0);
 
 		//Properties*****************************************************
-		soundSpeed.write(i,j, getSoundSpeed(i,j));
-		thermalConductivity.write(i,j, getThermalConductivity(i,j));
-		thermalDiffusivity.write(i,j, getThermalDiffusivity(i,j));
-		dynamicViscosity.write(i,j, getDynamicViscosity(i,j));
-		kinematicViscosity.write(i,j, getKinematicViscosity(i,j));
+		soundSpeed.write(i,j, calcSoundSpeed(i,j));
+		thermalConductivity.write(i,j, calcThermalConductivity(i,j));
+		thermalDiffusivity.write(i,j, calcThermalDiffusivity(i,j));
+		dynamicViscosity.write(i,j, calcDynamicViscosity(i,j));
+		kinematicViscosity.write(i,j, calcKinematicViscosity(i,j));
 	}
+}
+
+//***************************************************************************
+//Update Data****************************************************************
+void PerfectGas2D::update_from_rhs(int i, int j, double timeStep)
+{
+	//Get new Values*********************************************************
+	double massDensity_new=massDensity.get(i,j)
+		+timeStep*continuity_rhs.get(i,j);
+	Vector2D<double> momentum_new=momentum.get(i,j)
+		+timeStep*momentum_rhs.get(i,j);
+	double totalEnergy_new=totalEnergy.get(i,j)
+		+timeStep*totalEnergy_rhs.get(i,j);
+
+	//Update Dependent Variables*********************************************
+	massDensity.write(i,j, massDensity_new);
+	momentum.write(i,j, momentum_new);
+	totalEnergy.write(i,j, totalEnergy_new);
+
+	//Update Object State****************************************************
+	molarDensity.write(i,j, massDensity_new/(particleMass*c_Avagadro) );
+	velocity.write(i,j, momentum_new*(1.0/massDensity_new));
+	double localKineticEnergy=0.5*massDensity_new*pow(
+		velocity.get(i,j).get_magnitude(), 2.0);
+	internalEnergy.write(i,j, totalEnergy_new-localKineticEnergy);
+	temperature.write(i,j, internalEnergy.get(i,j)
+		*(1.0/(massDensity_new*Cv_J_per_kg_K())));
+
+	pressure.write(i,j, calcPressure(i,j));
+	soundSpeed.write(i,j, calcSoundSpeed(i,j) );
+	thermalConductivity.write(i,j, calcThermalConductivity(i,j) );
+	thermalDiffusivity.write(i,j, calcThermalDiffusivity(i,j) );
+	dynamicViscosity.write(i,j, calcDynamicViscosity(i,j) );
+	kinematicViscosity.write(i,j, calcKinematicViscosity(i,j) );
+}
+
+void PerfectGas2D::update_boundary_values()
+{
+	massDensity.set_NeumannBdyValues_all();
+	molarDensity.set_NeumannBdyValues_all();
+	momentum.set_DirichletBdyValues_all(Vector2D<double>(0.0,0.0) );
+	velocity.set_DirichletBdyValues_all(Vector2D<double>(0.0,0.0) );
+	totalEnergy.set_NeumannBdyValues_all();
+	internalEnergy.set_NeumannBdyValues_all();
+
+	temperature.set_NeumannBdyValues_all();
+}
+
+//***************************************************************************
+//Get Data*******************************************************************
+
+double PerfectGas2D::get_explicit_timeStep(double CFL_number) const
+{
+	double maxSoundSpeed=soundSpeed.get_max();
+	double minMeshSpacing=geometry->get_minMeshSpacing();
+
+	return CFL_number*minMeshSpacing/maxSoundSpeed;
 }
 
 //***************************************************************************
@@ -174,7 +233,7 @@ double PerfectGas2D::collFreq(int i, int j) const
 
 //***************************************************************************
 //Properties*****************************************************************
-double PerfectGas2D::getThermalConductivity(int i, int j) const //units: [W m^{-1} K{-1}]
+double PerfectGas2D::calcThermalConductivity(int i, int j) const //units: [W m^{-1} K{-1}]
 {
 	//See Bukowski (1996).
 	//See Woods (1993) pg. 64.
@@ -183,14 +242,14 @@ double PerfectGas2D::getThermalConductivity(int i, int j) const //units: [W m^{-
 		/(particleMass*collFreq(i,j)); //units: [W m^{-1} K{-1}]
 }
 
-double PerfectGas2D::getThermalDiffusivity(int i, int j) const //units: m^2/s
+double PerfectGas2D::calcThermalDiffusivity(int i, int j) const //units: m^2/s
 {
-	return getThermalConductivity(i,j)
+	return calcThermalConductivity(i,j)
 		/(massDensity.get(i,j)*Cv_J_per_kg_K());
 		//units: m^2/s
 }
 
-double PerfectGas2D::getDynamicViscosity(int i, int j) const //units: [Pa s]
+double PerfectGas2D::calcDynamicViscosity(int i, int j) const //units: [Pa s]
 {
 	//See Woods (1993) pg. 50
 	return 1.4962*(2.0/3.0)
@@ -199,11 +258,20 @@ double PerfectGas2D::getDynamicViscosity(int i, int j) const //units: [Pa s]
 		//units: Pa s
 }
 
-double PerfectGas2D::getKinematicViscosity(int i, int j) const //units: [m^2/s]
+double PerfectGas2D::calcKinematicViscosity(int i, int j) const //units: [m^2/s]
 {
-	return getDynamicViscosity(i,j)
+	return calcDynamicViscosity(i,j)
 		/(massDensity.get(i,j));
 		//units: [m^2/s]
 }
 
+//***************************************************************************
+//Thermal Speeds*************************************************************
 
+
+//***************************************************************************
+//Collisions*****************************************************************
+
+
+//***************************************************************************
+//Properties*****************************************************************

@@ -153,6 +153,8 @@ class StructuredGeometry2D
 	Point2D<double> getPoint(int i, int j) const;
 	Vector2D<double> getMeshDelta(int i, int j) const;
 
+	inline double get_minMeshSpacing() const { return minMeshSpacing; }
+
 	//Coordinate System Specific Functions: Default to rectangular.
 	virtual double getVolume(int i, int j) const;
 	virtual StructuredLocalField2D<double> getCellAreas(int i, int j) const;

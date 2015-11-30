@@ -140,6 +140,10 @@ template <typename T> Vector2D<T> operator+(const Vector2D<T>& v1, const Vector2
 						v1.get_dir2() + v2.get_dir2() 	);
 }
 
+template <typename T> bool operator>(const Vector2D<T>& v1, const Vector2D<T>& v2)
+{
+	return v1.get_magnitude() > v2.get_magnitude();
+}
 
 template <typename T> T dotProduct(const Vector2D<T>& vec1, const Vector2D<T>& vec2)
 {
@@ -329,7 +333,9 @@ template <class type> class SpacialArray2D
 
 	void print() const;
 	void fill(const type& value);
-	void set_adiabaticBdyValues();
+	void set_NeumannBdyValues_all();
+	void set_DirichletBdyValues_all(const type& value);
+	type get_max() const;
 
 	StructuredLocalField2D<type> getLocalField(int i, int j) const;
 };

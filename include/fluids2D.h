@@ -19,10 +19,14 @@
 #include "dataTypes2D.h"
 #include "structuredGeometry2D.h"
 
+class Euler2D;
+
 using namespace std;
 
 class PerfectGas2D
 {
+	friend class Euler2D;
+	
 	private:
 	//Mesh Size**************************************************************
 	StructuredGeometry2D* geometry;
@@ -88,13 +92,46 @@ class PerfectGas2D
 
 	void init_fromBasicProps();
 
+
+
+	void init_test()
+	{
+		double air_temperature=20.0;	//deg C
+		fill_temperature(air_temperature+273.15);	//K
+		fill_pressure(101325.0);					//Pa
+		fill_velocity(Vector2D<double>(0.0,0.0));	//m/s
+		
+		init_fromBasicProps();
+
+		temperature.write(1,1, 800);
+		pressure.write(1,1, calcPressure(1,1));
+	}
+
+	//***********************************************************************
+	//Update Data************************************************************
+	inline void continuity_write_rhs(int i, int j, double value)
+		{ continuity_rhs.write(i,j, value); }
+	inline void momentum_write_rhs(int i, int j, Vector2D<double> value)
+		{ momentum_rhs.write(i,j, value); }
+	inline void totalEnergy_write_rhs(int i, int j, double value)
+		{ totalEnergy_rhs.write(i,j, value); }
+
+	void update_from_rhs(int i, int j, double timeStep);
+
+	void update_boundary_values();
 	//***********************************************************************
 	//Get Data***************************************************************
-	StructuredLocalField2D<double> getCellAreas(int i, int j)
+	
+	inline StructuredLocalField2D<double> getCellAreas(int i, int j) const
 		{ return geometry->getCellAreas(i,j); }
 
-	double getVolume(int i, int j)
+	inline double getVolume(int i, int j) const
 		{ return geometry->getVolume(i,j); }
+
+	inline Vector2D<int> getSize() const { return geometry->getSize(); }
+
+	double get_explicit_timeStep(double CFL_number=0.5) const;
+
 
 	//***********************************************************************
 	//Calculate Data*********************************************************
@@ -114,9 +151,45 @@ class PerfectGas2D
 	double calcPressure(int i, int j) const; //units: Pa
 	double calcInternalEnergy(int i, int j) const; //units: J/m^3
 
-	//***********************************************************************
-	//Get Data***************************************************************
-	inline Vector2D<int> getSize() const { return geometry->getSize(); }
+
+	/*
+	 * Function: calcSoundSpeed()
+	 * Purpose: Return the local fluid sound speed based on the
+	 * 	temperature, specific heat ratio, and particle mass.
+	 */
+	inline double calcSoundSpeed(int i, int j) const //units: m/s
+		{ return sqrt(gamma*c_k*temperature.get(i,j)/particleMass); }
+
+	/*
+	 * 	Function: calcThermalConductivity()
+	 *	Purpose: Return the thermal conductivity based on
+	 * 		self collisions only and assuming electrically neutral.
+	 */
+	double calcThermalConductivity(int i, int j) const; //units: [W m^{-1} K{-1}]
+
+	/*
+	 * 	Function: calcThermalDiffusivity()
+	 *	Purpose: Return the thermal diffusivity based on
+	 * 		the local thermal conductivity and density.
+	 */
+	double calcThermalDiffusivity(int i, int j) const; //units: m^2/s
+
+	/*
+	 * 	Function: calcDynamicViscosity()
+	 *	Purpose: Return the dynamic viscosity based on
+	 * 		the assumption of electrical neutrality.
+	 *
+	 * 	Description: See Woods (1993) pg. 50
+	 */
+	double calcDynamicViscosity(int i, int j) const; //units: [Pa s]
+
+	/*
+	 * 	Function: calcKinematicViscosity()
+	 *	Purpose: Return the kinematic viscosity based on
+	 * 		the dynamic viscosity and the density.
+	 */
+	double calcKinematicViscosity(int i, int j) const; //units: [m^2/s]
+
 
 	//***********************************************************************
 	//Thermal Speeds*********************************************************
@@ -159,44 +232,6 @@ class PerfectGas2D
 	//***********************************************************************
 	//Properties*************************************************************
 	/*
-	 * 	Function: getThermalConductivity()
-	 *	Purpose: Return the thermal conductivity based on
-	 * 		self collisions only and assuming electrically neutral.
-	 */
-	double getThermalConductivity(int i, int j) const; //units: [W m^{-1} K{-1}]
-
-	/*
-	 * 	Function: getThermalDiffusivity()
-	 *	Purpose: Return the thermal diffusivity based on
-	 * 		the local thermal conductivity and density.
-	 */
-	double getThermalDiffusivity(int i, int j) const; //units: m^2/s
-
-	/*
-	 * 	Function: getDynamicViscosity()
-	 *	Purpose: Return the dynamic viscosity based on
-	 * 		the assumption of electrical neutrality.
-	 *
-	 * 	Description: See Woods (1993) pg. 50
-	 */
-	double getDynamicViscosity(int i, int j) const; //units: [Pa s]
-
-	/*
-	 * 	Function: getKinematicViscosity()
-	 *	Purpose: Return the kinematic viscosity based on
-	 * 		the dynamic viscosity and the density.
-	 */
-	double getKinematicViscosity(int i, int j) const; //units: [m^2/s]
-
-
-	/*
-	 * Function: getSoundSpeed()
-	 * Purpose: Return the local fluid sound speed.
-	 */
-	inline double getSoundSpeed(int i, int j) const //units: m/s
-		{ return sqrt(gamma*c_k*temperature.get(i,j)/particleMass); }
-	
-	/*
 	 * Function: Cv_J_per_kg_K()
 	 * Purpose: Return the specific heat of the fluid at a constant volume.
 	 * 	Units are J/(kg K).
@@ -214,24 +249,76 @@ class PerfectGas2D
 
 };
 
-//~ class Euler2D
-//~ {
-	//~ public:
-	//~ Operators2D* operate;
-	//~ Euler2D(Operators2D* ptr)
-	//~ {
-		//~ operate=ptr;
-//~ 
-		//~ cout << "operate->getVolume(i,j)=" << operate->getVolume(2,3) << endl;
-	//~ }
-//~ 
-//~ 
-//~ 
-	//~ double continuity_rhs(const PerfectGas2D& fluid)
-	//~ {
-		//~ return 0.0;
-	//~ }
-//~ };
+class Euler2D
+{
+	public:
+	double get_continuity_rhs(int i, int j, const PerfectGas2D& fluid) const
+	{
+		double numericalFlux=get_numericalDissipationFlux(i,j, fluid, fluid.massDensity);
+
+		return 	(-1.0)*fluid.geometry->divergence(i,j, fluid.massDensity,
+					fluid.velocity)
+				+(-1.0)*numericalFlux;
+	}
+
+
+	Vector2D<double> get_momentum_rhs(int i, int j, const PerfectGas2D& fluid) const
+	{
+		Vector2D<double> numericalFlux=get_numericalDissipationFlux(i,j, fluid, fluid.momentum);
+		
+		return 	(-1.0)*fluid.geometry->divergence(i,j, fluid.massDensity,
+					fluid.velocity, fluid.velocity)
+				-fluid.geometry->gradient(i,j, fluid.pressure)
+				+(-1.0)*numericalFlux;
+	}
+
+
+	double get_totEnergy_rhs(int i, int j, const PerfectGas2D& fluid) const
+	{
+		double numericalFlux=get_numericalDissipationFlux(i,j, fluid, fluid.totalEnergy);
+
+		return 	(-1.0)*fluid.geometry->divergence(i,j, fluid.totalEnergy,
+					fluid.velocity)
+				-fluid.geometry->divergence(i,j, fluid.pressure,
+					fluid.velocity)
+				+(-1.0)*numericalFlux;
+	}
+
+	private:
+	template <typename T> T get_numericalDissipationFlux(int i, int j, const PerfectGas2D& fluid,
+		SpacialArray2D<T> array) const
+	{
+		StructuredLocalField2D<T> localField;
+		StructuredLocalField2D<double> soundSpeed;
+		StructuredLocalField2D<double> maxSoundSpeed;
+		StructuredLocalField2D<T> localFlux;
+
+		localField=array.getLocalField(i,j);
+		soundSpeed=fluid.soundSpeed.getLocalField(i,j);
+		
+		maxSoundSpeed.N=max_2arg(soundSpeed.P, soundSpeed.N);
+		maxSoundSpeed.S=max_2arg(soundSpeed.P, soundSpeed.S);
+		maxSoundSpeed.E=max_2arg(soundSpeed.P, soundSpeed.E);
+		maxSoundSpeed.W=max_2arg(soundSpeed.P, soundSpeed.W);
+
+		localFlux.N=-0.5*maxSoundSpeed.N*(localField.N-localField.P);
+		localFlux.S=-0.5*maxSoundSpeed.S*(localField.P-localField.S);
+		localFlux.E=-0.5*maxSoundSpeed.E*(localField.E-localField.P);
+		localFlux.W=-0.5*maxSoundSpeed.W*(localField.P-localField.W);
+
+		StructuredLocalField2D<double> area=fluid.geometry->getCellAreas(i,j);
+
+		//Compute Divergence.
+		T divergence=(1.0/fluid.geometry->getVolume(i,j))*(
+			 cellNormal_N*localFlux.N*area.N
+			+cellNormal_S*localFlux.S*area.S
+			+cellNormal_E*localFlux.E*area.E
+			+cellNormal_W*localFlux.W*area.W );
+
+		return divergence;
+
+	}
+};
 
 //~ class ThreeComponentPlasma2D
 //~ {
