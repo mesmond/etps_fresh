@@ -86,6 +86,8 @@ class StructuredGeometry2D
 		const SpacialArray2D<double>& divergence,
 		const char* fileName="output.vtk") const;
 
+	void vtkOutput(ofstream& output);
+
 	//Diferential Operators**************************************************
 	private:
 	template <typename T> T getDivergenceFromField(int i, int j,

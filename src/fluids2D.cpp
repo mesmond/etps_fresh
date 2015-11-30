@@ -100,7 +100,161 @@ PerfectGas2D::~PerfectGas2D()
 
 //***************************************************************************
 //Print Data*****************************************************************
+void PerfectGas2D::vtkOutput(const char* prefix, int& outputCount) const
+{
 
+	
+	cout << "Writing Output File, prefix=" << prefix
+		<< ", index=" << outputCount << endl;
+
+	const char *extension=".vtk";
+
+	char outputCount_char[7];
+	char buffer[100];
+
+	sprintf(outputCount_char,"%.6d",outputCount);
+
+	int charLocation=0;
+	while (prefix[charLocation] != '\0')
+	{
+		buffer[charLocation]=prefix[charLocation];
+		charLocation++;
+	}
+	buffer[charLocation]='@';
+	charLocation++;
+	buffer[charLocation]='-';
+	charLocation++;
+	int prefixLength=charLocation;
+	
+	while ( (charLocation-prefixLength) < 6 )
+	{
+		buffer[charLocation]=outputCount_char[charLocation-prefixLength];
+		charLocation++;
+	}
+	prefixLength=charLocation;
+	while ( (charLocation-prefixLength) < 4 )
+	{
+		buffer[charLocation]=extension[charLocation-prefixLength];
+		charLocation++;
+	}
+
+	
+	buffer[charLocation]='\0';
+
+	//~ cout << "buffer=" << buffer << endl;	
+	
+
+
+	//Store the output precision so that it can be returned to its
+	//	usual value after this function.
+	//~ streamsize ss = cout.precision();
+
+	ofstream output;
+	output.open(buffer, ios::out);
+
+	if (output.is_open())
+	{
+		output << "# vtk DataFile Version 2.0" << endl;
+		output 	<< "Blank"
+				<< scientific
+				<< setprecision(10)
+				<< endl;
+		output << "ASCII" << endl;
+
+
+		geometry->vtkOutput(output);
+		
+
+
+
+
+
+
+
+
+
+
+		output.close();
+	}
+	else
+	{
+		cout << "Unable to open output file=" << buffer << endl;
+		exit(1);
+	}
+
+
+
+	
+//~ 
+//~ 
+	//~ if ( output.is_open() )
+	//~ {
+		//~ int maxi=numZones.get_dir1()+1;
+		//~ int maxj=numZones.get_dir2()+1;
+		//~ output << "# vtk DataFile Version 2.0" << endl;
+		//~ output 	<< "Blank"
+				//~ << scientific
+				//~ << setprecision(10)
+				//~ << endl;
+		//~ output << "ASCII" << endl;
+		//~ output	<< "DATASET STRUCTURED_GRID" << endl;
+//~ 
+		//~ output << "DIMENSIONS " << maxi << " " 
+				//~ << maxj << " 2" << endl;
+//~ 
+		//~ output << "POINTS " <<
+			//~ maxi*maxj*2
+			//~ << " float\n";
+//~ 
+		//~ for (double depth=0.0; depth<0.00101; depth=depth+0.001)
+		//~ {
+			//~ for (int j=1; j<=maxj; ++j) {
+			//~ for (int i=1; i<=maxi; ++i)
+			//~ {
+				//~ output	<< globalCoord.dir1[i]-0.5*zoneDelta.dir1[i]
+						//~ << " "
+						//~ << globalCoord.dir2[j]-0.5*zoneDelta.dir2[j]
+						//~ << " "
+						//~ << depth << endl;
+			//~ }}
+		//~ }
+//~ 
+		//~ output.close();
+//~ 
+	//~ }
+//~ 
+	//~ 
+	//~ vtkOutput(scalar, vector, fileName);
+//~ 
+	//~ //Store the output precision so that it can be returned to its
+	//~ //	usual value after this function.
+	//~ streamsize ss = cout.precision();
+//~ 
+	//~ assert(divergence.getCount_dir1() == numZones.get_dir1());
+	//~ assert(divergence.getCount_dir2() == numZones.get_dir2());
+//~ 
+	//~ ofstream output;
+	//~ output.open(fileName, ios::app);
+//~ 
+	//~ if ( output.is_open() )
+	//~ {
+		//~ output << "\nSCALARS " << "divergence" << " float" << endl;
+		//~ output << "LOOKUP_TABLE default" << endl;
+		//~ for (int j=1; j<=numZones.get_dir2(); ++j){
+		//~ for (int i=1; i<=numZones.get_dir1(); ++i)
+		//~ {
+			//~ output << divergence.get(i,j) << endl;
+		//~ }}
+		//~ output << endl;
+		//~ 
+		//~ output.close();
+	//~ }
+
+
+	outputCount++;
+	//Restore original cout precision.
+	//~ cout.precision (ss);
+}
 
 //***************************************************************************
 //Fill Data******************************************************************

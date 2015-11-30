@@ -65,6 +65,8 @@ int main(int argc, char *argv[])
 	Euler2D euler;
 	double simTime=0.0;
 	double timeStep=1.0e-12;
+	int outputCount=0;
+	air.vtkOutput("output", outputCount);
 
 	//~ air.set_boundary_conditions();
 
@@ -91,6 +93,8 @@ int main(int argc, char *argv[])
 		simTime+=timeStep;
 		air.update_boundary_values();
 		timeStep=air.get_explicit_timeStep();
+
+		air.vtkOutput("output", outputCount);
 	}
 
 	cout << "Simulation Done!" << endl;

@@ -12,7 +12,7 @@
 #define INCLUDE_FLUIDS2D_H_
 
 #include <iostream>
-#include <string.h>
+//~ #include <string.h>
 //~ #include <typeinfo>
 
 #include "simulationConstants.h"
@@ -84,6 +84,8 @@ class PerfectGas2D
 	inline void print_thermalConductivity() const { thermalConductivity.print(); }
 	inline void print_geometry() const { geometry->print(); }
 
+	void vtkOutput(const char* prefix, int& outputCount) const;
+
 	//***********************************************************************
 	//Fill Data**************************************************************
 	inline void fill_temperature(const double& scalar) { temperature.fill(scalar); }
@@ -100,11 +102,13 @@ class PerfectGas2D
 		fill_temperature(air_temperature+273.15);	//K
 		fill_pressure(101325.0);					//Pa
 		fill_velocity(Vector2D<double>(0.0,0.0));	//m/s
-		
-		init_fromBasicProps();
+
 
 		temperature.write(1,1, 800);
 		pressure.write(1,1, calcPressure(1,1));
+
+		
+		init_fromBasicProps();
 	}
 
 	//***********************************************************************
