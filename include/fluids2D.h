@@ -103,6 +103,7 @@ class PerfectGas2D
 		fill_pressure(101325.0);					//Pa
 		fill_velocity(Vector2D<double>(0.0,0.0));	//m/s
 
+		init_fromBasicProps();
 
 		temperature.write(1,1, 800);
 		pressure.write(1,1, calcPressure(1,1));

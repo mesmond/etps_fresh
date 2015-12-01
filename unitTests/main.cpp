@@ -48,53 +48,52 @@ int main(int argc, char *argv[])
 
 	Point2D<double> origin(0.0,0.0);
 	Point2D<double> length(1.0,1.0);
-	Vector2D<int> size(20,20);
+	Vector2D<int> size(100,100);
 	StructuredGeometry2D geom(origin, origin+length, size);
 
 	PerfectGas2D air(geom);
-	
-	//~ double air_temperature=20.0;	//deg C
-	//~ air.fill_temperature(air_temperature+273.15);	//K
-	//~ air.fill_pressure(101325.0);					//Pa
-	//~ air.fill_velocity(Vector2D<double>(0.0,0.0));	//m/s
-	//~ 
-	//~ air.init_fromBasicProps();
 
 	air.init_test();
+	//~ air.set_boundary_conditions();
+	air.update_boundary_values();
 
 	Euler2D euler;
 	double simTime=0.0;
-	double timeStep=1.0e-12;
+	double timeStep=1.0e-10;
+	double dt_dump=1.0e-4;
 	int outputCount=0;
 	air.vtkOutput("output", outputCount);
 
-	//~ air.set_boundary_conditions();
-
-	while (simTime <1e-10)
+	while (simTime <1e-1)
 	{
+		cout << "*** SimTime=" << simTime << ", timeStep=" << timeStep << endl;
+		
 		for (int i=1; i<=air.getSize().get_dir1(); ++i)
-			for (int j=1; j<=air.getSize().get_dir2(); ++j)
-			{
-				double continuity_rhs=euler.get_continuity_rhs(i,j, air);
-				Vector2D<double> momentum_rhs=euler.get_momentum_rhs(i,j, air);
-				double totEnergy_rhs=euler.get_totEnergy_rhs(i,j, air);
+		for (int j=1; j<=air.getSize().get_dir2(); ++j)
+		{
+			double continuity_rhs=euler.get_continuity_rhs(i,j, air);
+			Vector2D<double> momentum_rhs=euler.get_momentum_rhs(i,j, air);
+			double totEnergy_rhs=euler.get_totEnergy_rhs(i,j, air);
 
-				air.continuity_write_rhs(i,j, continuity_rhs);
-				air.momentum_write_rhs(i,j, momentum_rhs);
-				air.totalEnergy_write_rhs(i,j, totEnergy_rhs);
-			}
+			air.continuity_write_rhs(i,j, continuity_rhs);
+			air.momentum_write_rhs(i,j, momentum_rhs);
+			air.totalEnergy_write_rhs(i,j, totEnergy_rhs);
+		}
 
 		for (int i=1; i<=air.getSize().get_dir1(); ++i)
-			for (int j=1; j<=air.getSize().get_dir2(); ++j)
-			{
-				air.update_from_rhs(i,j, timeStep);
-			}
+		for (int j=1; j<=air.getSize().get_dir2(); ++j)
+		{
+			air.update_from_rhs(i,j, timeStep);
+		}
 
 		simTime+=timeStep;
 		air.update_boundary_values();
-		timeStep=air.get_explicit_timeStep();
 
-		air.vtkOutput("output", outputCount);
+		if (simTime >= outputCount*dt_dump)
+			air.vtkOutput("output", outputCount);
+	
+		timeStep=min_2arg(air.get_explicit_timeStep(), 1.5*timeStep);
+
 	}
 
 	cout << "Simulation Done!" << endl;

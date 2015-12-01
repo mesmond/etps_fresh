@@ -336,6 +336,7 @@ template <class type> class SpacialArray2D
 	void set_NeumannBdyValues_all();
 	void set_DirichletBdyValues_all(const type& value);
 	type get_max() const;
+	void vtkOutput(ofstream& output, const char* name) const;
 
 	StructuredLocalField2D<type> getLocalField(int i, int j) const;
 };

@@ -354,27 +354,23 @@ void StructuredGeometry2D::vtkOutput(
 void StructuredGeometry2D::vtkOutput(ofstream& output)
 {
 	output << "DATASET STRUCTURED_GRID" << endl;
-	output << "DIMENSIONS " << getCount_dir1() << " " 
-				<< getCount_dir2() << " 2" << endl;
+	output << "DIMENSIONS " << getCount_dir1()+1 << " " 
+				<< getCount_dir2()+1 << " 2" << endl;
 
-	output << "POINTS " << getCount_dir1()*getCount_dir2()*2 << " float\n";
+	output << "POINTS " << (getCount_dir1()+1)*(getCount_dir2()+1)*2 << " float\n";
 
 	for (double depth=0.0; depth<0.00101; depth=depth+0.001)
 	{
-		for (int j=1; j<=getCount_dir2(); ++j)
-			for (int i=1; i<=getCount_dir1(); ++i)
-			{
-				output	<< globalCoord.dir1[i]-0.5*zoneDelta.dir1[i]
-						<< " "
-						<< globalCoord.dir2[j]-0.5*zoneDelta.dir2[j]
-						<< " "
-						<< depth << endl;
-			}
+		for (int j=1; j<=getCount_dir2()+1; ++j){
+		for (int i=1; i<=getCount_dir1()+1; ++i)
+		{
+			output	<< globalCoord.dir1[i]-0.5*zoneDelta.dir1[i]
+					<< " "
+					<< globalCoord.dir2[j]-0.5*zoneDelta.dir2[j]
+					<< " "
+					<< depth << endl;
+		}}
 	}
-
-
-
-	//~ output << "This is the geometry." << endl;
 }
 
 

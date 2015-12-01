@@ -296,6 +296,29 @@ template <typename type> type SpacialArray2D<type>::get_max() const
 	return maxValue;
 }
 
+template <typename type> void SpacialArray2D<type>::vtkOutput(ofstream& output, const char* name) const
+{
+	output << "\nSCALARS " << name << " float" << endl;
+	output << "LOOKUP_TABLE default" << endl;
+	for (int j=1; j<=getSize_dir2(); ++j)
+	for (int i=1; i<=getSize_dir1(); ++i)
+	{
+		output << get(i,j) << endl;
+	}
+}
+
+template<> void SpacialArray2D<Vector2D<double> >::vtkOutput(ofstream& output, const char* name) const
+{
+	output << "\nVECTORS " << name << " float" << endl;
+	for (int j=1; j<=getSize_dir2(); ++j)
+	for (int i=1; i<=getSize_dir1(); ++i)
+	{
+		output 	<< get(i,j).get_dir1() << "\t"
+				<< get(i,j).get_dir2() << "\t 0.0" << endl;
+	}
+}
+
+
 template class SpacialArray2D<Vector2D<double> >;
 template class SpacialArray2D<double>;
 template class SpacialArray2D<int>;
