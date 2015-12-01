@@ -12,8 +12,6 @@
 #define INCLUDE_FLUIDS2D_H_
 
 #include <iostream>
-//~ #include <string.h>
-//~ #include <typeinfo>
 
 #include "simulationConstants.h"
 #include "dataTypes2D.h"
@@ -26,9 +24,8 @@ using namespace std;
 class PerfectGas2D
 {
 	friend class Euler2D;
-	
+
 	private:
-	//Mesh Size**************************************************************
 	StructuredGeometry2D* geometry;
 
 	//Dependent Variables****************************************************
@@ -64,6 +61,8 @@ class PerfectGas2D
 	double maxSoundSpeed;				//m/s
 
 	public:
+	//***********************************************************************
+	//Constructors***********************************************************
 	PerfectGas2D(
 		StructuredGeometry2D& geom,
 		double gamma=1.4,
@@ -84,33 +83,18 @@ class PerfectGas2D
 	inline void print_thermalConductivity() const { thermalConductivity.print(); }
 	inline void print_geometry() const { geometry->print(); }
 
+	//***********************************************************************
+	//Output Data************************************************************
 	void vtkOutput(const char* prefix, int& outputCount) const;
 
 	//***********************************************************************
 	//Fill Data**************************************************************
 	inline void fill_temperature(const double& scalar) { temperature.fill(scalar); }
-	inline void fill_velocity(const Vector2D<double>& vector) { velocity.fill(vector); }
 	inline void fill_pressure(const double& scalar) { pressure.fill(scalar); }
+	inline void fill_velocity(const Vector2D<double>& vector) { velocity.fill(vector); }
 
-	void init_fromBasicProps();
-
-
-
-	void init_test()
-	{
-		double air_temperature=20.0;	//deg C
-		fill_temperature(air_temperature+273.15);	//K
-		fill_pressure(101325.0);					//Pa
-		fill_velocity(Vector2D<double>(0.0,0.0));	//m/s
-
-		init_fromBasicProps();
-
-		temperature.write(1,1, 800);
-		pressure.write(1,1, calcPressure(1,1));
-
-		
-		init_fromBasicProps();
-	}
+	void init_from_temperature_pressure_velocity();
+	void init_test_sedov_lowIntensity();
 
 	//***********************************************************************
 	//Update Data************************************************************
@@ -124,9 +108,9 @@ class PerfectGas2D
 	void update_from_rhs(int i, int j, double timeStep);
 
 	void update_boundary_values();
+
 	//***********************************************************************
 	//Get Data***************************************************************
-	
 	inline StructuredLocalField2D<double> getCellAreas(int i, int j) const
 		{ return geometry->getCellAreas(i,j); }
 
@@ -141,114 +125,112 @@ class PerfectGas2D
 	//***********************************************************************
 	//Calculate Data*********************************************************
 	/*
-	 * Functions: calcPressure(), calcInternalEnergy()
-	 * Purpose: Calculate and return the specified value based on
-	 * 	other properties in the fluid.
+	 * Functions:
+	 * 		calcPressure() 				//units: Pa
+	 * 		calcSoundSpeed()			//units: m/s
+	 * 		calcThermalConductivity()	//units: [W m^{-1} K{-1}]
+	 *		calcThermalDiffusivity()	//units: m^2/s
+	 *		calcDynamicViscosity()		//units: [Pa s]
+	 *		calcKinematicViscosity()	//units: m^2/s
+	 * 
+	 * Purpose: Return specified fluid properties based on
+	 * 	elementary fluid values and dependent variables.
 	 *
-	 * Description:
-	 * 	calcPressure() returns the pressure
-	 * 		as computed from the molar density and the temperature.
-	 * 	calcInternalEnergy() returns the internal fluid energy based on the
-	 * 		molar density and the temperature.
-	 *
-	 * 	Units are as shown by each function.
+	 * Descriptions:
+	 * 		calcPressure(): Returns the pressure based on the density
+	 * 			and temperature.
+	 * 		calcSoundSpeed(): Returns the sound speed based on the fluid
+	 * 			temperature and fluid particle mass.
+	 * 		calcThermalConductivity(): Returns the thermal conductivity
+	 * 			based on the work of Bukowski (1996) and Woods (1993, pg. 64).
+	 * 			This is based on the fluid temperature, density, and particle
+	 * 			mass.
+	 *		calcThermalDiffusivity(): Returns the thermal diffusivity
+	 * 			based on the calculated thermal conductivity, fluid density,
+	 * 			and specific heat.
+	 *		calcDynamicViscosity(): Returns an approximation of the fluid's
+	 * 			dynamic viscosity based on the work of Woods (1993, pg. 50).
+	 *		calcKinematicViscosity(): Returns the kinematic viscosity
+	 * 			based on a calculation of the dynamic viscosity and the
+	 * 			the fluid density.
 	 */
+
 	double calcPressure(int i, int j) const; //units: Pa
-	double calcInternalEnergy(int i, int j) const; //units: J/m^3
-
-
-	/*
-	 * Function: calcSoundSpeed()
-	 * Purpose: Return the local fluid sound speed based on the
-	 * 	temperature, specific heat ratio, and particle mass.
-	 */
 	inline double calcSoundSpeed(int i, int j) const //units: m/s
 		{ return sqrt(gamma*c_k*temperature.get(i,j)/particleMass); }
-
-	/*
-	 * 	Function: calcThermalConductivity()
-	 *	Purpose: Return the thermal conductivity based on
-	 * 		self collisions only and assuming electrically neutral.
-	 */
 	double calcThermalConductivity(int i, int j) const; //units: [W m^{-1} K{-1}]
-
-	/*
-	 * 	Function: calcThermalDiffusivity()
-	 *	Purpose: Return the thermal diffusivity based on
-	 * 		the local thermal conductivity and density.
-	 */
 	double calcThermalDiffusivity(int i, int j) const; //units: m^2/s
-
-	/*
-	 * 	Function: calcDynamicViscosity()
-	 *	Purpose: Return the dynamic viscosity based on
-	 * 		the assumption of electrical neutrality.
-	 *
-	 * 	Description: See Woods (1993) pg. 50
-	 */
 	double calcDynamicViscosity(int i, int j) const; //units: [Pa s]
-
-	/*
-	 * 	Function: calcKinematicViscosity()
-	 *	Purpose: Return the kinematic viscosity based on
-	 * 		the dynamic viscosity and the density.
-	 */
 	double calcKinematicViscosity(int i, int j) const; //units: [m^2/s]
 
 
 	//***********************************************************************
 	//Thermal Speeds*********************************************************
 	/*
-	 * 	Function: thermalVelocity_avg()
-	 * 	Purpose: Return the maxwellian averaged thermal velocity.
+	 * Functions:
+	 * 		thermalVelocity_avg()		//units: m/s
+	 * 		thermalVelocity()			//units: m/s
+	 * 		thermalVelocity_rms()		//units: m/s
+	 *
+	 * Purpose: Return different representations of the velocity of
+	 * 	particles with a Maxwellian distribution.
+	 *
+	 * Descriptions:
+	 * 		thermalVelocity_avg(): Returns the average speed of all
+	 * 			the fluid particles in a Maxwellian distibution.
+	 * 		thermalVelocity(): Returns the most probable speed of
+	 * 			a fluid particle with a Maxwellian distribution.
+	 * 		thermalVelocity_rms(): Returns the RMS value of the velocity of
+	 * 			fluid particles in a Maxwellian Distribution.
 	 */
-	inline double thermalVelocity_avg(int i, int j) const
+
+	inline double thermalVelocity_avg(int i, int j) const //units: m/s
 		{ return sqrt(8.0*c_k*temperature.get(i,j)/(c_pi*particleMass) ); }
-
-	/*
-	 * 	Function: thermalVelocity()
-	 * 	Purpose: Return the maxwellian thermal velocity.  This is the
-	 * 		most probable speed of an individual particle in the gas
-	 */
-	inline double thermalVelocity(int i, int j) const
+		
+	inline double thermalVelocity(int i, int j) const //units: m/s
 		{ return sqrt(2.0*c_k*temperature.get(i,j)/particleMass ); }
-
-	/*
-	 * 	Function: thermalVelocity_rms()
-	 * 	Purpose: Return the RMS value of the velocity for a
-	 * 		maxwellian distribution.
-	 */
-	inline double thermalVelocity_rms(int i, int j) const
+		
+	inline double thermalVelocity_rms(int i, int j) const //units: m/s
 		{ return sqrt(3.0*c_k*temperature.get(i,j)/particleMass ); }
 
 
 	//***********************************************************************
 	//Collisions*************************************************************
 	/*
-	 * 	Function: collFreq()
-	 * 	Purpose: Return the self collision frequency for the fluid assuming
-	 * 		electrically neutral.
+	 * 	Function:
+	 * 		collFreq()			//units: 1/s
+	 * 
+	 * 	Purpose: Calculate and return values related to the collisionality of
+	 * 		the fluid.
 	 *
-	 * 	Description: See Woods (1993) pg. 40.
+	 * 	Description:
+	 * 		collFreq(): Returns the collision frequency
+	 * 			due to intra-species collisions. For more details,
+	 * 			See Woods (1993) pg. 40.
 	 */
+
 	inline double collFreq(int i, int j) const; //units: 1/s
 
 
 	//***********************************************************************
-	//Properties*************************************************************
+	//Specific Heat**********************************************************
 	/*
-	 * Function: Cv_J_per_kg_K()
-	 * Purpose: Return the specific heat of the fluid at a constant volume.
-	 * 	Units are J/(kg K).
+	 * Functions:
+	 * 		Cv_J_per_kg_K()			//units: J/(kg K)
+	 * 		Cv_J_per_mol_K()		//units: J/(mol K)
+	 *
+	 * Purpose: Return the fluid specific heat in desired units.
+	 *
+	 * Descriptions:
+	 * 		Cv_J_per_kg_K(): Return the specific heat of
+	 * 			the fluid at a constant volume. Units are J/(kg K).
+	 * 		Cv_J_per_mol_K(): Return the specific heat of
+	 * 			the fluid at a constant volume. Units are J/(mol K).
 	 */
+
 	inline double Cv_J_per_kg_K() const //units: J/(kg K)
 		{ return c_k/((gamma-1.0)*particleMass); }
 
-	/*
-	 * Function: Cv_J_per_mol_K()
-	 * Purpose: Return the specific heat of the fluid at a constant volume.
-	 * 	Units are J/(mol K).
-	 */
 	inline double Cv_J_per_mol_K() const //units: J/(mol K)
 		{ return c_univGasConst/(gamma-1.0); }
 

@@ -1,0 +1,1 @@
+Write a function to return the output file name given a file prefix, extension and output index.

@@ -100,6 +100,9 @@ PerfectGas2D::~PerfectGas2D()
 
 //***************************************************************************
 //Print Data*****************************************************************
+
+//***************************************************************************
+//Output Data****************************************************************
 void PerfectGas2D::vtkOutput(const char* prefix, int& outputCount) const
 {	
 	cout << "\t\t Writing Output File, prefix=" << prefix
@@ -188,7 +191,7 @@ void PerfectGas2D::vtkOutput(const char* prefix, int& outputCount) const
 
 //***************************************************************************
 //Fill Data******************************************************************
-void PerfectGas2D::init_fromBasicProps()
+void PerfectGas2D::init_from_temperature_pressure_velocity()
 {
 	for (int i=0; i<=getSize().get_dir1()+1; ++i)
 	for (int j=0; j<=getSize().get_dir2()+1; ++j)
@@ -234,6 +237,22 @@ void PerfectGas2D::init_fromBasicProps()
 		kinematicViscosity.write(i,j, calcKinematicViscosity(i,j));
 	}
 }
+
+void PerfectGas2D::init_test_sedov_lowIntensity()
+{
+	double air_temperature=20.0;	//deg C
+	fill_temperature(air_temperature+273.15);	//K
+	fill_pressure(101325.0);					//Pa
+	fill_velocity(Vector2D<double>(0.0,0.0));	//m/s
+
+	init_from_temperature_pressure_velocity();
+
+	temperature.write(1,1, 800);
+	pressure.write(1,1, calcPressure(1,1));
+
+	init_from_temperature_pressure_velocity();
+}
+
 
 //***************************************************************************
 //Update Data****************************************************************
@@ -298,11 +317,6 @@ double PerfectGas2D::calcPressure(int i, int j) const //units: Pa
 {
 	return molarDensity.get(i,j)*c_univGasConst*temperature.get(i,j);
 		//units: Pa
-}
-double PerfectGas2D::calcInternalEnergy(int i, int j) const //units: J/m^3
-{
-	return molarDensity.get(i,j)*Cv_J_per_mol_K()*temperature.get(i,j);
-		//units: J/m^3
 }
 
 //***************************************************************************

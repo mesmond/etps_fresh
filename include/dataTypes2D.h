@@ -8,7 +8,6 @@
  * 		Vector2D
  * 		Dyad2D
  * 		StructuredLocalField2D
- * 		StructuredGeometry2D
  * 		SpacialArray2D
 */
 //***************************************************************************
@@ -41,7 +40,7 @@ using namespace std;
  */
 template <class type> class Point2D
 {
-	protected:
+	private:
 	type dir1;
 	type dir2;
 

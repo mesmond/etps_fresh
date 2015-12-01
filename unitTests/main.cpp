@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 
 	PerfectGas2D air(geom);
 
-	air.init_test();
+	air.init_test_sedov_lowIntensity();
 	//~ air.set_boundary_conditions();
 	air.update_boundary_values();
 
@@ -133,7 +133,7 @@ void test_PerfectGas2D()
 	air.fill_temperature(air_temperature+273.15);	//K
 	air.fill_pressure(101325.0);					//Pa
 	air.fill_velocity(Vector2D<double>(0.0,0.0));	//m/s
-	air.init_fromBasicProps();
+	air.init_from_temperature_pressure_velocity();
 	//~ air.print_geometry();
 
 	int soundSpeed=(int)air.calcSoundSpeed(2,3);
