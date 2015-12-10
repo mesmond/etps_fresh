@@ -217,21 +217,21 @@ void PerfectGas2D::sodProblemOutput(double simTime)
 		output << "# Output Time(s)=" << simTime << endl;
 
 		//Column Headers
-		output 	<< "#Position_dir1(m)"
-				<< "\t Pressure(Pa)"
-				<< "\t MassDensity(kg/m^3)"
-				<< "\t Temperature(K)"
-				<< "\t Veclocity_dir1(m/s)"
+		output 	<< "#Position_dir1(cm)"
+				<< "\t Pressure(Mbar)"
+				<< "\t MassDensity(g/cc)"
+				<< "\t Veclocity_dir1(cm/micsec)"
+				<< "\t Temperature(Mbar cc/g)"
 				<< endl;
 
 		int j=1;
 		for (int i=1; i<=getSize().get_dir1(); ++i)
 		{
-			output 	<< geometry->getPoint(i,j).get_dir1()
-					<< "\t" << pressure.get(i,j)
-					<< "\t" << massDensity.get(i,j)
-					<< "\t" << temperature.get(i,j)
-					<< "\t" << velocity.get(i,j).get_dir1()
+			output 	<< geometry->getPoint(i,j).get_dir1()*1.0e2 //units: cm
+					<< "\t" << pressure.get(i,j)*1.0e-11 //units: Mbar
+					<< "\t" << massDensity.get(i,j)*1.0e-3 //units: g/cc
+					<< "\t" << velocity.get(i,j).get_dir1()*1.0e-4 //units: cm/micsec
+					<< "\t" << temperature.get(i,j)*Cv_J_per_kg_K()*1.0e-8 //units: Mbar cc/g
 					<< endl;
 		}
 
