@@ -12,10 +12,12 @@
 #define INCLUDE_FLUIDS2D_H_
 
 #include <iostream>
+#include <string.h>
 
 #include "simulationConstants.h"
 #include "dataTypes2D.h"
 #include "structuredGeometry2D.h"
+#include "mesmond-utils.h"
 
 class Euler2D;
 
@@ -38,8 +40,8 @@ class PerfectGas2D
 	SpacialArray2D<double> temperature;						//Kelvin
 	SpacialArray2D<double> internalEnergy;					//J/m^3
 	SpacialArray2D<double> totalEnergy;						//J/m^3
-	
-	SpacialArray2D<double> pressure;
+
+	SpacialArray2D<double> pressure;						//Pa
 
 	//Governing Equations' right hand sides**********************************
 	SpacialArray2D<double> continuity_rhs;
@@ -86,6 +88,7 @@ class PerfectGas2D
 	//***********************************************************************
 	//Output Data************************************************************
 	void vtkOutput(const char* prefix, int& outputCount) const;
+	void sodProblemOutput(double simTime);
 
 	//***********************************************************************
 	//Fill Data**************************************************************
@@ -95,6 +98,7 @@ class PerfectGas2D
 
 	void init_from_temperature_pressure_velocity();
 	void init_test_sedov_lowIntensity();
+	void init_test_sod_shockTube();
 
 	//***********************************************************************
 	//Update Data************************************************************
@@ -252,7 +256,7 @@ class Euler2D
 	Vector2D<double> get_momentum_rhs(int i, int j, const PerfectGas2D& fluid) const
 	{
 		Vector2D<double> numericalFlux=get_numericalDissipationFlux(i,j, fluid, fluid.momentum);
-		
+
 		return 	(-1.0)*fluid.geometry->divergence(i,j, fluid.massDensity,
 					fluid.velocity, fluid.velocity)
 				-fluid.geometry->gradient(i,j, fluid.pressure)

@@ -25,6 +25,10 @@ double min_2arg(double arg1, double arg2);
 double max_2arg(double arg1, double arg2);
 double max_array(double array[],int num_elements);
 
+
+int getLength(const char* word);
+
+
 /*
  * Function: IsEqual()
  * Purpose: Compare floating point numbers for equality.

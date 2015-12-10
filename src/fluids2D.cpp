@@ -35,7 +35,8 @@ PerfectGas2D::PerfectGas2D( //Constructor
 		kinematicViscosity(geom.getSize()),
 		gamma(gamma),
 		particleMass(particleMass),
-		particleRadius(particleRadius)
+		particleRadius(particleRadius),
+		molarWeight(particleMass*c_Avagadro)
 {
 	//Check to see if the input Structured Geometry is Cylindrical.
 	StructuredCylGeometry2D* test=dynamic_cast<StructuredCylGeometry2D*>(&geom);
@@ -73,7 +74,8 @@ PerfectGas2D::PerfectGas2D(const PerfectGas2D& that) //Copy Constructor
 		kinematicViscosity(that.geometry->getSize()),
 		gamma(that.gamma),
 		particleMass(that.particleMass),
-		particleRadius(that.particleRadius)
+		particleRadius(that.particleRadius),
+		molarWeight(particleMass*c_Avagadro)
 {
 	//Check to see if the input Structured Geometry is Cylindrical.
 	StructuredCylGeometry2D* test=dynamic_cast<StructuredCylGeometry2D*>(that.geometry);
@@ -189,6 +191,61 @@ void PerfectGas2D::vtkOutput(const char* prefix, int& outputCount) const
 	outputCount++;
 }
 
+void PerfectGas2D::sodProblemOutput(double simTime)
+{
+	char zoneCount_char[9];
+	sprintf(zoneCount_char,"%.8d", getSize().get_dir1());
+	string prefix="SodProblemOutput-";
+	string extension=".out";
+	string number=zoneCount_char;
+	string fileName="SodProblemOutput-"+number+"z"+".out";
+	
+	//Open the file.
+	ofstream output;
+	output.open(fileName.c_str(), ios::out); //Clear contents if it exists.
+
+	//Output the data to the output file.
+	if (output.is_open())
+	{
+		output 	<< scientific
+				<< setprecision(10);
+		
+		output << "# Sod Problem Data" << endl;
+		output << "# Designed for a Shock propagating in the dir1 direction." << endl;
+		output << "# Number of zones in direction of interest="
+			<< getSize().get_dir1() << endl;
+		output << "# Output Time(s)=" << simTime << endl;
+
+		//Column Headers
+		output 	<< "#Position_dir1(m)"
+				<< "\t Pressure(Pa)"
+				<< "\t MassDensity(kg/m^3)"
+				<< "\t Temperature(K)"
+				<< "\t Veclocity_dir1(m/s)"
+				<< endl;
+
+		int j=1;
+		for (int i=1; i<=getSize().get_dir1(); ++i)
+		{
+			output 	<< geometry->getPoint(i,j).get_dir1()
+					<< "\t" << pressure.get(i,j)
+					<< "\t" << massDensity.get(i,j)
+					<< "\t" << temperature.get(i,j)
+					<< "\t" << velocity.get(i,j).get_dir1()
+					<< endl;
+		}
+
+		output.close();
+	}
+	else
+	{
+		cout << "Unable to open output file=" << fileName << endl;
+		exit(1);
+	}
+}
+
+
+
 //***************************************************************************
 //Fill Data******************************************************************
 void PerfectGas2D::init_from_temperature_pressure_velocity()
@@ -253,11 +310,51 @@ void PerfectGas2D::init_test_sedov_lowIntensity()
 	init_from_temperature_pressure_velocity();
 }
 
+void PerfectGas2D::init_test_sod_shockTube()
+{
+	fill_velocity(Vector2D<double>(0.0,0.0));	//m/s
+
+	double highPressure=1.0e11; 	//units: Pa
+	double highTemp=92676.71837;	//units: K
+
+	double lowPressure=0.1e11; 		//units: Pa
+	double lowTemp=74141.37469; 	//units: K
+
+	fill_temperature(lowTemp);	//K
+	fill_pressure(lowPressure);					//Pa
+
+	init_from_temperature_pressure_velocity();
+
+	for (int i=0; i<=getSize().get_dir1()+1; ++i)
+	for (int j=0; j<=getSize().get_dir2()+1; ++j)
+	{
+		if (i<=getSize().get_dir1()/2)
+		{
+			pressure.write(i,j, highPressure);
+			temperature.write(i,j, highTemp);
+		}
+	}
+
+	init_from_temperature_pressure_velocity();
+}
+
+
+
 
 //***************************************************************************
 //Update Data****************************************************************
 void PerfectGas2D::update_from_rhs(int i, int j, double timeStep)
 {
+
+	//~ if (i == getSize().get_dir1()/2 && j==1)
+	//~ {
+		//~ cout << "MassDensity Before=" << massDensity.get(i,j);
+		//~ cout << "\t MassDensity RHS=" << continuity_rhs.get(i,j);
+		//~ cout << "\t (i=" << i << ")" << endl;
+	//~ }
+
+
+	
 	//Get new Values*********************************************************
 	double massDensity_new=massDensity.get(i,j)
 		+timeStep*continuity_rhs.get(i,j);
@@ -270,6 +367,18 @@ void PerfectGas2D::update_from_rhs(int i, int j, double timeStep)
 	massDensity.write(i,j, massDensity_new);
 	momentum.write(i,j, momentum_new);
 	totalEnergy.write(i,j, totalEnergy_new);
+
+
+	//~ if (i == getSize().get_dir1()/2 && j==1)
+	//~ {
+		//~ cout << "MassDensity After=" << massDensity.get(i,j);
+		//~ cout << "\t MassDensity RHS=" << continuity_rhs.get(i,j);
+		//~ cout << "\t (i=" << i << ")" << endl;
+//~ 
+		//~ cin.get();
+	//~ }
+
+
 
 	//Update Object State****************************************************
 	molarDensity.write(i,j, massDensity_new/(particleMass*c_Avagadro) );
@@ -292,12 +401,14 @@ void PerfectGas2D::update_boundary_values()
 {
 	massDensity.set_NeumannBdyValues_all();
 	molarDensity.set_NeumannBdyValues_all();
-	momentum.set_DirichletBdyValues_all(Vector2D<double>(0.0,0.0) );
+	//~ momentum.set_DirichletBdyValues_all(Vector2D<double>(0.0,0.0) );
+	momentum.set_NeumannBdyValues_all();
 	velocity.set_DirichletBdyValues_all(Vector2D<double>(0.0,0.0) );
 	totalEnergy.set_NeumannBdyValues_all();
 	internalEnergy.set_NeumannBdyValues_all();
 
 	temperature.set_NeumannBdyValues_all();
+	pressure.set_NeumannBdyValues_all();
 }
 
 //***************************************************************************

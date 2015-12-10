@@ -12,11 +12,7 @@
 //***************************************************************************
 //***************************************************************************
 #include <iostream>
-#include <vector>
-#include <ctime>
-#include <chrono>
 #include <cstdio>
-#include "mpi.h"
 #include <assert.h>
 #include <string.h>
 
@@ -25,7 +21,6 @@
 #include "mesmond-utils.h"
 #include "structuredGeometry2D.h"
 #include "fluids2D.h"
-
 
 using namespace std;
 
@@ -38,68 +33,11 @@ void test_PerfectGas2D();
 
 int main(int argc, char *argv[])
 {
-	//~ test_Point2D_Vector2D();
-	//~ test_Dyad2D();
-	//~ test_SpacialArray2D();
-	//~ test_StructuredGeometry2D();
-	//~ test_PerfectGas2D();
-	//~ return 0;
-//~
-
-	Point2D<double> origin(0.0,0.0);
-	Point2D<double> length(1.0,1.0);
-	Vector2D<int> size(100,100);
-	StructuredGeometry2D geom(origin, origin+length, size);
-
-	PerfectGas2D air(geom);
-
-	air.init_test_sedov_lowIntensity();
-	//~ air.set_boundary_conditions();
-	air.update_boundary_values();
-
-	Euler2D euler;
-	double simTime=0.0;
-	double timeStep=1.0e-10;
-	double dt_dump=1.0e-4;
-	int outputCount=0;
-	air.vtkOutput("output", outputCount);
-
-	while (simTime <1e-1)
-	{
-		cout << "*** SimTime=" << simTime << ", timeStep=" << timeStep << endl;
-		
-		for (int i=1; i<=air.getSize().get_dir1(); ++i)
-		for (int j=1; j<=air.getSize().get_dir2(); ++j)
-		{
-			double continuity_rhs=euler.get_continuity_rhs(i,j, air);
-			Vector2D<double> momentum_rhs=euler.get_momentum_rhs(i,j, air);
-			double totEnergy_rhs=euler.get_totEnergy_rhs(i,j, air);
-
-			air.continuity_write_rhs(i,j, continuity_rhs);
-			air.momentum_write_rhs(i,j, momentum_rhs);
-			air.totalEnergy_write_rhs(i,j, totEnergy_rhs);
-		}
-
-		for (int i=1; i<=air.getSize().get_dir1(); ++i)
-		for (int j=1; j<=air.getSize().get_dir2(); ++j)
-		{
-			air.update_from_rhs(i,j, timeStep);
-		}
-
-		simTime+=timeStep;
-		air.update_boundary_values();
-
-		if (simTime >= outputCount*dt_dump)
-			air.vtkOutput("output", outputCount);
-	
-		timeStep=min_2arg(air.get_explicit_timeStep(), 1.5*timeStep);
-
-	}
-
-	cout << "Simulation Done!" << endl;
-	
-	
-
+	test_Point2D_Vector2D();
+	test_Dyad2D();
+	test_SpacialArray2D();
+	test_StructuredGeometry2D();
+	test_PerfectGas2D();
 	return 0;
 }
 

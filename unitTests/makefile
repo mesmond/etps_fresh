@@ -20,14 +20,14 @@
 WORKINGDIR=$(pwd)
 INCLUDE="../include/"
 SRC="../src/"
-projectName="euler2D"
+projectName="unitTests"
 
 #Compile Shared Source Code**************************************************
 cd $SRC
 
 # Compile all .cpp files
 for sourceFile in *.cpp
-do
+	do
 	objectFile="${sourceFile%%.*}.o"
 	headerNew=false
 
@@ -48,10 +48,10 @@ do
 done
 
 #Create the shared object file***********************************************
-mpic++ -Wall -std=c++0x -shared -O2 -fopenmp -o libmeshBlock.so *.o
+mpic++ -Wall -std=c++0x -shared -O2 -fopenmp -o libetps_fresh.so *.o
 
 #Copy shared object file into WORKINGDIR*************************************
-cp libmeshBlock.so $WORKINGDIR
+cp libetps_fresh.so $WORKINGDIR
 
 #Compile Project source files************************************************
 cd $WORKINGDIR
@@ -85,4 +85,4 @@ do
 done
 
 #Create Executable***********************************************************
-mpic++ -Wall -std=c++0x -I$INCLUDE -O2 -fopenmp -o $projectName *.o -L$WORKINGDIR -lmeshBlock
+mpic++ -Wall -std=c++0x -I$INCLUDE -O2 -fopenmp -o $projectName *.o -L$WORKINGDIR -letps_fresh

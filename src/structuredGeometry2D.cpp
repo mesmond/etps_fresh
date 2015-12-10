@@ -497,6 +497,7 @@ void StructuredGeometry2D::link_west(const StructuredGeometry2D& toLink)
 	setBdy_zoneDelta_west(toLink.get_zoneDelta_east());
 }
 
+
 //Get Information************************************************************
 StructuredLocalField2D<double>
 	StructuredGeometry2D::getLocalDeltaFactors(int i, int j) const

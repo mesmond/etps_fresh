@@ -194,6 +194,18 @@ template <typename type> SpacialArray2D<type>::~SpacialArray2D()
 }
 
 
+template <typename type> type SpacialArray2D<type>::getSum()
+{
+	type summation=(type)0;
+	for (int i=1; i<=getSize().get_dir1(); ++i)
+	for (int j=1; j<=getSize().get_dir2(); ++j)
+	{
+		summation=summation+get(i,j);
+	}
+
+	return summation;
+}
+
 template <typename type> void SpacialArray2D<type>::print() const
 {
 	for (int j=size.get_dir2()+1; j>=0; --j)

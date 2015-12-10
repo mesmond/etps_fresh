@@ -1,0 +1,20 @@
+#User Input File
+#Project: euler2D
+#Note: Use "#" for commenting lines.
+#dir0 - first direction x in (x,y), r in (r,z).
+#dir1 - second direction y in (x,y), z in (r,z).
+#
+#numBlocks	- Number of MeshBlocks in specified direction.
+#numZones	- Total number of zones in the specified direction.
+#length		- Spacial extent of domain in specified direction (meters).
+
+numBlocks_dir0=1
+numBlocks_dir1=1
+
+numZones_dir0=50
+numZones_dir1=50
+
+length_dir0=0.09 #meters
+length_dir1=0.09 #meters
+
+threads_per_block=1

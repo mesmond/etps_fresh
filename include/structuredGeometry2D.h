@@ -128,14 +128,31 @@ class StructuredGeometry2D
 		const SpacialArray2D<Vector2D<double> >& vector2) const;
 
 
-
-
-
 	//Mutation Handling******************************************************
 	void link_north(const StructuredGeometry2D& toLink);
 	void link_south(const StructuredGeometry2D& toLink);
 	void link_east(const StructuredGeometry2D& toLink);
 	void link_west(const StructuredGeometry2D& toLink);
+
+	inline void close_north()
+		{ setBdy_zoneDelta_north(0.0); }
+
+	inline void close_south()
+		{ setBdy_zoneDelta_south(0.0); }
+
+	inline void close_east()
+		{ setBdy_zoneDelta_east(0.0); }
+
+	inline void close_west()
+		{ setBdy_zoneDelta_west(0.0); }
+
+	inline void close_all_bdys()
+	{
+		close_north();
+		close_south();
+		close_east();
+		close_west();
+	}
 
 	//Get Information********************************************************
 	inline double get_zoneDelta_north() const
@@ -182,7 +199,7 @@ class StructuredGeometry2D
  * Purpose: Hold and process geometric parameters for a structured geometry
  * 	in cylindrical coordinates.
  *
- * Description: StructuredCylindricalGeometry2D holds information
+ * Description: StructuredCylGeometry2D holds information
  * 	on the spacial placement
  * 	of a particular geometry in cyilindrical. It also holds information
  * 	regarding the mesh spacing and mesh density.

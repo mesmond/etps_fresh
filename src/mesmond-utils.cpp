@@ -42,6 +42,19 @@ double max_array(double array[],int num_elements)
 }
 
 
+int getLength(const char* word)
+{
+	int length=0;
+	char thisChar=word[length];
+	while (thisChar != '\0')
+	{
+		length++;
+		thisChar=word[length];
+	}
+
+	return length;
+}
+
 /*
  * Function: IsEqual()
  * Purpose: Compare floating point numbers for equality.

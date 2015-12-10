@@ -39,4 +39,4 @@ totalProc=$(echo "$numBlocks_dir0 * $numBlocks_dir1" | bc -l)
 
 
 #Run the program*************************************************************
-mpirun -np $totalProc ./euler2D $inputFilePrefix.inp
+mpirun -np $totalProc ./unitTests $inputFilePrefix.inp

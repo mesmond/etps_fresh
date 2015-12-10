@@ -330,6 +330,9 @@ template <class type> class SpacialArray2D
 	inline int getCount_dir2() const { return size.get_dir2(); }
 	inline void write(int i, int j, const type& value) { array[i*maxHeight+j]=value; }
 
+	type getSum();
+
+
 	void print() const;
 	void fill(const type& value);
 	void set_NeumannBdyValues_all();
