@@ -36,7 +36,8 @@ PerfectGas2D::PerfectGas2D( //Constructor
 		gamma(gamma),
 		particleMass(particleMass),
 		particleRadius(particleRadius),
-		molarWeight(particleMass*c_Avagadro)
+		molarWeight(particleMass*c_Avagadro),
+		maxSoundSpeed(0.0)
 {
 	//Check to see if the input Structured Geometry is Cylindrical.
 	StructuredCylGeometry2D* test=dynamic_cast<StructuredCylGeometry2D*>(&geom);
@@ -75,7 +76,8 @@ PerfectGas2D::PerfectGas2D(const PerfectGas2D& that) //Copy Constructor
 		gamma(that.gamma),
 		particleMass(that.particleMass),
 		particleRadius(that.particleRadius),
-		molarWeight(particleMass*c_Avagadro)
+		molarWeight(particleMass*c_Avagadro),
+		maxSoundSpeed(0.0)
 {
 	//Check to see if the input Structured Geometry is Cylindrical.
 	StructuredCylGeometry2D* test=dynamic_cast<StructuredCylGeometry2D*>(that.geometry);
@@ -221,7 +223,7 @@ void PerfectGas2D::sodProblemOutput(double simTime)
 				<< "\t Pressure(Mbar)"
 				<< "\t MassDensity(g/cc)"
 				<< "\t Veclocity_dir1(cm/micsec)"
-				<< "\t Temperature(Mbar cc/g)"
+				<< "\t InternalEnergy(Mbar cc/g)"
 				<< endl;
 
 		int j=1;
@@ -414,12 +416,29 @@ void PerfectGas2D::update_boundary_values()
 //***************************************************************************
 //Get Data*******************************************************************
 
-double PerfectGas2D::get_explicit_timeStep(double CFL_number) const
+double PerfectGas2D::get_explicit_timeStep(double CFL_number, double compression_number)
 {
-	double maxSoundSpeed=soundSpeed.get_max();
+	maxSoundSpeed=soundSpeed.get_max();
+	
 	double minMeshSpacing=geometry->get_minMeshSpacing();
 
-	return CFL_number*minMeshSpacing/maxSoundSpeed;
+	double CFL_timeStep=CFL_number*minMeshSpacing/maxSoundSpeed;
+
+
+	double maxDivergence=0.0;
+
+	for (int i=1; i<=getSize().get_dir1(); ++i)
+	for (int j=1; j<=getSize().get_dir2(); ++j)
+	{
+		double localDivergence=geometry->divergence(i,j, velocity); //units: 1/s
+		if (fabs(localDivergence) > maxDivergence)
+			maxDivergence=fabs(localDivergence);
+	}
+
+	double compression_timeStep=compression_number*(1.0/maxDivergence); //units: s
+	
+
+	return min_2arg(CFL_timeStep, compression_timeStep);
 }
 
 //***************************************************************************

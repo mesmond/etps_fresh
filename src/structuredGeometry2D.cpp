@@ -402,6 +402,28 @@ Vector2D<double> StructuredGeometry2D::gradient(int i, int j,
 }
 
 
+double StructuredGeometry2D::divergence(const int i, const int j,
+	const SpacialArray2D<Vector2D<double> >& vector) const
+{
+	this->checkIndices(i,j);
+
+	StructuredLocalField2D<Vector2D<double> > vectorField;
+	StructuredLocalField2D<double> localField;
+
+	vectorField=vector.getLocalField(i,j);
+
+	localField.P_dir2=vectorField.P.get_dir2();
+	localField.P_dir1=vectorField.P.get_dir1();
+	
+	localField.N=vectorField.N.get_dir2();
+	localField.S=vectorField.S.get_dir2();
+	localField.E=vectorField.E.get_dir1();
+	localField.W=vectorField.W.get_dir1();
+	
+	return getDivergenceFromField(i,j,localField);
+}
+
+
 double StructuredGeometry2D::divergence(int i, int j,
 	const SpacialArray2D<double>& scalar,
 	const SpacialArray2D<Vector2D<double> >& vector) const

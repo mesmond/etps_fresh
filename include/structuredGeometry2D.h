@@ -120,6 +120,8 @@ class StructuredGeometry2D
 	Vector2D<double> gradient(const int i, const int j,
 		const SpacialArray2D<double>& scalarField) const;
 	double divergence(const int i, const int j,
+		const SpacialArray2D<Vector2D<double> >& vector) const;
+	double divergence(const int i, const int j,
 		const SpacialArray2D<double>& scalar,
 		const SpacialArray2D<Vector2D<double> >& vector) const;
 	Vector2D<double> divergence(const int i, const int j,

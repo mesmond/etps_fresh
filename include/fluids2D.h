@@ -123,7 +123,7 @@ class PerfectGas2D
 
 	inline Vector2D<int> getSize() const { return geometry->getSize(); }
 
-	double get_explicit_timeStep(double CFL_number=0.5) const;
+	double get_explicit_timeStep(double CFL_number=0.5, double compression_number=0.01);
 
 
 	//***********************************************************************
@@ -285,19 +285,31 @@ class Euler2D
 		StructuredLocalField2D<T> localFlux;
 
 		localField=array.getLocalField(i,j);
+
 		soundSpeed=fluid.soundSpeed.getLocalField(i,j);
-		
+
 		maxSoundSpeed.N=max_2arg(soundSpeed.P, soundSpeed.N);
 		maxSoundSpeed.S=max_2arg(soundSpeed.P, soundSpeed.S);
 		maxSoundSpeed.E=max_2arg(soundSpeed.P, soundSpeed.E);
 		maxSoundSpeed.W=max_2arg(soundSpeed.P, soundSpeed.W);
+
+
+
+		//~ localFlux.N=-0.5*fluid.maxSoundSpeed*(localField.N-localField.P);
+		//~ localFlux.S=-0.5*fluid.maxSoundSpeed*(localField.P-localField.S);
+		//~ localFlux.E=-0.5*fluid.maxSoundSpeed*(localField.E-localField.P);
+		//~ localFlux.W=-0.5*fluid.maxSoundSpeed*(localField.P-localField.W);
+
 
 		localFlux.N=-0.5*maxSoundSpeed.N*(localField.N-localField.P);
 		localFlux.S=-0.5*maxSoundSpeed.S*(localField.P-localField.S);
 		localFlux.E=-0.5*maxSoundSpeed.E*(localField.E-localField.P);
 		localFlux.W=-0.5*maxSoundSpeed.W*(localField.P-localField.W);
 
+
+
 		StructuredLocalField2D<double> area=fluid.geometry->getCellAreas(i,j);
+
 
 		//Compute Divergence.
 		T divergence=(1.0/fluid.geometry->getVolume(i,j))*(
@@ -307,7 +319,6 @@ class Euler2D
 			+cellNormal_W*localFlux.W*area.W );
 
 		return divergence;
-
 	}
 };
 

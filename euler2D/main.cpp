@@ -46,6 +46,9 @@ int main(int argc, char *argv[])
 	int numZones[3]={100,1000,10000};
 	int numMeshes=3;
 
+	//~ simpleEuler2D(numZones[1]);
+
+
 	for (int i=0; i<numMeshes; ++i)
 	{
 		simpleEuler2D(numZones[i]);
@@ -82,7 +85,7 @@ void simpleEuler2D(int axialZones)
 
 	do
 	{
-		//~ cout << "*** SimTime=" << simTime << ", timeStep=" << timeStep << endl;
+		cout << "*** SimTime=" << simTime << ", timeStep=" << timeStep << endl;
 		
 		for (int i=1; i<=air.getSize().get_dir1(); ++i)
 		for (int j=1; j<=air.getSize().get_dir2(); ++j)
@@ -108,7 +111,7 @@ void simpleEuler2D(int axialZones)
 		if (simTime >= outputCount*dt_dump)
 			air.vtkOutput("output", outputCount);
 
-		timeStep=min_2arg(air.get_explicit_timeStep(), 1.5*timeStep);
+		timeStep=min_2arg(air.get_explicit_timeStep(), 1.2*timeStep);
 
 		if (simTime+timeStep > maxTime)
 		{
